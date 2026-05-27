@@ -13,6 +13,7 @@ import paymentRoutes from './routes/payment.routes';
 import expenseRoutes from './routes/expense.routes';
 import agreementRoutes from './routes/agreement.routes';
 import documentRoutes from './routes/document.routes';
+import uploadRoutes from './routes/upload.routes';
 
 export const createApp = () => {
   const app = express();
@@ -39,6 +40,7 @@ export const createApp = () => {
   app.use('/api/expenses', expenseRoutes);
   app.use('/api/agreements', agreementRoutes);
   app.use('/api/documents', documentRoutes);
+  app.use('/api/uploads', uploadRoutes);
 
   app.use(errorHandler);
 

@@ -21,12 +21,30 @@ const carBaseSchema = z.object({
   rcExpiry: z.string().datetime().optional(),
   currentKilometer: z.number().int().nonnegative().optional(),
   status: z.enum(['AVAILABLE', 'BOOKED', 'MAINTENANCE', 'OUT_OF_SERVICE']).optional(),
+  imageUrl: z.string().url().optional(),
 });
 
 const updateCarSchema = carBaseSchema.partial();
 
-export const getCars = async (_req: Request, res: Response, next: NextFunction) => {
-  try { res.json({ success: true, data: await carService.getAllCars() }); } catch (e) { next(e); }
+const listQuerySchema = z.object({
+  search: z.string().optional(),
+  status: z.enum(['AVAILABLE', 'BOOKED', 'MAINTENANCE', 'OUT_OF_SERVICE']).optional(),
+  sortBy: z.enum(['createdAt', 'dailyRent', 'year', 'carName', 'brand']).optional(),
+  sortOrder: z.enum(['asc', 'desc']).optional(),
+  page: z.coerce.number().int().positive().optional(),
+  pageSize: z.coerce.number().int().positive().max(100).optional(),
+});
+
+export const getCars = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const params = listQuerySchema.parse(req.query);
+    const result = await carService.getAllCars(params);
+    res.json({
+      success: true,
+      data: result.items,
+      meta: { total: result.total, page: result.page, pageSize: result.pageSize, totalPages: result.totalPages },
+    });
+  } catch (e) { next(e); }
 };
 
 export const getCar = async (req: Request, res: Response, next: NextFunction) => {

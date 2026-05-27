@@ -1,9 +1,10 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { StatusBadge } from '@/components/shared/StatusBadge';
+import { AddBookingDialog } from '@/components/bookings/AddBookingDialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -16,16 +17,19 @@ export default function BookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const load = useCallback(() => {
+    setLoading(true);
     api.get('/bookings')
       .then((res) => setBookings(res.data.data))
       .catch(() => toast.error('Failed to load bookings'))
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => { load(); }, [load]);
+
   return (
     <div>
-      <PageHeader title="Bookings" description="View and manage all rental bookings" />
+      <PageHeader title="Bookings" description="View and manage all rental bookings" action={<AddBookingDialog onCreated={load} />} />
 
       <Card>
         <CardContent className="p-0">

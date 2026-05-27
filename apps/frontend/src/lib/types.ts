@@ -23,7 +23,37 @@ export interface Car {
   rcExpiry: string | null;
   currentKilometer: number;
   status: CarStatus;
+  imageUrl: string | null;
   createdAt: string;
+}
+
+export interface CarExpense {
+  id: string;
+  category: string;
+  amount: string;
+  expenseDate: string;
+  notes: string | null;
+}
+
+export interface CarBookingRow {
+  id: string;
+  pickupDate: string;
+  returnDate: string;
+  totalAmount: string;
+  bookingStatus: BookingStatus;
+  customer: { fullName: string };
+}
+
+export interface CarDetail extends Car {
+  bookings: CarBookingRow[];
+  expenses: CarExpense[];
+}
+
+export interface ListMeta {
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
 }
 
 export interface Customer {
