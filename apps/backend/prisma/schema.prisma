@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  STAFF
+}
+
+enum CarStatus {
+  AVAILABLE
+  RENTED
+  MAINTENANCE
+  RETIRED
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  REFUNDED
+  FAILED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  password     String
+  name         String
+  role         Role     @default(STAFF)
+  avatar       String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("users")
+}
+
+model CarCategory {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  pricePerDay Decimal  @db.Decimal(10, 2)
+  cars        Car[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("car_categories")
+}
+
+model Car {
+  id           String        @id @default(cuid())
+  plate        String        @unique
+  make         String
+  model        String
+  year         Int
+  color        String
+  status       CarStatus     @default(AVAILABLE)
+  mileage      Int           @default(0)
+  imageUrl     String?
+  categoryId   String
+  category     CarCategory   @relation(fields: [categoryId], references: [id])
+  reservations Reservation[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@map("cars")
+}
+
+model Customer {
+  id           String        @id @default(cuid())
+  firstName    String
+  lastName     String
+  email        String        @unique
+  phone        String
+  licenseNo    String        @unique
+  address      String?
+  avatarUrl    String?
+  reservations Reservation[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@map("customers")
+}
+
+model Reservation {
+  id           String            @id @default(cuid())
+  customerId   String
+  customer     Customer          @relation(fields: [customerId], references: [id])
+  carId        String
+  car          Car               @relation(fields: [carId], references: [id])
+  startDate    DateTime
+  endDate      DateTime
+  totalDays    Int
+  totalAmount  Decimal           @db.Decimal(10, 2)
+  status       ReservationStatus @default(PENDING)
+  notes        String?
+  invoice      Invoice?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@map("reservations")
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  reservationId String        @unique
+  reservation   Reservation   @relation(fields: [reservationId], references: [id])
+  invoiceNo     String        @unique
+  amount        Decimal       @db.Decimal(10, 2)
+  paymentStatus PaymentStatus @default(PENDING)
+  pdfUrl        String?
+  issuedAt      DateTime      @default(now())
+  paidAt        DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@map("invoices")
+}
