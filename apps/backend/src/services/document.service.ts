@@ -17,6 +17,7 @@ export const createDocument = async (data: {
   fileUrl: string;
   customerId?: string;
   carId?: string;
+  ocrText?: string;
 }) => {
   if (!data.customerId && !data.carId) {
     throw new AppError(400, 'Document must be linked to a customer or a car');

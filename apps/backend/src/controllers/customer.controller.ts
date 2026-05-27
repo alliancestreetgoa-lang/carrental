@@ -13,12 +13,34 @@ const createCustomerSchema = z.object({
   aadhaarNumber: z.string().min(1).optional(),
   emergencyContact: z.string().optional(),
   notes: z.string().optional(),
+  blacklisted: z.boolean().optional(),
+  blacklistReason: z.string().optional(),
 });
 
 const updateCustomerSchema = createCustomerSchema.partial();
 
-export const getCustomers = async (_req: Request, res: Response, next: NextFunction) => {
-  try { res.json({ success: true, data: await customerService.getAllCustomers() }); } catch (e) { next(e); }
+const listQuerySchema = z.object({
+  search: z.string().optional(),
+  blacklisted: z.enum(['true', 'false']).optional(),
+  sortBy: z.enum(['createdAt', 'fullName']).optional(),
+  sortOrder: z.enum(['asc', 'desc']).optional(),
+  page: z.coerce.number().int().positive().optional(),
+  pageSize: z.coerce.number().int().positive().max(100).optional(),
+});
+
+export const getCustomers = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const q = listQuerySchema.parse(req.query);
+    const result = await customerService.getAllCustomers({
+      ...q,
+      blacklisted: q.blacklisted === undefined ? undefined : q.blacklisted === 'true',
+    });
+    res.json({
+      success: true,
+      data: result.items,
+      meta: { total: result.total, page: result.page, pageSize: result.pageSize, totalPages: result.totalPages },
+    });
+  } catch (e) { next(e); }
 };
 
 export const getCustomer = async (req: Request, res: Response, next: NextFunction) => {

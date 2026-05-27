@@ -3,10 +3,11 @@ import * as documentService from '../services/document.service';
 import { z } from 'zod';
 
 const createDocumentSchema = z.object({
-  type: z.enum(['LICENSE', 'AADHAAR', 'RC', 'INSURANCE', 'POLLUTION', 'PHOTO', 'OTHER']),
+  type: z.enum(['LICENSE', 'AADHAAR', 'PASSPORT', 'RC', 'INSURANCE', 'POLLUTION', 'PHOTO', 'OTHER']),
   fileUrl: z.string().url(),
   customerId: z.string().min(1).optional(),
   carId: z.string().min(1).optional(),
+  ocrText: z.string().optional(),
 });
 
 export const getDocuments = async (req: Request, res: Response, next: NextFunction) => {

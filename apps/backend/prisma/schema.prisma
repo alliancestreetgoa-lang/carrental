@@ -65,6 +65,7 @@ enum ExpenseCategory {
 enum DocumentType {
   LICENSE
   AADHAAR
+  PASSPORT
   RC
   INSURANCE
   POLLUTION
@@ -142,6 +143,8 @@ model Customer {
   aadhaarNumber    String?   @unique
   emergencyContact String?
   notes            String?
+  blacklisted      Boolean   @default(false)
+  blacklistReason  String?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   deletedAt        DateTime?
@@ -151,6 +154,7 @@ model Customer {
 
   @@index([mobile])
   @@index([fullName])
+  @@index([blacklisted])
   @@index([deletedAt])
   @@map("customers")
 }
@@ -253,6 +257,7 @@ model Document {
   carId      String?
   type       DocumentType @default(OTHER)
   fileUrl    String
+  ocrText    String?
   createdAt  DateTime     @default(now())
   updatedAt  DateTime     @updatedAt
   deletedAt  DateTime?

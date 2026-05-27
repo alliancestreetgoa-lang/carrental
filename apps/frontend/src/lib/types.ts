@@ -68,7 +68,33 @@ export interface Customer {
   aadhaarNumber: string | null;
   emergencyContact: string | null;
   notes: string | null;
+  blacklisted: boolean;
+  blacklistReason: string | null;
   createdAt: string;
+}
+
+export interface CustomerDocument {
+  id: string;
+  type: 'LICENSE' | 'AADHAAR' | 'PASSPORT' | 'RC' | 'INSURANCE' | 'POLLUTION' | 'PHOTO' | 'OTHER';
+  fileUrl: string;
+  ocrText: string | null;
+  createdAt: string;
+}
+
+export interface CustomerBookingRow {
+  id: string;
+  pickupDate: string;
+  returnDate: string;
+  totalAmount: string;
+  bookingStatus: BookingStatus;
+  car: { carName: string; brand: string; registrationNumber: string };
+}
+
+export interface CustomerDetail extends Customer {
+  bookings: CustomerBookingRow[];
+  documents: CustomerDocument[];
+  pendingDues: number;
+  totalSpent: number;
 }
 
 export interface Booking {
