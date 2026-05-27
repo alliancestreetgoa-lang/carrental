@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import { errorHandler } from './middleware/error.middleware';
+import authRoutes from './routes/auth.routes';
 
 export const createApp = () => {
   const app = express();
@@ -19,6 +20,8 @@ export const createApp = () => {
   app.use(cookieParser());
 
   app.get('/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
+
+  app.use('/api/auth', authRoutes);
 
   app.use(errorHandler);
 
