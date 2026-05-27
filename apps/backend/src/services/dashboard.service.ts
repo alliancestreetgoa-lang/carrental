@@ -1,21 +1,53 @@
 import { prisma } from '../lib/prisma';
 
 export const getDashboardStats = async () => {
-  const [totalCars, availableCars, totalCustomers, activeReservations, recentReservations, monthlyRevenue] = await Promise.all([
-    prisma.car.count(),
-    prisma.car.count({ where: { status: 'AVAILABLE' } }),
-    prisma.customer.count(),
-    prisma.reservation.count({ where: { status: { in: ['CONFIRMED', 'ACTIVE'] } } }),
-    prisma.reservation.findMany({
+  const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+
+  const [
+    totalCars,
+    availableCars,
+    bookedCars,
+    maintenanceCars,
+    totalCustomers,
+    activeBookings,
+    monthlyRevenue,
+    monthlyExpenses,
+    recentBookings,
+  ] = await Promise.all([
+    prisma.car.count({ where: { deletedAt: null } }),
+    prisma.car.count({ where: { deletedAt: null, status: 'AVAILABLE' } }),
+    prisma.car.count({ where: { deletedAt: null, status: 'BOOKED' } }),
+    prisma.car.count({ where: { deletedAt: null, status: 'MAINTENANCE' } }),
+    prisma.customer.count({ where: { deletedAt: null } }),
+    prisma.booking.count({ where: { deletedAt: null, bookingStatus: { in: ['RESERVED', 'ACTIVE'] } } }),
+    prisma.payment.aggregate({
+      where: { deletedAt: null, paymentDate: { gte: startOfMonth } },
+      _sum: { amount: true },
+    }),
+    prisma.expense.aggregate({
+      where: { deletedAt: null, expenseDate: { gte: startOfMonth } },
+      _sum: { amount: true },
+    }),
+    prisma.booking.findMany({
+      where: { deletedAt: null },
       take: 5,
       orderBy: { createdAt: 'desc' },
-      include: { customer: { select: { firstName: true, lastName: true } }, car: { select: { make: true, model: true, plate: true } } },
-    }),
-    prisma.invoice.aggregate({
-      where: { paymentStatus: 'PAID', issuedAt: { gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1) } },
-      _sum: { amount: true },
+      include: {
+        customer: { select: { fullName: true } },
+        car: { select: { carName: true, brand: true, registrationNumber: true } },
+      },
     }),
   ]);
 
-  return { totalCars, availableCars, totalCustomers, activeReservations, recentReservations, monthlyRevenue: monthlyRevenue._sum.amount ?? 0 };
+  return {
+    totalCars,
+    availableCars,
+    bookedCars,
+    maintenanceCars,
+    totalCustomers,
+    activeBookings,
+    monthlyRevenue: monthlyRevenue._sum.amount ?? 0,
+    monthlyExpenses: monthlyExpenses._sum.amount ?? 0,
+    recentBookings,
+  };
 };
