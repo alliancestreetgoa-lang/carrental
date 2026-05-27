@@ -16,7 +16,7 @@ import { Separator } from '@/components/ui/separator';
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/fleet', label: 'Fleet', icon: Car },
-  { href: '/reservations', label: 'Reservations', icon: CalendarDays },
+  { href: '/bookings', label: 'Bookings', icon: CalendarDays },
   { href: '/customers', label: 'Customers', icon: Users },
   { href: '/billing', label: 'Billing', icon: Receipt },
   { href: '/settings', label: 'Settings', icon: Settings },

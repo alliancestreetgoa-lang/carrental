@@ -63,7 +63,7 @@ async function main() {
     where: { registrationNumber: 'GA-01-AB-1234' },
     update: {},
     create: {
-      carName: 'Maruti Swift VXi',
+      carName: 'Swift VXi',
       brand: 'Maruti Suzuki',
       model: 'Swift',
       year: 2023,
@@ -88,7 +88,7 @@ async function main() {
     where: { registrationNumber: 'GA-02-CD-5678' },
     update: {},
     create: {
-      carName: 'Toyota Innova Crysta',
+      carName: 'Innova Crysta',
       brand: 'Toyota',
       model: 'Innova Crysta',
       year: 2024,
@@ -113,7 +113,7 @@ async function main() {
     where: { registrationNumber: 'GA-03-EF-9012' },
     update: {},
     create: {
-      carName: 'Tata Nexon EV',
+      carName: 'Nexon EV',
       brand: 'Tata',
       model: 'Nexon EV',
       year: 2024,

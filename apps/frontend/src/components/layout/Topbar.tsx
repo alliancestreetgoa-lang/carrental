@@ -10,7 +10,7 @@ import { usePathname } from 'next/navigation';
 const pageTitles: Record<string, string> = {
   '/dashboard': 'Dashboard',
   '/fleet': 'Fleet Management',
-  '/reservations': 'Reservations',
+  '/bookings': 'Bookings',
   '/customers': 'Customers',
   '/billing': 'Billing',
   '/settings': 'Settings',
