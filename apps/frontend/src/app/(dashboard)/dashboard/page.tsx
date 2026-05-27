@@ -5,9 +5,13 @@ import { toast } from 'sonner';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { StatsCard } from '@/components/dashboard/StatsCard';
 import { RevenueChart } from '@/components/dashboard/RevenueChart';
-import { RecentBookings } from '@/components/dashboard/RecentBookings';
+import { BookingsChart } from '@/components/dashboard/BookingsChart';
+import { CarUtilizationChart } from '@/components/dashboard/CarUtilizationChart';
+import { RecentBookingsTable } from '@/components/dashboard/RecentBookingsTable';
+import { BookingListCard } from '@/components/dashboard/BookingListCard';
+import { MaintenanceAlerts } from '@/components/dashboard/MaintenanceAlerts';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Car, Users, CalendarCheck, DollarSign } from 'lucide-react';
+import { Car, CarFront, KeyRound, CreditCard, Users, DollarSign, CalendarClock, RotateCcw } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import type { DashboardStats } from '@/lib/types';
 
@@ -22,11 +26,15 @@ export default function DashboardPage() {
       .finally(() => setLoading(false));
   }, []);
 
-  if (loading) return (
+  if (loading || !stats) return (
     <div>
       <PageHeader title="Dashboard" description="Welcome back to Alliance Car Rental" />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-32 rounded-xl" />)}
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+        {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />)}
+      </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+        <div className="lg:col-span-2"><Skeleton className="h-80 rounded-xl" /></div>
+        <Skeleton className="h-80 rounded-xl" />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2"><Skeleton className="h-72 rounded-xl" /></div>
@@ -35,22 +43,47 @@ export default function DashboardPage() {
     </div>
   );
 
+  const { cards } = stats;
+
   return (
     <div>
       <PageHeader title="Dashboard" description="Welcome back to Alliance Car Rental" />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatsCard title="Total Vehicles" value={stats?.totalCars ?? 0} description={`${stats?.availableCars ?? 0} available · ${stats?.maintenanceCars ?? 0} in service`} icon={Car} trend={{ value: 12, label: 'vs last month' }} />
-        <StatsCard title="Total Customers" value={stats?.totalCustomers ?? 0} icon={Users} trend={{ value: 8, label: 'vs last month' }} />
-        <StatsCard title="Active Bookings" value={stats?.activeBookings ?? 0} icon={CalendarCheck} trend={{ value: 5, label: 'vs last month' }} />
-        <StatsCard title="Monthly Revenue" value={formatCurrency(stats?.monthlyRevenue ?? 0)} description={`${formatCurrency(stats?.monthlyExpenses ?? 0)} expenses`} icon={DollarSign} trend={{ value: 15, label: 'vs last month' }} />
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
+        <StatsCard title="Total Cars" value={cards.totalCars} icon={Car} />
+        <StatsCard title="Available Cars" value={cards.availableCars} icon={CarFront} />
+        <StatsCard title="Active Rentals" value={cards.activeRentals} icon={KeyRound} />
+        <StatsCard title="Pending Payments" value={formatCurrency(cards.pendingPaymentsAmount)} description={`${cards.pendingPaymentsCount} booking${cards.pendingPaymentsCount === 1 ? '' : 's'}`} icon={CreditCard} />
+        <StatsCard title="Total Customers" value={cards.totalCustomers} icon={Users} />
+        <StatsCard title="Monthly Revenue" value={formatCurrency(cards.monthlyRevenue)} icon={DollarSign} />
       </div>
 
+      {/* Charts row 1 */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+        <div className="lg:col-span-2">
+          <RevenueChart data={stats.monthlyRevenue} />
+        </div>
+        <CarUtilizationChart data={stats.carUtilization} />
+      </div>
+
+      {/* Charts row 2 */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+        <div className="lg:col-span-2">
+          <BookingsChart data={stats.bookingsAnalytics} />
+        </div>
+        <MaintenanceAlerts alerts={stats.maintenanceAlerts} />
+      </div>
+
+      {/* Tables + lists */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2">
-          <RevenueChart />
+          <RecentBookingsTable bookings={stats.recentBookings} />
         </div>
-        <RecentBookings bookings={stats?.recentBookings ?? []} />
+        <div className="space-y-4">
+          <BookingListCard title="Cars Due Today" icon={CalendarClock} bookings={stats.carsDueToday} emptyText="Nothing due today" />
+          <BookingListCard title="Pending Returns" icon={RotateCcw} bookings={stats.pendingReturns} emptyText="No active rentals" showOverdue />
+        </div>
       </div>
     </div>
   );

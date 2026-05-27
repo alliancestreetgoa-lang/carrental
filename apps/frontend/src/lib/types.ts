@@ -61,21 +61,41 @@ export interface Booking {
   car: { carName: string; brand: string; registrationNumber: string };
 }
 
+export interface DashboardBookingRow {
+  id: string;
+  pickupDate: string;
+  returnDate: string;
+  totalAmount: string;
+  bookingStatus: BookingStatus;
+  customer: { fullName: string };
+  car: { carName: string; brand: string; registrationNumber: string };
+  overdue?: boolean;
+}
+
+export interface MaintenanceAlert {
+  carId: string;
+  carName: string;
+  brand: string;
+  registrationNumber: string;
+  type: 'MAINTENANCE' | 'INSURANCE' | 'POLLUTION' | 'RC';
+  detail: string;
+}
+
 export interface DashboardStats {
-  totalCars: number;
-  availableCars: number;
-  bookedCars: number;
-  maintenanceCars: number;
-  totalCustomers: number;
-  activeBookings: number;
-  monthlyRevenue: string;
-  monthlyExpenses: string;
-  recentBookings: Array<{
-    id: string;
-    pickupDate: string;
-    totalAmount: string;
-    bookingStatus: BookingStatus;
-    customer: { fullName: string };
-    car: { carName: string; brand: string; registrationNumber: string };
-  }>;
+  cards: {
+    totalCars: number;
+    availableCars: number;
+    activeRentals: number;
+    pendingPaymentsAmount: number;
+    pendingPaymentsCount: number;
+    totalCustomers: number;
+    monthlyRevenue: number;
+  };
+  monthlyRevenue: { month: string; revenue: number }[];
+  bookingsAnalytics: { month: string; bookings: number }[];
+  carUtilization: { status: string; count: number }[];
+  recentBookings: DashboardBookingRow[];
+  carsDueToday: DashboardBookingRow[];
+  pendingReturns: DashboardBookingRow[];
+  maintenanceAlerts: MaintenanceAlert[];
 }
