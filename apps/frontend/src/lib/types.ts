@@ -107,14 +107,44 @@ export interface Booking {
   dropLocation: string | null;
   bookingStatus: BookingStatus;
   fuelLevel: string | null;
+  returnFuelLevel: string | null;
   startKilometer: number | null;
   endKilometer: number | null;
+  actualReturnDate: string | null;
   advancePayment: string;
   securityDeposit: string;
   totalAmount: string;
+  lateFee: string;
   createdAt: string;
   customer: { fullName: string; mobile?: string; email?: string | null };
   car: { carName: string; brand: string; registrationNumber: string };
+}
+
+export interface Payment {
+  id: string;
+  bookingId: string;
+  amount: string;
+  paymentMethod: 'CASH' | 'UPI' | 'CARD' | 'BANK_TRANSFER';
+  paymentDate: string;
+  notes: string | null;
+}
+
+export interface BookingInvoice {
+  rentTotal: number;
+  lateFee: number;
+  grandTotal: number;
+  securityDeposit: number;
+  advancePayment: number;
+  paymentsReceived: number;
+  balanceDue: number;
+}
+
+export interface BookingDetail extends Booking {
+  totalDays: number;
+  payments: Payment[];
+  agreement: { id: string; agreementNumber: string; signed: boolean } | null;
+  invoice: BookingInvoice;
+  car: { carName: string; brand: string; registrationNumber: string; dailyRent?: string };
 }
 
 export interface DashboardBookingRow {
