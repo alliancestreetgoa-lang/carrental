@@ -20,3 +20,7 @@ export const getIO = (): SocketServer => {
   if (!io) throw new Error('Socket.IO not initialized');
   return io;
 };
+
+export const emitBookingChanged = () => {
+  io?.emit('booking:changed');
+};

@@ -130,3 +130,28 @@
     @apply font-sans;
   }
 }
+/* FullCalendar theme integration */
+.acr-calendar {
+  --fc-border-color: var(--border);
+  --fc-page-bg-color: transparent;
+  --fc-neutral-bg-color: color-mix(in oklch, var(--muted) 60%, transparent);
+  --fc-today-bg-color: color-mix(in oklch, var(--primary) 8%, transparent);
+  --fc-event-text-color: #ffffff;
+  font-size: 0.875rem;
+}
+.acr-calendar .fc {
+  --fc-button-bg-color: var(--secondary);
+  --fc-button-border-color: var(--border);
+  --fc-button-text-color: var(--secondary-foreground);
+  --fc-button-active-bg-color: var(--primary);
+  --fc-button-active-border-color: var(--primary);
+  --fc-button-hover-bg-color: color-mix(in oklch, var(--secondary) 80%, var(--foreground));
+  --fc-button-hover-border-color: var(--border);
+}
+.acr-calendar .fc .fc-toolbar-title { font-size: 1.1rem; font-weight: 600; }
+.acr-calendar .fc .fc-button { text-transform: capitalize; box-shadow: none; border-radius: 0.5rem; padding: 0.35rem 0.7rem; }
+.acr-calendar .fc-theme-standard td,
+.acr-calendar .fc-theme-standard th { border-color: var(--border); }
+.acr-calendar .fc .fc-datagrid-cell-cushion { padding: 0; }
+.acr-calendar .fc .fc-resource-timeline-divider { background: var(--border); }
+.acr-calendar .fc-event { cursor: pointer; border-radius: 4px; }

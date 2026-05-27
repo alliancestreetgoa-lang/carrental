@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import * as bookingService from '../services/booking.service';
 import { streamInvoicePdf } from '../lib/invoice';
+import { emitBookingChanged } from '../socket';
 import { z } from 'zod';
 
 const emptyToUndef = (v: unknown) => (v === '' || v === null ? undefined : v);
@@ -21,6 +22,7 @@ const createBookingSchema = z.object({
 });
 
 const updateBookingSchema = z.object({
+  carId: z.preprocess(emptyToUndef, z.string().min(1).optional()),
   pickupDate: z.preprocess(emptyToUndef, z.string().datetime().optional()),
   returnDate: z.preprocess(emptyToUndef, z.string().datetime().optional()),
   pickupLocation: z.preprocess(emptyToUndef, z.string().optional()),
@@ -58,7 +60,9 @@ export const createBooking = async (req: Request, res: Response, next: NextFunct
   try {
     const parsed = createBookingSchema.parse(req.body);
     const data = { ...parsed, pickupDate: new Date(parsed.pickupDate), returnDate: new Date(parsed.returnDate) };
-    res.status(201).json({ success: true, data: await bookingService.createBooking(data) });
+    const created = await bookingService.createBooking(data);
+    emitBookingChanged();
+    res.status(201).json({ success: true, data: created });
   } catch (e) { next(e); }
 };
 
@@ -70,14 +74,18 @@ export const updateBooking = async (req: Request, res: Response, next: NextFunct
       pickupDate: parsed.pickupDate ? new Date(parsed.pickupDate) : undefined,
       returnDate: parsed.returnDate ? new Date(parsed.returnDate) : undefined,
     };
-    res.json({ success: true, data: await bookingService.updateBooking(String(req.params.id), data) });
+    const updated = await bookingService.updateBooking(String(req.params.id), data);
+    emitBookingChanged();
+    res.json({ success: true, data: updated });
   } catch (e) { next(e); }
 };
 
 export const updateStatus = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { status } = statusSchema.parse(req.body);
-    res.json({ success: true, data: await bookingService.updateBookingStatus(String(req.params.id), status) });
+    const updated = await bookingService.updateBookingStatus(String(req.params.id), status);
+    emitBookingChanged();
+    res.json({ success: true, data: updated });
   } catch (e) { next(e); }
 };
 
@@ -89,13 +97,17 @@ export const completeBooking = async (req: Request, res: Response, next: NextFun
       returnFuelLevel: parsed.returnFuelLevel as string | undefined,
       actualReturnDate: parsed.actualReturnDate ? new Date(parsed.actualReturnDate as string) : undefined,
     };
-    res.json({ success: true, data: await bookingService.completeBooking(String(req.params.id), data) });
+    const updated = await bookingService.completeBooking(String(req.params.id), data);
+    emitBookingChanged();
+    res.json({ success: true, data: updated });
   } catch (e) { next(e); }
 };
 
 export const cancelBooking = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    res.json({ success: true, data: await bookingService.updateBookingStatus(String(req.params.id), 'CANCELLED') });
+    const updated = await bookingService.updateBookingStatus(String(req.params.id), 'CANCELLED');
+    emitBookingChanged();
+    res.json({ success: true, data: updated });
   } catch (e) { next(e); }
 };
 

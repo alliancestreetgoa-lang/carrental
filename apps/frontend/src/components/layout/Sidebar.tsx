@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/stores/ui.store';
 import {
-  Car, LayoutDashboard, Users, CalendarDays, Receipt,
+  Car, LayoutDashboard, Users, CalendarDays, CalendarRange, Receipt,
   Settings, ChevronLeft, LogOut
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth.store';
@@ -17,6 +17,7 @@ const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/fleet', label: 'Fleet', icon: Car },
   { href: '/bookings', label: 'Bookings', icon: CalendarDays },
+  { href: '/calendar', label: 'Calendar', icon: CalendarRange },
   { href: '/customers', label: 'Customers', icon: Users },
   { href: '/billing', label: 'Billing', icon: Receipt },
   { href: '/settings', label: 'Settings', icon: Settings },

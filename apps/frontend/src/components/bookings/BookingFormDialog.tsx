@@ -52,10 +52,11 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   booking?: Booking | null;
+  prefill?: { carId?: string; pickupDate?: string; returnDate?: string } | null;
   onSaved: () => void;
 }
 
-export function BookingFormDialog({ open, onOpenChange, booking, onSaved }: Props) {
+export function BookingFormDialog({ open, onOpenChange, booking, prefill, onSaved }: Props) {
   const isEdit = Boolean(booking);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [cars, setCars] = useState<Car[]>([]);
@@ -87,9 +88,15 @@ export function BookingFormDialog({ open, onOpenChange, booking, onSaved }: Prop
         advancePayment: Number(booking.advancePayment), securityDeposit: Number(booking.securityDeposit),
       });
     } else {
-      reset({ customerId: '', carId: '', fuelLevel: '' });
+      reset({
+        customerId: '',
+        carId: prefill?.carId ?? '',
+        fuelLevel: '',
+        pickupDate: prefill?.pickupDate ? toLocalInput(prefill.pickupDate) : '',
+        returnDate: prefill?.returnDate ? toLocalInput(prefill.returnDate) : '',
+      });
     }
-  }, [open, booking, reset]);
+  }, [open, booking, prefill, reset]);
 
   const carId = watch('carId');
   const pickup = watch('pickupDate');

@@ -142,6 +142,7 @@ export const createBooking = async (data: {
 export const updateBooking = async (
   id: string,
   data: {
+    carId?: string;
     pickupDate?: Date;
     returnDate?: Date;
     pickupLocation?: string;
@@ -166,8 +167,19 @@ export const updateBooking = async (
   const returnDate = data.returnDate ?? booking.returnDate;
   if (returnDate <= pickupDate) throw new AppError(400, 'returnDate must be after pickupDate');
 
-  if (data.pickupDate || data.returnDate) {
-    await assertNoOverlap(booking.carId, pickupDate, returnDate, id);
+  const movingCar = Boolean(data.carId && data.carId !== booking.carId);
+  const targetCarId = data.carId ?? booking.carId;
+
+  if (movingCar) {
+    const targetCar = await prisma.car.findFirst({ where: { id: targetCarId, deletedAt: null } });
+    if (!targetCar) throw new AppError(404, 'Car not found');
+    if (targetCar.status === 'MAINTENANCE' || targetCar.status === 'OUT_OF_SERVICE') {
+      throw new AppError(400, 'Target car is under maintenance or out of service');
+    }
+  }
+
+  if (movingCar || data.pickupDate || data.returnDate) {
+    await assertNoOverlap(targetCarId, pickupDate, returnDate, id);
   }
 
   // Recalculate rent from the locked-in daily rate when dates change
@@ -176,20 +188,28 @@ export const updateBooking = async (
   const totalDays = daysBetween(pickupDate, returnDate);
   const totalAmount = Math.round(lockedDailyRate * totalDays * 100) / 100;
 
-  return prisma.booking.update({
-    where: { id },
-    data: {
-      pickupDate,
-      returnDate,
-      totalAmount,
-      pickupLocation: data.pickupLocation,
-      dropLocation: data.dropLocation,
-      fuelLevel: data.fuelLevel,
-      startKilometer: data.startKilometer,
-      advancePayment: data.advancePayment,
-      securityDeposit: data.securityDeposit,
-    },
-    include: bookingInclude,
+  return prisma.$transaction(async (tx) => {
+    const updated = await tx.booking.update({
+      where: { id },
+      data: {
+        carId: targetCarId,
+        pickupDate,
+        returnDate,
+        totalAmount,
+        pickupLocation: data.pickupLocation,
+        dropLocation: data.dropLocation,
+        fuelLevel: data.fuelLevel,
+        startKilometer: data.startKilometer,
+        advancePayment: data.advancePayment,
+        securityDeposit: data.securityDeposit,
+      },
+      include: bookingInclude,
+    });
+    if (movingCar) {
+      await tx.car.update({ where: { id: targetCarId }, data: { status: 'BOOKED' } });
+      await refreshCarStatus(tx, booking.carId);
+    }
+    return updated;
   });
 };
 
