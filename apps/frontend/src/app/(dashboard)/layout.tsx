@@ -8,14 +8,17 @@ import { useUIStore } from '@/stores/ui.store';
 import { cn } from '@/lib/utils';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { user } = useAuthStore();
+  const { user, hasHydrated } = useAuthStore();
   const { sidebarOpen } = useUIStore();
   const router = useRouter();
 
   useEffect(() => {
-    if (user === null) router.push('/login');
-  }, [user, router]);
+    if (hasHydrated && !user) router.push('/login');
+  }, [hasHydrated, user, router]);
 
+  if (!hasHydrated) {
+    return <div className="flex h-screen items-center justify-center bg-background"><div className="h-6 w-6 animate-spin rounded-full border-2 border-muted border-t-red-600" /></div>;
+  }
   if (!user) return null;
 
   return (
