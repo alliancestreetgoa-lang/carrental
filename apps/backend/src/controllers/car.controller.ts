@@ -21,7 +21,7 @@ const carBaseSchema = z.object({
   rcExpiry: z.string().datetime().optional(),
   currentKilometer: z.number().int().nonnegative().optional(),
   status: z.enum(['AVAILABLE', 'BOOKED', 'MAINTENANCE', 'OUT_OF_SERVICE']).optional(),
-  imageUrl: z.string().url().optional(),
+  images: z.array(z.string().url()).optional(),
 });
 
 const updateCarSchema = carBaseSchema.partial();
@@ -29,11 +29,39 @@ const updateCarSchema = carBaseSchema.partial();
 const listQuerySchema = z.object({
   search: z.string().optional(),
   status: z.enum(['AVAILABLE', 'BOOKED', 'MAINTENANCE', 'OUT_OF_SERVICE']).optional(),
+  fuelType: z.enum(['PETROL', 'DIESEL', 'ELECTRIC', 'HYBRID', 'CNG', 'LPG']).optional(),
+  minYear: z.coerce.number().int().optional(),
+  maxYear: z.coerce.number().int().optional(),
+  minRent: z.coerce.number().nonnegative().optional(),
+  maxRent: z.coerce.number().nonnegative().optional(),
   sortBy: z.enum(['createdAt', 'dailyRent', 'year', 'carName', 'brand']).optional(),
   sortOrder: z.enum(['asc', 'desc']).optional(),
   page: z.coerce.number().int().positive().optional(),
-  pageSize: z.coerce.number().int().positive().max(100).optional(),
+  pageSize: z.coerce.number().int().positive().max(1000).optional(),
 });
+
+const bulkStatusSchema = z.object({
+  ids: z.array(z.string().min(1)).min(1),
+  status: z.enum(['AVAILABLE', 'BOOKED', 'MAINTENANCE', 'OUT_OF_SERVICE']),
+});
+
+const bulkDeleteSchema = z.object({
+  ids: z.array(z.string().min(1)).min(1),
+});
+
+export const bulkUpdateStatus = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { ids, status } = bulkStatusSchema.parse(req.body);
+    res.json({ success: true, data: await carService.bulkUpdateStatus(ids, status) });
+  } catch (e) { next(e); }
+};
+
+export const bulkDelete = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { ids } = bulkDeleteSchema.parse(req.body);
+    res.json({ success: true, data: await carService.bulkDeleteCars(ids) });
+  } catch (e) { next(e); }
+};
 
 export const getCars = async (req: Request, res: Response, next: NextFunction) => {
   try {

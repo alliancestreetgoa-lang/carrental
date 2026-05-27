@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'sonner';
-import { Loader2, Upload, ImageIcon } from 'lucide-react';
+import { Loader2, Upload, ImageIcon, X, Plus } from 'lucide-react';
 import { api } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -37,7 +37,6 @@ const schema = z.object({
   insuranceExpiry: optionalDate,
   pollutionExpiry: optionalDate,
   rcExpiry: optionalDate,
-  imageUrl: z.preprocess(emptyToUndef, z.string().url().optional()),
 });
 
 type FormData = z.input<typeof schema>;
@@ -58,9 +57,11 @@ interface Props {
 export function CarFormDialog({ open, onOpenChange, car, onSaved }: Props) {
   const isEdit = Boolean(car);
   const [uploading, setUploading] = useState(false);
+  const [images, setImages] = useState<string[]>([]);
+  const [urlInput, setUrlInput] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const { register, handleSubmit, reset, watch, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { fuelType: 'PETROL', transmission: 'MANUAL', status: 'AVAILABLE', seatingCapacity: 5 },
   });
@@ -80,14 +81,21 @@ export function CarFormDialog({ open, onOpenChange, car, onSaved }: Props) {
         insuranceExpiry: toDateInput(car.insuranceExpiry),
         pollutionExpiry: toDateInput(car.pollutionExpiry),
         rcExpiry: toDateInput(car.rcExpiry),
-        imageUrl: car.imageUrl ?? '',
       });
+      setImages(car.images ?? []);
     } else {
       reset({ fuelType: 'PETROL', transmission: 'MANUAL', status: 'AVAILABLE', seatingCapacity: 5 });
+      setImages([]);
     }
+    setUrlInput('');
   }, [open, car, reset]);
 
-  const imageUrl = watch('imageUrl') as string | undefined;
+  const addImage = (url: string) => {
+    const u = url.trim();
+    if (!u) return;
+    setImages((prev) => (prev.includes(u) ? prev : [...prev, u]));
+  };
+  const removeImage = (url: string) => setImages((prev) => prev.filter((i) => i !== url));
 
   const handleFile = async (file: File) => {
     setUploading(true);
@@ -95,7 +103,7 @@ export function CarFormDialog({ open, onOpenChange, car, onSaved }: Props) {
     fd.append('file', file);
     try {
       const { data } = await api.post('/uploads/image', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      setValue('imageUrl', data.data.url);
+      addImage(data.data.url);
       toast.success('Image uploaded');
     } catch (e: unknown) {
       const msg = (e as { response?: { data?: { message?: string } } })?.response?.data?.message;
@@ -109,6 +117,7 @@ export function CarFormDialog({ open, onOpenChange, car, onSaved }: Props) {
     const data = schema.parse(raw);
     const payload = {
       ...data,
+      images,
       insuranceExpiry: toIso(data.insuranceExpiry),
       pollutionExpiry: toIso(data.pollutionExpiry),
       rcExpiry: toIso(data.rcExpiry),
@@ -136,22 +145,33 @@ export function CarFormDialog({ open, onOpenChange, car, onSaved }: Props) {
           <DialogDescription>{isEdit ? 'Update vehicle details.' : 'Register a new car in the fleet.'}</DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {/* Image */}
-          <div className="sm:col-span-2 flex items-center gap-4">
-            <div className="w-24 h-16 rounded-lg bg-muted flex items-center justify-center overflow-hidden flex-shrink-0 border border-border">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              {imageUrl ? <img src={imageUrl} alt="Car" className="w-full h-full object-cover" /> : <ImageIcon className="w-6 h-6 text-muted-foreground" />}
+          {/* Image gallery */}
+          <div className="sm:col-span-2">
+            <Label>Images</Label>
+            <div className="flex flex-wrap gap-2 mt-1">
+              {images.map((url, i) => (
+                <div key={url} className="relative w-20 h-16 rounded-lg overflow-hidden border border-border group">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={url} alt={`Car ${i + 1}`} className="w-full h-full object-cover" />
+                  {i === 0 && <span className="absolute bottom-0 inset-x-0 bg-black/60 text-white text-[9px] text-center">Cover</span>}
+                  <button type="button" onClick={() => removeImage(url)} className="absolute top-0.5 right-0.5 w-4 h-4 rounded-full bg-black/60 text-white flex items-center justify-center cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity">
+                    <X className="w-2.5 h-2.5" />
+                  </button>
+                </div>
+              ))}
+              {images.length === 0 && (
+                <div className="w-20 h-16 rounded-lg bg-muted flex items-center justify-center border border-border">
+                  <ImageIcon className="w-5 h-5 text-muted-foreground" />
+                </div>
+              )}
             </div>
-            <div className="flex-1">
-              <Label htmlFor="imageUrl">Image</Label>
-              <div className="flex gap-2">
-                <Input id="imageUrl" placeholder="Paste image URL or upload" {...register('imageUrl')} />
-                <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
-                <Button type="button" variant="outline" className="cursor-pointer flex-shrink-0" onClick={() => fileRef.current?.click()} disabled={uploading}>
-                  {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
-                </Button>
-              </div>
-              <Err name="imageUrl" />
+            <div className="flex gap-2 mt-2">
+              <Input placeholder="Paste image URL" value={urlInput} onChange={(e) => setUrlInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addImage(urlInput); setUrlInput(''); } }} />
+              <Button type="button" variant="outline" className="cursor-pointer flex-shrink-0" onClick={() => { addImage(urlInput); setUrlInput(''); }}><Plus className="w-4 h-4" /></Button>
+              <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
+              <Button type="button" variant="outline" className="cursor-pointer flex-shrink-0" onClick={() => fileRef.current?.click()} disabled={uploading}>
+                {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Upload className="w-4 h-4" />}
+              </Button>
             </div>
           </div>
 

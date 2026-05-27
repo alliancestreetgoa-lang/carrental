@@ -81,6 +81,10 @@ async function main() {
       rcExpiry: new Date('2038-01-01'),
       currentKilometer: 18500,
       status: CarStatus.AVAILABLE,
+      images: [
+        'https://images.unsplash.com/photo-1549924231-f129b911e442?w=800',
+        'https://images.unsplash.com/photo-1502877338535-766e1452684a?w=800',
+      ],
     },
   });
 
@@ -106,6 +110,10 @@ async function main() {
       rcExpiry: new Date('2039-01-01'),
       currentKilometer: 9200,
       status: CarStatus.BOOKED,
+      images: [
+        'https://images.unsplash.com/photo-1632245889029-e406faaa34cd?w=800',
+        'https://images.unsplash.com/photo-1605559424843-9e4c228bf1c2?w=800',
+      ],
     },
   });
 
@@ -130,6 +138,10 @@ async function main() {
       rcExpiry: new Date('2039-06-01'),
       currentKilometer: 4300,
       status: CarStatus.MAINTENANCE,
+      images: [
+        'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800',
+        'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=800',
+      ],
     },
   });
 

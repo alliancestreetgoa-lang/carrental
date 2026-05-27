@@ -45,6 +45,7 @@ export default function CarDetailPage() {
   const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [activeImg, setActiveImg] = useState(0);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -76,6 +77,9 @@ export default function CarDetailPage() {
 
   if (!car) return <p className="text-sm text-muted-foreground">Vehicle not found.</p>;
 
+  const gallery = car.images ?? [];
+  const cover = gallery[Math.min(activeImg, Math.max(0, gallery.length - 1))];
+
   return (
     <div>
       <div className="flex items-center justify-between mb-4">
@@ -91,9 +95,25 @@ export default function CarDetailPage() {
       {/* Profile */}
       <Card className="mb-4 overflow-hidden">
         <div className="grid grid-cols-1 md:grid-cols-3">
-          <div className="md:col-span-1 h-52 md:h-auto bg-muted flex items-center justify-center overflow-hidden">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            {car.imageUrl ? <img src={car.imageUrl} alt={car.carName} className="w-full h-full object-cover" /> : <CarIcon className="w-16 h-16 text-muted-foreground" />}
+          <div className="md:col-span-1 bg-muted">
+            <div className="h-52 flex items-center justify-center overflow-hidden">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              {cover ? <img src={cover} alt={car.carName} className="w-full h-full object-cover" /> : <CarIcon className="w-16 h-16 text-muted-foreground" />}
+            </div>
+            {gallery.length > 1 && (
+              <div className="flex gap-2 p-2 overflow-x-auto">
+                {gallery.map((url, i) => (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={url}
+                    src={url}
+                    alt={`${car.carName} ${i + 1}`}
+                    onClick={() => setActiveImg(i)}
+                    className={`w-14 h-12 rounded object-cover cursor-pointer flex-shrink-0 ring-2 transition-all ${i === activeImg ? 'ring-red-600' : 'ring-transparent opacity-70 hover:opacity-100'}`}
+                  />
+                ))}
+              </div>
+            )}
           </div>
           <div className="md:col-span-2 p-6">
             <div className="flex items-start justify-between gap-3 mb-4">

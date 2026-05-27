@@ -7,6 +7,11 @@ const router = Router();
 router.use(authenticate);
 
 router.get('/', carController.getCars);
+
+// Bulk routes must be declared before the dynamic ":id" routes
+router.patch('/bulk/status', authorize('SUPER_ADMIN', 'STAFF'), carController.bulkUpdateStatus);
+router.post('/bulk/delete', authorize('SUPER_ADMIN'), carController.bulkDelete);
+
 router.get('/:id', carController.getCar);
 router.post('/', authorize('SUPER_ADMIN', 'STAFF'), carController.createCar);
 router.patch('/:id', authorize('SUPER_ADMIN', 'STAFF'), carController.updateCar);

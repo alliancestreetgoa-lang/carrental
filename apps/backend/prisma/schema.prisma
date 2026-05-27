@@ -114,6 +114,7 @@ model Car {
   rcExpiry           DateTime?
   currentKilometer   Int          @default(0)
   status             CarStatus    @default(AVAILABLE)
+  images             String[]     @default([])
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
   deletedAt          DateTime?

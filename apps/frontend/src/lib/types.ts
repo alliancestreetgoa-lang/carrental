@@ -23,7 +23,7 @@ export interface Car {
   rcExpiry: string | null;
   currentKilometer: number;
   status: CarStatus;
-  imageUrl: string | null;
+  images: string[];
   createdAt: string;
 }
 
