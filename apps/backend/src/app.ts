@@ -5,6 +5,10 @@ import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import { errorHandler } from './middleware/error.middleware';
 import authRoutes from './routes/auth.routes';
+import dashboardRoutes from './routes/dashboard.routes';
+import fleetRoutes from './routes/fleet.routes';
+import customerRoutes from './routes/customer.routes';
+import reservationRoutes from './routes/reservation.routes';
 
 export const createApp = () => {
   const app = express();
@@ -22,6 +26,10 @@ export const createApp = () => {
   app.get('/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
   app.use('/api/auth', authRoutes);
+  app.use('/api/dashboard', dashboardRoutes);
+  app.use('/api/fleet', fleetRoutes);
+  app.use('/api/customers', customerRoutes);
+  app.use('/api/reservations', reservationRoutes);
 
   app.use(errorHandler);
 
