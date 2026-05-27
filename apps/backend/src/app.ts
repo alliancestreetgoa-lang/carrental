@@ -2,8 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
-import rateLimit from 'express-rate-limit';
 import { errorHandler } from './middleware/error.middleware';
+import { apiLimiter, authLimiter } from './middleware/rateLimit.middleware';
 import authRoutes from './routes/auth.routes';
 import dashboardRoutes from './routes/dashboard.routes';
 import carRoutes from './routes/car.routes';
@@ -22,13 +22,14 @@ export const createApp = () => {
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
     credentials: true,
   }));
-  app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
+  app.use(apiLimiter);
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(cookieParser());
 
   app.get('/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
+  app.use('/api/auth/login', authLimiter);
   app.use('/api/auth', authRoutes);
   app.use('/api/dashboard', dashboardRoutes);
   app.use('/api/cars', carRoutes);
