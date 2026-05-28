@@ -145,6 +145,12 @@ function CarDetailInner() {
 
   useRealtime([...CAR_EVENTS, ...BOOKING_EVENTS], fetchCar);
 
+  useEffect(() => {
+    if (car) {
+      document.title = `${car.brand} ${car.carName} | Alliance Car Rental`;
+    }
+  }, [car]);
+
   function handleShare() {
     const url = window.location.href;
     const title = car ? `${car.brand} ${car.carName}` : 'Car Rental';
@@ -187,8 +193,34 @@ function CarDetailInner() {
   const hasImages = car.images && car.images.length > 0;
   const displayedImage = hasImages ? car.images[activeImage] ?? car.images[0] : null;
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3011';
+  const vehicleJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: `${car.brand} ${car.carName}`,
+    image: car.images?.[0] ?? undefined,
+    description: `Rent the ${car.year} ${car.brand} ${car.carName} in Goa — ${car.fuelType}, ${car.transmission}, ${car.seatingCapacity} seats.`,
+    url: `${siteUrl}/cars/${car.id}`,
+    offers: {
+      '@type': 'Offer',
+      price: String(car.dailyRent),
+      priceCurrency: 'INR',
+      availability: 'https://schema.org/InStock',
+      priceSpecification: {
+        '@type': 'UnitPriceSpecification',
+        price: String(car.dailyRent),
+        priceCurrency: 'INR',
+        unitText: 'DAY',
+      },
+    },
+  };
+
   return (
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8 pb-28 lg:pb-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(vehicleJsonLd) }}
+      />
       {/* Breadcrumb / back link */}
       <nav className="flex items-center gap-1.5 text-sm text-slate-500" aria-label="Breadcrumb">
         <Link

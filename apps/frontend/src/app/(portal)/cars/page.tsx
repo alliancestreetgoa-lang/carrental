@@ -64,6 +64,10 @@ function CarsBrowser() {
   const from = params.get('from') ?? '';
   const to = params.get('to') ?? '';
 
+  useEffect(() => {
+    document.title = 'Browse cars | Alliance Car Rental';
+  }, []);
+
   const [cars, setCars] = useState<PortalCar[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'grid' | 'list'>('grid');

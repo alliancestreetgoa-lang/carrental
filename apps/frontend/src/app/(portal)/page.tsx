@@ -81,8 +81,30 @@ export default function StorefrontHome() {
       .catch(() => {/* silently ignore */});
   }, []);
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3011';
+  const orgJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'AutoRental',
+    name: 'Alliance Car Rental',
+    url: siteUrl,
+    description:
+      'Alliance Car Rental offers premium self-drive cars in Goa. Browse a hand-picked fleet, book instantly, and explore Goa at your own pace.',
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'Calangute',
+      addressRegion: 'Goa',
+      addressCountry: 'IN',
+    },
+    telephone: '+91-90000-00000',
+    email: 'hello@alliancecarrental.com',
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+      />
       {/* ─── HERO ─────────────────────────────────────────────── */}
       <section className="relative bg-gradient-to-br from-slate-900 to-slate-800 text-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-20 pb-32 sm:pt-28 sm:pb-40">
