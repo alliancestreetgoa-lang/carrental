@@ -2,11 +2,12 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ShieldCheck, Clock, IndianRupee } from 'lucide-react';
+import { ShieldCheck, Clock, IndianRupee, Phone, Mail, MapPin } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CarCard } from '@/components/portal/CarCard';
 import { DateRangeSearch } from '@/components/portal/DateRangeSearch';
 import { StarRating } from '@/components/portal/StarRating';
+import { Faq } from '@/components/portal/Faq';
 import { portalApi } from '@/lib/portalApi';
 import type { PortalCar } from '@/lib/portalTypes';
 
@@ -100,7 +101,7 @@ export default function StorefrontHome() {
 
         {/* Date search card — overlapping the hero bottom */}
         <div className="absolute bottom-0 left-0 right-0 translate-y-1/2 px-4 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-3xl bg-white rounded-2xl shadow-xl px-6 py-6 sm:py-5">
+          <div className="mx-auto max-w-5xl bg-white rounded-2xl shadow-xl px-6 py-6 sm:py-5">
             <DateRangeSearch />
           </div>
         </div>
@@ -193,6 +194,74 @@ export default function StorefrontHome() {
           </div>
         </section>
       )}
+
+      {/* ─── FAQ ──────────────────────────────────────────────── */}
+      <div className="bg-slate-50 border-y border-slate-200">
+        <Faq />
+      </div>
+
+      {/* ─── CONTACT ──────────────────────────────────────────── */}
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+        <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 text-center mb-10">
+          Get in touch
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-10">
+          <div className="flex flex-col items-center text-center gap-3">
+            <div className="flex size-12 items-center justify-center rounded-2xl bg-red-100 text-red-600 shrink-0">
+              <Phone className="size-6" strokeWidth={1.75} />
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Phone</p>
+              <a
+                href="tel:+919000000000"
+                className="text-sm font-medium text-slate-800 hover:text-red-600 transition-colors cursor-pointer"
+              >
+                +91 90000 00000
+              </a>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center text-center gap-3">
+            <div className="flex size-12 items-center justify-center rounded-2xl bg-red-100 text-red-600 shrink-0">
+              <Mail className="size-6" strokeWidth={1.75} />
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Email</p>
+              <a
+                href="mailto:hello@alliancecarrental.com"
+                className="text-sm font-medium text-slate-800 hover:text-red-600 transition-colors cursor-pointer break-all"
+              >
+                hello@alliancecarrental.com
+              </a>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center text-center gap-3">
+            <div className="flex size-12 items-center justify-center rounded-2xl bg-red-100 text-red-600 shrink-0">
+              <MapPin className="size-6" strokeWidth={1.75} />
+            </div>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">Address</p>
+              <p className="text-sm font-medium text-slate-800">Calangute, Goa</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <a
+            href="mailto:hello@alliancecarrental.com"
+            className="inline-flex items-center justify-center h-11 px-8 text-sm font-medium rounded-lg bg-red-600 hover:bg-red-700 text-white transition-colors cursor-pointer"
+          >
+            Email us
+          </a>
+          <a
+            href="tel:+919000000000"
+            className="inline-flex items-center justify-center h-11 px-8 text-sm font-medium rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-colors cursor-pointer"
+          >
+            Call us
+          </a>
+        </div>
+      </section>
 
       {/* ─── CTA BAND ─────────────────────────────────────────── */}
       <section className="bg-slate-900 text-white">
