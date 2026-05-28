@@ -302,7 +302,7 @@ export default function FleetPage() {
                   </div>
                   <div className="flex items-center justify-between mt-3">
                     <span className="text-sm text-muted-foreground">{car.fuelType} · {car.year}</span>
-                    <span className="font-bold text-foreground">{formatCurrency(car.dailyRent)}<span className="text-xs font-normal text-muted-foreground">/day</span></span>
+                    <span className="font-semibold text-foreground">{formatCurrency(car.dailyRent)}<span className="text-xs font-normal text-muted-foreground">/day</span></span>
                   </div>
                   <div className="mt-3 pt-3 border-t border-border"><RowActions car={car} /></div>
                 </CardContent>

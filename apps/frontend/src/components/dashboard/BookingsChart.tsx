@@ -6,7 +6,7 @@ export function BookingsChart({ data }: { data: { month: string; bookings: numbe
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base font-semibold">Bookings Analytics</CardTitle>
+        <CardTitle>Bookings Analytics</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={260}>

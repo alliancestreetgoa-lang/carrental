@@ -118,7 +118,7 @@ export default function CarDetailPage() {
           <div className="md:col-span-2 p-6">
             <div className="flex items-start justify-between gap-3 mb-4">
               <div>
-                <h2 className="text-2xl font-bold text-foreground">{car.brand} {car.carName}</h2>
+                <h2 className="text-2xl font-semibold tracking-tight text-foreground">{car.brand} {car.carName}</h2>
                 <p className="text-sm text-muted-foreground">{car.model} · {car.year} · <span className="font-mono">{car.registrationNumber}</span></p>
               </div>
               <StatusBadge status={car.status} />
@@ -137,16 +137,16 @@ export default function CarDetailPage() {
       {/* Pricing + Documents */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         <Card>
-          <CardHeader><CardTitle className="text-base font-semibold">Pricing</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Pricing</CardTitle></CardHeader>
           <CardContent className="grid grid-cols-2 gap-4">
-            <div><p className="text-xs text-muted-foreground">Daily</p><p className="text-lg font-bold text-foreground">{formatCurrency(car.dailyRent)}</p></div>
-            <div><p className="text-xs text-muted-foreground">Weekly</p><p className="text-lg font-bold text-foreground">{car.weeklyRent ? formatCurrency(car.weeklyRent) : '—'}</p></div>
-            <div><p className="text-xs text-muted-foreground">Monthly</p><p className="text-lg font-bold text-foreground">{car.monthlyRent ? formatCurrency(car.monthlyRent) : '—'}</p></div>
-            <div><p className="text-xs text-muted-foreground">Security Deposit</p><p className="text-lg font-bold text-foreground">{formatCurrency(car.securityDeposit)}</p></div>
+            <div><p className="text-xs text-muted-foreground">Daily</p><p className="text-lg font-semibold text-foreground">{formatCurrency(car.dailyRent)}</p></div>
+            <div><p className="text-xs text-muted-foreground">Weekly</p><p className="text-lg font-semibold text-foreground">{car.weeklyRent ? formatCurrency(car.weeklyRent) : '—'}</p></div>
+            <div><p className="text-xs text-muted-foreground">Monthly</p><p className="text-lg font-semibold text-foreground">{car.monthlyRent ? formatCurrency(car.monthlyRent) : '—'}</p></div>
+            <div><p className="text-xs text-muted-foreground">Security Deposit</p><p className="text-lg font-semibold text-foreground">{formatCurrency(car.securityDeposit)}</p></div>
           </CardContent>
         </Card>
         <Card>
-          <CardHeader><CardTitle className="text-base font-semibold">Documents</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Documents</CardTitle></CardHeader>
           <CardContent className="space-y-2 text-sm">
             <div className="flex justify-between"><span className="text-muted-foreground">Insurance Expiry</span><span className={expiryClass(car.insuranceExpiry)}>{car.insuranceExpiry ? formatDate(car.insuranceExpiry) : '—'}</span></div>
             <div className="flex justify-between"><span className="text-muted-foreground">Pollution Expiry</span><span className={expiryClass(car.pollutionExpiry)}>{car.pollutionExpiry ? formatDate(car.pollutionExpiry) : '—'}</span></div>
@@ -157,7 +157,7 @@ export default function CarDetailPage() {
 
       {/* Booking history */}
       <Card className="mb-4">
-        <CardHeader><CardTitle className="text-base font-semibold flex items-center gap-2"><Calendar className="w-4 h-4 text-muted-foreground" /> Booking History</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="flex items-center gap-2"><Calendar className="w-4 h-4 text-muted-foreground" /> Booking History</CardTitle></CardHeader>
         <CardContent className="p-0">
           {car.bookings.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-6">No bookings for this vehicle</p>
@@ -190,7 +190,7 @@ export default function CarDetailPage() {
 
       {/* Maintenance history */}
       <Card>
-        <CardHeader><CardTitle className="text-base font-semibold flex items-center gap-2"><Wrench className="w-4 h-4 text-muted-foreground" /> Maintenance &amp; Expense History</CardTitle></CardHeader>
+        <CardHeader><CardTitle className="flex items-center gap-2"><Wrench className="w-4 h-4 text-muted-foreground" /> Maintenance &amp; Expense History</CardTitle></CardHeader>
         <CardContent className="p-0">
           {car.expenses.length === 0 ? (
             <p className="text-sm text-muted-foreground text-center py-6">No expense records</p>

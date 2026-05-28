@@ -109,7 +109,7 @@ export default function ReportsPage() {
           {/* Revenue vs expenses + status mix */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
             <Card className="lg:col-span-2">
-              <CardHeader><CardTitle className="text-base font-semibold">Revenue vs Expenses</CardTitle></CardHeader>
+              <CardHeader><CardTitle>Revenue vs Expenses</CardTitle></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={280}>
                   <BarChart data={report.revenueByMonth} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
@@ -125,7 +125,7 @@ export default function ReportsPage() {
               </CardContent>
             </Card>
             <Card>
-              <CardHeader><CardTitle className="text-base font-semibold">Bookings by Status</CardTitle></CardHeader>
+              <CardHeader><CardTitle>Bookings by Status</CardTitle></CardHeader>
               <CardContent>
                 {report.statusMix.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-16">No bookings in range</p>
@@ -147,7 +147,7 @@ export default function ReportsPage() {
           {/* Top cars + customers */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Card>
-              <CardHeader><CardTitle className="text-base font-semibold">Top Vehicles</CardTitle></CardHeader>
+              <CardHeader><CardTitle>Top Vehicles</CardTitle></CardHeader>
               <CardContent className="p-0">
                 {report.topCars.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-8">No data</p>
@@ -177,7 +177,7 @@ export default function ReportsPage() {
               </CardContent>
             </Card>
             <Card>
-              <CardHeader><CardTitle className="text-base font-semibold">Top Customers</CardTitle></CardHeader>
+              <CardHeader><CardTitle>Top Customers</CardTitle></CardHeader>
               <CardContent className="p-0">
                 {report.topCustomers.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-8">No data</p>

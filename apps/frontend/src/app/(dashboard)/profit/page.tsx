@@ -112,7 +112,7 @@ export default function ProfitPage() {
 
           {/* Profit per car chart */}
           <Card className="mb-4">
-            <CardHeader><CardTitle className="text-base font-semibold">Profit per Vehicle</CardTitle></CardHeader>
+            <CardHeader><CardTitle>Profit per Vehicle</CardTitle></CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={profitData} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
@@ -130,7 +130,7 @@ export default function ProfitPage() {
 
           {/* Revenue vs expenses per car */}
           <Card className="mb-4">
-            <CardHeader><CardTitle className="text-base font-semibold">Revenue vs Expenses per Vehicle</CardTitle></CardHeader>
+            <CardHeader><CardTitle>Revenue vs Expenses per Vehicle</CardTitle></CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={data.cars} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
@@ -149,7 +149,7 @@ export default function ProfitPage() {
           {/* Top / Lowest / Idle */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
             <Card>
-              <CardHeader><CardTitle className="text-base font-semibold flex items-center gap-2"><ArrowUp className="w-4 h-4 text-emerald-600" /> Top Earning</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="flex items-center gap-2"><ArrowUp className="w-4 h-4 text-emerald-600" /> Top Earning</CardTitle></CardHeader>
               <CardContent className="space-y-2">
                 {earning.length === 0 ? <p className="text-sm text-muted-foreground text-center py-4">No profitable cars in range</p> :
                   earning.slice(0, 5).map((c) => (
@@ -161,7 +161,7 @@ export default function ProfitPage() {
               </CardContent>
             </Card>
             <Card>
-              <CardHeader><CardTitle className="text-base font-semibold flex items-center gap-2"><ArrowDown className="w-4 h-4 text-red-600" /> Lowest Earning</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="flex items-center gap-2"><ArrowDown className="w-4 h-4 text-red-600" /> Lowest Earning</CardTitle></CardHeader>
               <CardContent className="space-y-2">
                 {losing.length === 0 ? <p className="text-sm text-muted-foreground text-center py-4">No loss-making cars</p> :
                   losing.slice(0, 5).map((c) => (
@@ -173,7 +173,7 @@ export default function ProfitPage() {
               </CardContent>
             </Card>
             <Card>
-              <CardHeader><CardTitle className="text-base font-semibold flex items-center gap-2"><CarFront className="w-4 h-4 text-amber-600" /> Idle Cars</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="flex items-center gap-2"><CarFront className="w-4 h-4 text-amber-600" /> Idle Cars</CardTitle></CardHeader>
               <CardContent className="space-y-2">
                 {idle.length === 0 ? <p className="text-sm text-muted-foreground text-center py-4">All cars rented in range</p> :
                   idle.map((c) => (
@@ -188,7 +188,7 @@ export default function ProfitPage() {
 
           {/* Full table */}
           <Card>
-            <CardHeader><CardTitle className="text-base font-semibold">All Vehicles</CardTitle></CardHeader>
+            <CardHeader><CardTitle>All Vehicles</CardTitle></CardHeader>
             <CardContent className="p-0">
               <Table>
                 <TableHeader>

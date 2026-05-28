@@ -14,7 +14,7 @@ export function MaintenanceAlerts({ alerts }: { alerts: MaintenanceAlert[] }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base font-semibold flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2">
           <AlertTriangle className="w-4 h-4 text-amber-500" />
           Maintenance Alerts
           {alerts.length > 0 && (

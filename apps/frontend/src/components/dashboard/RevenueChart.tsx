@@ -7,7 +7,7 @@ export function RevenueChart({ data }: { data: { month: string; revenue: number 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base font-semibold">Monthly Revenue</CardTitle>
+        <CardTitle>Monthly Revenue</CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={260}>

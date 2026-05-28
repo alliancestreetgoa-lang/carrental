@@ -52,7 +52,7 @@ export function Sidebar() {
             <Car className="w-4 h-4 text-white" />
           </div>
           {sidebarOpen && (
-            <span className="font-bold text-sm text-foreground whitespace-nowrap">Alliance Car Rental</span>
+            <span className="font-semibold text-sm text-foreground whitespace-nowrap">Alliance Car Rental</span>
           )}
         </Link>
         <Button

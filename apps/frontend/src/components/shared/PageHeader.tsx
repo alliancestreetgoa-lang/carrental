@@ -8,7 +8,7 @@ export function PageHeader({ title, description, action }: PageHeaderProps) {
   return (
     <div className="flex items-start justify-between mb-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-foreground">{title}</h2>
+        <h2 className="text-2xl font-semibold tracking-tight text-foreground">{title}</h2>
         {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
       </div>
       {action && <div>{action}</div>}

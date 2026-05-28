@@ -81,7 +81,7 @@ export default function MaintenancePage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         {/* Upcoming & overdue */}
         <Card>
-          <CardHeader><CardTitle className="text-base font-semibold flex items-center gap-2"><CalendarClock className="w-4 h-4" /> Upcoming & Overdue</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="flex items-center gap-2"><CalendarClock className="w-4 h-4" /> Upcoming & Overdue</CardTitle></CardHeader>
           <CardContent className="space-y-2">
             {!summary ? (
               Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 rounded-md" />)
@@ -107,7 +107,7 @@ export default function MaintenancePage() {
 
         {/* Document expiry alerts */}
         <Card>
-          <CardHeader><CardTitle className="text-base font-semibold flex items-center gap-2"><FileWarning className="w-4 h-4" /> Document Expiry Alerts</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="flex items-center gap-2"><FileWarning className="w-4 h-4" /> Document Expiry Alerts</CardTitle></CardHeader>
           <CardContent className="space-y-2">
             {!summary ? (
               Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 rounded-md" />)
@@ -134,7 +134,7 @@ export default function MaintenancePage() {
       {/* Service history */}
       <Card>
         <CardHeader className="flex-row items-center justify-between space-y-0">
-          <CardTitle className="text-base font-semibold flex items-center gap-2"><Wrench className="w-4 h-4" /> Service History</CardTitle>
+          <CardTitle className="flex items-center gap-2"><Wrench className="w-4 h-4" /> Service History</CardTitle>
           <div className="flex gap-2">
             <select className={selectClass} value={status} onChange={(e) => setStatus(e.target.value)}>
               <option value="">All status</option>

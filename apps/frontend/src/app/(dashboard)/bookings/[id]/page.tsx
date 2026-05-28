@@ -33,7 +33,7 @@ const Field = ({ label, value }: { label: string; value: string }) => (
 const InvoiceRow = ({ label, value, bold, tone }: { label: string; value: string; bold?: boolean; tone?: string }) => (
   <div className="flex items-center justify-between py-1.5">
     <span className={`text-sm ${bold ? 'font-semibold text-foreground' : 'text-muted-foreground'}`}>{label}</span>
-    <span className={`text-sm ${bold ? 'font-bold' : 'font-medium'} ${tone ?? 'text-foreground'}`}>{value}</span>
+    <span className={`text-sm ${bold ? 'font-semibold' : 'font-medium'} ${tone ?? 'text-foreground'}`}>{value}</span>
   </div>
 );
 
@@ -140,14 +140,14 @@ export default function BookingDetailPage() {
         <CardContent className="p-6 flex items-start justify-between gap-3 flex-wrap">
           <div>
             <div className="flex items-center gap-3">
-              <h2 className="text-2xl font-bold text-foreground">{b.customer.fullName}</h2>
+              <h2 className="text-2xl font-semibold tracking-tight text-foreground">{b.customer.fullName}</h2>
               <StatusBadge status={b.bookingStatus} />
             </div>
             <p className="text-sm text-muted-foreground mt-1">{b.car.brand} {b.car.carName} · <span className="font-mono">{b.car.registrationNumber}</span></p>
           </div>
           <div className="text-right">
             <p className="text-xs text-muted-foreground">Grand Total</p>
-            <p className="text-2xl font-bold text-foreground">{formatCurrency(b.invoice.grandTotal)}</p>
+            <p className="text-2xl font-semibold tracking-tight text-foreground">{formatCurrency(b.invoice.grandTotal)}</p>
           </div>
         </CardContent>
       </Card>
@@ -156,7 +156,7 @@ export default function BookingDetailPage() {
         {/* Left: details */}
         <div className="lg:col-span-2 space-y-4">
           <Card>
-            <CardHeader><CardTitle className="text-base font-semibold">Rental Details</CardTitle></CardHeader>
+            <CardHeader><CardTitle>Rental Details</CardTitle></CardHeader>
             <CardContent className="grid grid-cols-2 sm:grid-cols-3 gap-4">
               <Field label="Pickup" value={formatDate(b.pickupDate)} />
               <Field label="Scheduled Return" value={formatDate(b.returnDate)} />
@@ -176,7 +176,7 @@ export default function BookingDetailPage() {
           {/* Payments */}
           <Card>
             <CardHeader className="flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-base font-semibold">Payments</CardTitle>
+              <CardTitle>Payments</CardTitle>
               <Button size="sm" variant="outline" className="cursor-pointer" onClick={() => setPaymentOpen(true)}><Plus className="w-4 h-4 mr-1" /> Add Payment</Button>
             </CardHeader>
             <CardContent className="p-0">
@@ -212,7 +212,7 @@ export default function BookingDetailPage() {
         <div>
           <Card>
             <CardHeader className="flex-row items-center justify-between space-y-0">
-              <CardTitle className="text-base font-semibold flex items-center gap-2"><FileText className="w-4 h-4 text-muted-foreground" /> Invoice</CardTitle>
+              <CardTitle className="flex items-center gap-2"><FileText className="w-4 h-4 text-muted-foreground" /> Invoice</CardTitle>
               <Button size="sm" variant="outline" className="cursor-pointer" onClick={downloadInvoice}><Download className="w-4 h-4 mr-1" /> PDF</Button>
             </CardHeader>
             <CardContent>
@@ -232,7 +232,7 @@ export default function BookingDetailPage() {
 
           {/* Agreement */}
           <Card className="mt-4">
-            <CardHeader><CardTitle className="text-base font-semibold flex items-center gap-2"><FileSignature className="w-4 h-4 text-muted-foreground" /> Agreement</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="flex items-center gap-2"><FileSignature className="w-4 h-4 text-muted-foreground" /> Agreement</CardTitle></CardHeader>
             <CardContent>
               {!b.agreement ? (
                 <div className="text-center py-2">

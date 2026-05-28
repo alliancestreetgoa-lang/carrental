@@ -80,7 +80,7 @@ export default function ExpensesPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
         <Card className="lg:col-span-2">
-          <CardHeader><CardTitle className="text-base font-semibold">Monthly Expenses</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Monthly Expenses</CardTitle></CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={summary?.byMonth ?? []} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
@@ -94,7 +94,7 @@ export default function ExpensesPage() {
           </CardContent>
         </Card>
         <Card>
-          <CardHeader><CardTitle className="text-base font-semibold">By Category</CardTitle></CardHeader>
+          <CardHeader><CardTitle>By Category</CardTitle></CardHeader>
           <CardContent>
             {!summary || summary.byCategory.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-16">No expenses yet</p>
@@ -116,7 +116,7 @@ export default function ExpensesPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* By car */}
         <Card>
-          <CardHeader><CardTitle className="text-base font-semibold">Top Spend by Vehicle</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Top Spend by Vehicle</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             {!summary || summary.byCar.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-4">No data</p>
@@ -142,7 +142,7 @@ export default function ExpensesPage() {
         {/* Ledger */}
         <Card className="lg:col-span-2">
           <CardHeader className="flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-base font-semibold">Expenses</CardTitle>
+            <CardTitle>Expenses</CardTitle>
             <select className={selectClass} value={category} onChange={(e) => setCategory(e.target.value)}>
               <option value="">All categories</option>
               {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}

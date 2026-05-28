@@ -11,7 +11,7 @@ export function RecentBookingsTable({ bookings }: { bookings: DashboardBookingRo
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base font-semibold">Recent Bookings</CardTitle>
+        <CardTitle>Recent Bookings</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
         {bookings.length === 0 ? (

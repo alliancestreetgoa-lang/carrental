@@ -86,7 +86,7 @@ export default function BillingPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* By method */}
         <Card className="lg:col-span-1">
-          <CardHeader><CardTitle className="text-base font-semibold">Revenue by Method</CardTitle></CardHeader>
+          <CardHeader><CardTitle>Revenue by Method</CardTitle></CardHeader>
           <CardContent className="space-y-3">
             {!summary || summary.byMethod.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-4">No payments yet</p>
@@ -109,7 +109,7 @@ export default function BillingPage() {
         {/* Ledger */}
         <Card className="lg:col-span-2">
           <CardHeader className="space-y-3">
-            <CardTitle className="text-base font-semibold">Payments Ledger</CardTitle>
+            <CardTitle>Payments Ledger</CardTitle>
             <div className="flex flex-wrap items-center gap-2">
               <Input placeholder="Search customer..." className="flex-1 min-w-[140px] h-9" value={searchInput} onChange={(e) => setSearchInput(e.target.value)} />
               <select className={selectClass} value={method} onChange={(e) => setMethod(e.target.value)}>

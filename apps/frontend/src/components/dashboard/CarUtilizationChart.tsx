@@ -17,7 +17,7 @@ export function CarUtilizationChart({ data }: { data: { status: string; count: n
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-base font-semibold">Car Utilization</CardTitle>
+        <CardTitle>Car Utilization</CardTitle>
       </CardHeader>
       <CardContent>
         {total === 0 ? (

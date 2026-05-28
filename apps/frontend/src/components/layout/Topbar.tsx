@@ -31,7 +31,7 @@ export function Topbar() {
       <Button variant="ghost" size="icon" className="cursor-pointer" onClick={toggleSidebar}>
         <Menu className="h-5 w-5" />
       </Button>
-      <h1 className="text-lg font-semibold text-foreground">{title}</h1>
+      <h1 className="text-lg font-semibold tracking-tight text-foreground">{title}</h1>
       <div className="flex-1" />
       <div className="hidden md:flex items-center gap-2 max-w-sm w-full">
         <div className="relative w-full">

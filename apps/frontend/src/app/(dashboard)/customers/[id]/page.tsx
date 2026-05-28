@@ -31,7 +31,7 @@ const Stat = ({ icon: Icon, label, value, tone }: { icon: typeof Wallet; label: 
     <CardContent className="p-4 flex items-center justify-between">
       <div>
         <p className="text-xs text-muted-foreground">{label}</p>
-        <p className={cn('text-xl font-bold', tone ?? 'text-foreground')}>{value}</p>
+        <p className={cn('text-xl font-semibold tracking-tight', tone ?? 'text-foreground')}>{value}</p>
       </div>
       <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center"><Icon className="w-5 h-5 text-muted-foreground" /></div>
     </CardContent>
@@ -85,7 +85,7 @@ export default function CustomerDetailPage() {
         <CardContent className="p-6 flex items-start justify-between gap-3">
           <div>
             <div className="flex items-center gap-3">
-              <h2 className="text-2xl font-bold text-foreground">{customer.fullName}</h2>
+              <h2 className="text-2xl font-semibold tracking-tight text-foreground">{customer.fullName}</h2>
               {customer.blacklisted
                 ? <Badge className="bg-red-100 text-red-700 border-0 dark:bg-red-900/30 dark:text-red-400"><Ban className="w-3 h-3 mr-1" />Blacklisted</Badge>
                 : <Badge className="bg-emerald-100 text-emerald-700 border-0 dark:bg-emerald-900/30 dark:text-emerald-400">Active</Badge>}

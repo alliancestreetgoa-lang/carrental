@@ -211,7 +211,7 @@ export function BookingFormDialog({ open, onOpenChange, booking, prefill, onSave
 
           <div className="sm:col-span-2 flex items-center justify-between rounded-lg bg-muted/50 px-4 py-3">
             <span className="text-sm text-muted-foreground">Estimated rent {days > 0 && `(${days} day${days === 1 ? '' : 's'})`}</span>
-            <span className="text-lg font-bold text-foreground">{formatCurrency(estTotal)}</span>
+            <span className="text-lg font-semibold text-foreground">{formatCurrency(estTotal)}</span>
           </div>
 
           <DialogFooter className="sm:col-span-2">
