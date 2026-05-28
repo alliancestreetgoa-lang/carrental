@@ -6,6 +6,7 @@ import { X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { selectClass, cn } from '@/lib/utils';
+import { portalApi } from '@/lib/portalApi';
 
 const FUEL_TYPES = ['PETROL', 'DIESEL', 'ELECTRIC', 'HYBRID', 'CNG', 'LPG'] as const;
 const TRANSMISSIONS = ['MANUAL', 'AUTOMATIC'] as const;
@@ -27,6 +28,9 @@ export function CarFilters() {
   const transmission = params.get('transmission') ?? '';
   const seats = params.get('seats') ?? '';
   const sort = params.get('sort') ?? '';
+  const brand = params.get('brand') ?? '';
+  const minPrice = params.get('minPrice') ?? '';
+  const maxPrice = params.get('maxPrice') ?? '';
 
   const push = useCallback(
     (updates: Record<string, string>) => {
@@ -51,7 +55,41 @@ export function CarFilters() {
     qTimer.current = setTimeout(() => push({ q: value }), 400);
   };
 
-  const hasFilters = !!(q || from || to || fuelType || transmission || seats || sort);
+  // Brand options fetched from /car-brands
+  const [brands, setBrands] = useState<string[]>([]);
+  useEffect(() => {
+    portalApi
+      .get<{ success: boolean; data: string[] }>('/car-brands')
+      .then((res) => {
+        if (res.data.success) setBrands(res.data.data);
+      })
+      .catch(() => {
+        // silently fail — brand filter just won't show options
+      });
+  }, []);
+
+  // Debounced price inputs — keep locally controlled like the search input
+  const [minPriceInput, setMinPriceInput] = useState(minPrice);
+  const [maxPriceInput, setMaxPriceInput] = useState(maxPrice);
+  useEffect(() => { setMinPriceInput(minPrice); }, [minPrice]);
+  useEffect(() => { setMaxPriceInput(maxPrice); }, [maxPrice]);
+
+  const minTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const maxTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const onMinPriceChange = (value: string) => {
+    setMinPriceInput(value);
+    if (minTimer.current) clearTimeout(minTimer.current);
+    minTimer.current = setTimeout(() => push({ minPrice: value }), 400);
+  };
+
+  const onMaxPriceChange = (value: string) => {
+    setMaxPriceInput(value);
+    if (maxTimer.current) clearTimeout(maxTimer.current);
+    maxTimer.current = setTimeout(() => push({ maxPrice: value }), 400);
+  };
+
+  const hasFilters = !!(q || from || to || fuelType || transmission || seats || sort || brand || minPrice || maxPrice);
 
   return (
     <div className="bg-white border border-slate-200 rounded-2xl shadow-sm px-4 py-4 sm:px-6 sm:py-5">
@@ -96,6 +134,23 @@ export function CarFilters() {
 
       {/* Row 2: selects + clear */}
       <div className="flex flex-wrap gap-3 items-end mt-3">
+        {/* Brand */}
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-slate-500 uppercase tracking-wide">Brand</label>
+          <select
+            value={brand}
+            onChange={(e) => push({ brand: e.target.value })}
+            className={selectClass}
+          >
+            <option value="">All brands</option>
+            {brands.map((b) => (
+              <option key={b} value={b}>
+                {b}
+              </option>
+            ))}
+          </select>
+        </div>
+
         {/* Fuel type */}
         <div className="flex flex-col gap-1">
           <label className="text-xs font-medium text-slate-500 uppercase tracking-wide">Fuel</label>
@@ -178,6 +233,35 @@ export function CarFilters() {
             </Button>
           </div>
         )}
+      </div>
+
+      {/* Row 3: price range */}
+      <div className="flex flex-wrap gap-3 items-end mt-3">
+        {/* Min price */}
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-slate-500 uppercase tracking-wide">Min price (&#8377;/day)</label>
+          <Input
+            type="number"
+            placeholder="0"
+            min={0}
+            value={minPriceInput}
+            onChange={(e) => onMinPriceChange(e.target.value)}
+            className="h-9 rounded-lg text-sm w-28"
+          />
+        </div>
+
+        {/* Max price */}
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-slate-500 uppercase tracking-wide">Max price (&#8377;/day)</label>
+          <Input
+            type="number"
+            placeholder="Any"
+            min={0}
+            value={maxPriceInput}
+            onChange={(e) => onMaxPriceChange(e.target.value)}
+            className="h-9 rounded-lg text-sm w-28"
+          />
+        </div>
       </div>
     </div>
   );

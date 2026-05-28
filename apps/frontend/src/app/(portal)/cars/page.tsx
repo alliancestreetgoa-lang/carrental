@@ -4,12 +4,15 @@ import { Suspense, useEffect, useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { LayoutGrid, List, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CarCard } from '@/components/portal/CarCard';
 import { CarFilters } from '@/components/portal/CarFilters';
 import { portalApi } from '@/lib/portalApi';
-import { formatDate } from '@/lib/utils';
+import { formatDate, cn } from '@/lib/utils';
 import type { PortalCar } from '@/lib/portalTypes';
+
+const PAGE_SIZE = 9;
 
 /* ── Skeleton grid shown during load ────────────────────────────────── */
 function CardSkeleton() {
@@ -49,7 +52,7 @@ function CarsBrowser() {
 
   const qs = useMemo(() => {
     const next = new URLSearchParams();
-    const forward = ['q', 'from', 'to', 'fuelType', 'transmission', 'seats', 'sort'];
+    const forward = ['q', 'from', 'to', 'fuelType', 'transmission', 'seats', 'sort', 'brand', 'minPrice', 'maxPrice'];
     forward.forEach((k) => {
       const v = params.get(k);
       if (v) next.set(k, v);
@@ -62,6 +65,8 @@ function CarsBrowser() {
 
   const [cars, setCars] = useState<PortalCar[]>([]);
   const [loading, setLoading] = useState(true);
+  const [view, setView] = useState<'grid' | 'list'>('grid');
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     setLoading(true);
@@ -78,6 +83,13 @@ function CarsBrowser() {
       .finally(() => setLoading(false));
   }, [qs]);
 
+  // Reset to page 1 whenever the result set changes
+  useEffect(() => {
+    setPage(1);
+  }, [cars]);
+
+  const totalPages = Math.max(1, Math.ceil(cars.length / PAGE_SIZE));
+  const pagedCars = cars.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   const hasDateRange = !!(from && to);
 
   return (
@@ -138,11 +150,78 @@ function CarsBrowser() {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {cars.map((car) => (
-            <CarCard key={car.id} car={car} query={qs} />
-          ))}
-        </div>
+        <>
+          {/* View toggle + result count */}
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-slate-500">
+              {cars.length} car{cars.length !== 1 ? 's' : ''} found
+            </p>
+            <div className="flex items-center gap-1 rounded-lg border border-slate-200 bg-white p-0.5">
+              <button
+                onClick={() => setView('grid')}
+                aria-label="Grid view"
+                className={cn(
+                  'flex items-center justify-center rounded-md p-1.5 transition-colors cursor-pointer',
+                  view === 'grid'
+                    ? 'bg-slate-100 text-slate-900'
+                    : 'text-slate-400 hover:text-slate-600'
+                )}
+              >
+                <LayoutGrid className="size-4" />
+              </button>
+              <button
+                onClick={() => setView('list')}
+                aria-label="List view"
+                className={cn(
+                  'flex items-center justify-center rounded-md p-1.5 transition-colors cursor-pointer',
+                  view === 'list'
+                    ? 'bg-slate-100 text-slate-900'
+                    : 'text-slate-400 hover:text-slate-600'
+                )}
+              >
+                <List className="size-4" />
+              </button>
+            </div>
+          </div>
+
+          {/* Car grid/list */}
+          <div
+            className={
+              view === 'grid'
+                ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'
+                : 'flex flex-col gap-4'
+            }
+          >
+            {pagedCars.map((car) => (
+              <CarCard key={car.id} car={car} query={qs} />
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-3 pt-2">
+              <button
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1}
+                aria-label="Previous page"
+                className="flex items-center justify-center rounded-lg border border-slate-200 bg-white p-2 text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              >
+                <ChevronLeft className="size-4" />
+              </button>
+              <span className="text-sm text-slate-600 font-medium">
+                Page {page} of {totalPages}
+              </span>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                aria-label="Next page"
+                className="flex items-center justify-center rounded-lg border border-slate-200 bg-white p-2 text-slate-600 transition-colors hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+              >
+                <ChevronRight className="size-4" />
+              </button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

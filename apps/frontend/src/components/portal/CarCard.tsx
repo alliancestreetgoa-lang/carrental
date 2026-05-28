@@ -47,6 +47,11 @@ export function CarCard({ car, query }: CarCardProps) {
             <Car className="size-12 text-slate-400" strokeWidth={1.5} />
           </div>
         )}
+
+        {/* Availability badge */}
+        <span className="absolute top-2.5 left-2.5 inline-flex items-center rounded-full bg-emerald-500/90 px-2.5 py-0.5 text-xs font-semibold text-white">
+          Available
+        </span>
       </div>
 
       {/* Body */}
@@ -74,6 +79,15 @@ export function CarCard({ car, query }: CarCardProps) {
             View &amp; book
           </span>
         </div>
+
+        {/* Book now button */}
+        <Link
+          href={href}
+          onClick={(e) => e.stopPropagation()}
+          className="mt-1 flex w-full items-center justify-center rounded-xl bg-red-600 hover:bg-red-700 active:bg-red-800 px-4 py-2 text-sm font-semibold text-white transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
+        >
+          Book now
+        </Link>
       </div>
     </Link>
   );
