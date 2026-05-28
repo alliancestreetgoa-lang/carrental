@@ -24,7 +24,10 @@ export const listCars = async (f: {
 }) => {
   const where: Prisma.CarWhereInput = {
     deletedAt: null,
-    status: 'AVAILABLE',
+    // List all bookable cars (incl. currently BOOKED ones — they're still
+    // bookable for non-overlapping future dates); the date-window overlap
+    // filter below handles per-date availability. Exclude only unbookable states.
+    status: { notIn: ['OUT_OF_SERVICE', 'MAINTENANCE'] },
     ...(f.fuelType ? { fuelType: f.fuelType } : {}),
     ...(f.transmission ? { transmission: f.transmission } : {}),
     ...(f.seats ? { seatingCapacity: { gte: f.seats } } : {}),
