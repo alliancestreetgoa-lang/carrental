@@ -15,6 +15,8 @@ import agreementRoutes from './routes/agreement.routes';
 import documentRoutes from './routes/document.routes';
 import uploadRoutes from './routes/upload.routes';
 import reportsRoutes from './routes/reports.routes';
+import userRoutes from './routes/user.routes';
+import notificationRoutes from './routes/notification.routes';
 
 export const createApp = () => {
   const app = express();
@@ -43,6 +45,8 @@ export const createApp = () => {
   app.use('/api/documents', documentRoutes);
   app.use('/api/uploads', uploadRoutes);
   app.use('/api/reports', reportsRoutes);
+  app.use('/api/users', userRoutes);
+  app.use('/api/notifications', notificationRoutes);
 
   app.use(errorHandler);
 

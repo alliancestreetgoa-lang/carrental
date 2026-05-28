@@ -142,6 +142,27 @@ export interface BillingPayment {
   };
 }
 
+export type UserRole = 'SUPER_ADMIN' | 'STAFF' | 'ACCOUNTANT';
+
+export interface AdminUser {
+  id: string;
+  name: string;
+  email: string;
+  mobile: string | null;
+  role: UserRole;
+  isActive: boolean;
+  createdAt: string;
+}
+
+export interface AppNotification {
+  id: string;
+  type: 'OVERDUE' | 'DUE_TODAY' | 'MAINTENANCE' | 'DOC_EXPIRY';
+  severity: 'high' | 'medium' | 'low';
+  title: string;
+  detail: string;
+  link?: string;
+}
+
 export interface ReportData {
   from: string;
   to: string;

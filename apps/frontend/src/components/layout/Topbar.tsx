@@ -1,10 +1,10 @@
 'use client';
-import { Menu, Bell, Search } from 'lucide-react';
+import { Menu, Search } from 'lucide-react';
 import { useUIStore } from '@/stores/ui.store';
 import { ThemeToggle } from '@/components/shared/ThemeToggle';
+import { NotificationBell } from '@/components/layout/NotificationBell';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { usePathname } from 'next/navigation';
 
 const pageTitles: Record<string, string> = {
@@ -37,10 +37,7 @@ export function Topbar() {
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" className="cursor-pointer relative">
-          <Bell className="h-4 w-4" />
-          <Badge className="absolute -top-1 -right-1 h-4 w-4 p-0 text-[10px] bg-red-600 text-white flex items-center justify-center rounded-full">3</Badge>
-        </Button>
+        <NotificationBell />
         <ThemeToggle />
       </div>
     </header>
