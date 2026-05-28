@@ -4,13 +4,16 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { toast } from 'sonner';
-import { ChevronRight, Calendar, Car } from 'lucide-react';
+import { ChevronRight, Calendar, Car, CalendarCheck, IndianRupee, Clock } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { portalApi } from '@/lib/portalApi';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import type { PortalBookingRow } from '@/lib/portalTypes';
 import VerifyBanners from '@/components/portal/VerifyBanners';
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
+import { useCustomerStore } from '@/stores/customer.store';
 
 const STATUS_COLORS: Record<string, string> = {
   RESERVED: 'bg-blue-50 text-blue-700 border-blue-100',
@@ -42,17 +45,46 @@ function BookingRowSkeleton() {
   );
 }
 
-function BookingCard({ booking }: { booking: PortalBookingRow }) {
+function SummaryCardSkeleton() {
+  return (
+    <div className="rounded-2xl border border-slate-100 bg-white p-4 flex items-center gap-4">
+      <Skeleton className="size-10 rounded-xl shrink-0" />
+      <div className="space-y-2 flex-1">
+        <Skeleton className="h-3 w-28" />
+        <Skeleton className="h-6 w-16" />
+      </div>
+    </div>
+  );
+}
+
+interface SummaryCardProps {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+}
+
+function SummaryCard({ icon, label, value }: SummaryCardProps) {
+  return (
+    <div className="rounded-2xl border border-slate-100 bg-white p-4 flex items-center gap-4">
+      <div className="size-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0 text-red-600">
+        {icon}
+      </div>
+      <div>
+        <p className="text-xs font-medium text-slate-400 uppercase tracking-widest">{label}</p>
+        <p className="text-lg font-bold text-slate-900 mt-0.5">{value}</p>
+      </div>
+    </div>
+  );
+}
+
+function BookingCard({ booking, onCancel }: { booking: PortalBookingRow; onCancel: (id: string) => void }) {
   const imgSrc = booking.car.images?.[0] ?? null;
   const paid = booking.payments.reduce((sum, p) => sum + Number(p.amount), 0);
 
   return (
-    <Link
-      href={`/account/bookings/${booking.id}`}
-      className="flex items-center gap-4 p-4 rounded-2xl border border-slate-100 bg-white hover:border-red-200 hover:shadow-sm transition-all cursor-pointer group"
-    >
+    <div className="flex items-center gap-4 p-4 rounded-2xl border border-slate-100 bg-white hover:border-red-200 hover:shadow-sm transition-all group">
       {/* Car image */}
-      <div className="size-16 rounded-xl bg-slate-100 overflow-hidden shrink-0 relative">
+      <Link href={`/account/bookings/${booking.id}`} className="size-16 rounded-xl bg-slate-100 overflow-hidden shrink-0 relative cursor-pointer">
         {imgSrc ? (
           <Image
             src={imgSrc}
@@ -66,10 +98,10 @@ function BookingCard({ booking }: { booking: PortalBookingRow }) {
             <Car className="size-7 text-slate-400" />
           </div>
         )}
-      </div>
+      </Link>
 
       {/* Details */}
-      <div className="flex-1 min-w-0">
+      <Link href={`/account/bookings/${booking.id}`} className="flex-1 min-w-0 cursor-pointer">
         <p className="font-semibold text-slate-900 truncate">
           {booking.car.brand} {booking.car.carName}
         </p>
@@ -91,27 +123,38 @@ function BookingCard({ booking }: { booking: PortalBookingRow }) {
             </span>
           )}
         </div>
-      </div>
+      </Link>
 
-      {/* Amounts */}
-      <div className="hidden sm:flex flex-col items-end gap-1 shrink-0 text-right">
-        <p className="font-semibold text-slate-900 text-sm">{formatCurrency(booking.totalAmount)}</p>
-        <p className="text-xs text-slate-400">Paid: {formatCurrency(paid)}</p>
-        <ChevronRight className="size-4 text-slate-300 group-hover:text-red-500 transition-colors mt-0.5" />
+      {/* Amounts + actions */}
+      <div className="flex flex-col items-end gap-1.5 shrink-0 text-right">
+        <p className="font-semibold text-slate-900 text-sm hidden sm:block">{formatCurrency(booking.totalAmount)}</p>
+        <p className="text-xs text-slate-400 hidden sm:block">Paid: {formatCurrency(paid)}</p>
+        {booking.bookingStatus === 'RESERVED' && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 rounded-xl text-xs cursor-pointer"
+            onClick={(e) => { e.preventDefault(); onCancel(booking.id); }}
+          >
+            Cancel
+          </Button>
+        )}
+        <Link href={`/account/bookings/${booking.id}`}>
+          <ChevronRight className="size-4 text-slate-300 group-hover:text-red-500 transition-colors mt-0.5 cursor-pointer" />
+        </Link>
       </div>
-      <ChevronRight className="size-4 text-slate-300 group-hover:text-red-500 transition-colors sm:hidden shrink-0" />
-    </Link>
+    </div>
   );
 }
 
-function Section({ title, bookings, empty }: { title: string; bookings: PortalBookingRow[]; empty: string }) {
+function Section({ title, bookings, empty, onCancel }: { title: string; bookings: PortalBookingRow[]; empty: string; onCancel: (id: string) => void }) {
   if (bookings.length === 0) return null;
   return (
     <div className="space-y-3">
       <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-widest">{title}</h2>
       <div className="space-y-2.5">
         {bookings.map((b) => (
-          <BookingCard key={b.id} booking={b} />
+          <BookingCard key={b.id} booking={b} onCancel={onCancel} />
         ))}
       </div>
     </div>
@@ -121,8 +164,11 @@ function Section({ title, bookings, empty }: { title: string; bookings: PortalBo
 export default function AccountPage() {
   const [bookings, setBookings] = useState<PortalBookingRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const [cancelId, setCancelId] = useState<string | null>(null);
+  const { cancelBooking } = useCustomerStore();
 
-  useEffect(() => {
+  const fetchBookings = () => {
+    setLoading(true);
     portalApi
       .get<{ success: boolean; data: PortalBookingRow[] }>('/bookings')
       .then((res) => {
@@ -130,9 +176,26 @@ export default function AccountPage() {
       })
       .catch(() => toast.error('Failed to load bookings'))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchBookings();
   }, []);
 
+  const handleCancel = async () => {
+    if (!cancelId) return;
+    try {
+      await cancelBooking(cancelId);
+      toast.success('Booking cancelled');
+      fetchBookings();
+    } catch (e) {
+      const msg = (e as { response?: { data?: { message?: string } } }).response?.data?.message;
+      toast.error(msg ?? 'Could not cancel booking');
+    }
+  };
+
   const now = new Date();
+  const sevenDaysOut = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
   const upcoming = bookings.filter((b) => {
     const active = b.bookingStatus === 'RESERVED' || b.bookingStatus === 'ACTIVE';
@@ -141,9 +204,49 @@ export default function AccountPage() {
 
   const past = bookings.filter((b) => !upcoming.includes(b));
 
+  // Summary stats
+  const activeCount = bookings.filter((b) => b.bookingStatus === 'ACTIVE').length;
+  const pendingPayments = bookings
+    .filter((b) => b.bookingStatus !== 'CANCELLED')
+    .reduce((sum, b) => {
+      const paid = b.payments.reduce((s, p) => s + Number(p.amount), 0);
+      return sum + Math.max(0, Number(b.totalAmount) - paid);
+    }, 0);
+  const upcomingReturns = bookings.filter(
+    (b) => b.bookingStatus === 'ACTIVE' && new Date(b.returnDate) >= now && new Date(b.returnDate) <= sevenDaysOut
+  ).length;
+
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
+      {/* Summary cards */}
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <SummaryCardSkeleton />
+          <SummaryCardSkeleton />
+          <SummaryCardSkeleton />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <SummaryCard
+            icon={<CalendarCheck className="size-5" />}
+            label="Active rentals"
+            value={String(activeCount)}
+          />
+          <SummaryCard
+            icon={<IndianRupee className="size-5" />}
+            label="Pending payments"
+            value={formatCurrency(pendingPayments)}
+          />
+          <SummaryCard
+            icon={<Clock className="size-5" />}
+            label="Upcoming returns"
+            value={String(upcomingReturns)}
+          />
+        </div>
+      )}
+
       <VerifyBanners />
+
       {loading ? (
         <div className="space-y-10">
           <div className="space-y-3">
@@ -180,13 +283,22 @@ export default function AccountPage() {
         </div>
       ) : (
         <>
-          <Section title="Upcoming" bookings={upcoming} empty="" />
-          <Section title="Past" bookings={past} empty="" />
+          <Section title="Upcoming" bookings={upcoming} empty="" onCancel={setCancelId} />
+          <Section title="Past" bookings={past} empty="" onCancel={setCancelId} />
           {upcoming.length === 0 && past.length === 0 && (
             <p className="text-slate-400 text-sm">No bookings to display.</p>
           )}
         </>
       )}
+
+      <ConfirmDialog
+        open={cancelId !== null}
+        onOpenChange={(open) => { if (!open) setCancelId(null); }}
+        title="Cancel booking?"
+        description="This action cannot be undone. The booking will be permanently cancelled."
+        confirmText="Cancel booking"
+        onConfirm={handleCancel}
+      />
     </div>
   );
 }

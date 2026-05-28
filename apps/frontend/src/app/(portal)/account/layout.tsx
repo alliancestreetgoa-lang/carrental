@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 
 const NAV_LINKS = [
   { label: 'Bookings', href: '/account' },
+  { label: 'Payments', href: '/account/payments' },
   { label: 'Profile', href: '/account/profile' },
 ];
 

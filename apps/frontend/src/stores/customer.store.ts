@@ -21,6 +21,8 @@ interface CustomerStore {
     fullName?: string; mobile?: string; whatsapp?: string | null;
     address?: string | null; licenseNumber?: string; licenseExpiry?: string | null;
   }) => Promise<void>;
+  cancelBooking: (id: string) => Promise<void>;
+  extendBooking: (id: string, returnDate: string) => Promise<void>;
 }
 
 export const useCustomerStore = create<CustomerStore>((set) => ({
@@ -48,4 +50,6 @@ export const useCustomerStore = create<CustomerStore>((set) => ({
   sendMobileOtp: async () => { await portalApi.post('/auth/send-mobile-otp'); },
   verifyMobileOtp: async (code) => { await portalApi.post('/auth/verify-mobile-otp', { code }); await useCustomerStore.getState().fetchMe(); },
   updateProfile: async (data) => { const { data: res } = await portalApi.patch('/auth/me', data); set({ customer: res.data }); },
+  cancelBooking: async (id) => { await portalApi.post(`/bookings/${id}/cancel`); },
+  extendBooking: async (id, returnDate) => { await portalApi.patch(`/bookings/${id}/extend`, { returnDate }); },
 }));

@@ -4,12 +4,15 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { toast } from 'sonner';
-import { ArrowLeft, Download, MapPin, Calendar, Clock, Car } from 'lucide-react';
+import { ArrowLeft, Download, MapPin, Calendar, Clock, Car, CalendarPlus } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { StarRating } from '@/components/portal/StarRating';
+import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { portalApi } from '@/lib/portalApi';
-import { formatDate, formatCurrency } from '@/lib/utils';
+import { formatDate, formatCurrency, toDateInput } from '@/lib/utils';
+import { useCustomerStore } from '@/stores/customer.store';
 
 interface BookingInvoice {
   rentTotal: string;
@@ -79,6 +82,30 @@ export default function BookingDetailPage() {
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
 
+  // Cancel state
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+
+  // Extend state
+  const [extendDate, setExtendDate] = useState('');
+  const [extending, setExtending] = useState(false);
+
+  const { cancelBooking, extendBooking } = useCustomerStore();
+
+  const fetchBooking = () => {
+    if (!id) return;
+    portalApi
+      .get<{ success: boolean; data: BookingDetail }>(`/bookings/${id}`)
+      .then((res) => {
+        if (res.data.success) setBooking(res.data.data);
+        else setNotFound(true);
+      })
+      .catch((e) => {
+        if (e?.response?.status === 404) setNotFound(true);
+        else toast.error('Failed to load booking');
+      })
+      .finally(() => setLoading(false));
+  };
+
   const submitReview = async () => {
     if (!id) return;
     setReviewSubmitting(true);
@@ -101,19 +128,44 @@ export default function BookingDetailPage() {
     }
   };
 
-  useEffect(() => {
+  const handleCancel = async () => {
     if (!id) return;
-    portalApi
-      .get<{ success: boolean; data: BookingDetail }>(`/bookings/${id}`)
-      .then((res) => {
-        if (res.data.success) setBooking(res.data.data);
-        else setNotFound(true);
-      })
-      .catch((e) => {
-        if (e?.response?.status === 404) setNotFound(true);
-        else toast.error('Failed to load booking');
-      })
-      .finally(() => setLoading(false));
+    try {
+      await cancelBooking(id);
+      toast.success('Booking cancelled');
+      fetchBooking();
+    } catch (e) {
+      const msg = (e as { response?: { data?: { message?: string } } }).response?.data?.message;
+      toast.error(msg ?? 'Could not cancel booking');
+    }
+  };
+
+  const handleExtend = async () => {
+    if (!id || !extendDate) return;
+    setExtending(true);
+    try {
+      await extendBooking(id, new Date(extendDate).toISOString());
+      toast.success('Booking extended successfully');
+      setExtendDate('');
+      fetchBooking();
+    } catch (e) {
+      const status = (e as { response?: { status?: number; data?: { message?: string } } }).response?.status;
+      const msg = (e as { response?: { data?: { message?: string } } }).response?.data?.message;
+      if (status === 409) {
+        toast.error("Those extra dates aren't available");
+      } else if (status === 400) {
+        toast.error(msg ?? 'Invalid extension date');
+      } else {
+        toast.error('Could not extend booking. Please try again.');
+      }
+    } finally {
+      setExtending(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBooking();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const download = async (kind: 'invoice' | 'agreement') => {
@@ -175,6 +227,15 @@ export default function BookingDetailPage() {
   }
 
   const statusClass = STATUS_COLORS[booking.bookingStatus] ?? 'bg-slate-100 text-slate-600 border-slate-200';
+  const canCancel = booking.bookingStatus === 'RESERVED';
+  const canExtend = booking.bookingStatus === 'RESERVED' || booking.bookingStatus === 'ACTIVE';
+
+  // Min date for extend input: day after current returnDate
+  const minExtendDate = (() => {
+    const d = new Date(booking.returnDate);
+    d.setDate(d.getDate() + 1);
+    return toDateInput(d.toISOString());
+  })();
 
   return (
     <div className="space-y-6">
@@ -304,6 +365,52 @@ export default function BookingDetailPage() {
         </Button>
       </div>
 
+      {/* Extend rental */}
+      {canExtend && (
+        <div className="rounded-2xl border border-slate-100 bg-white p-6 space-y-4">
+          <div className="flex items-center gap-2">
+            <CalendarPlus className="size-5 text-red-600" />
+            <h3 className="text-base font-semibold text-slate-800">Extend rental</h3>
+          </div>
+          <p className="text-sm text-slate-400">
+            Choose a new return date (must be after {formatDate(booking.returnDate)}).
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <Input
+              type="date"
+              min={minExtendDate}
+              value={extendDate}
+              onChange={(e) => setExtendDate(e.target.value)}
+              className="rounded-xl border-slate-200 focus:border-red-400 focus:ring-red-500/40 cursor-pointer sm:max-w-xs"
+            />
+            <Button
+              onClick={handleExtend}
+              disabled={extending || !extendDate}
+              className="bg-red-600 hover:bg-red-700 text-white rounded-xl cursor-pointer"
+            >
+              {extending ? 'Extending…' : 'Extend'}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel booking */}
+      {canCancel && (
+        <div className="rounded-2xl border border-red-100 bg-red-50/40 p-5 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
+          <div>
+            <p className="text-sm font-semibold text-slate-800">Cancel this booking</p>
+            <p className="text-xs text-slate-500 mt-0.5">This action cannot be undone.</p>
+          </div>
+          <Button
+            variant="outline"
+            className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 rounded-xl cursor-pointer self-start sm:self-auto"
+            onClick={() => setShowCancelDialog(true)}
+          >
+            Cancel booking
+          </Button>
+        </div>
+      )}
+
       {/* Leave a review — only for completed bookings */}
       {booking.bookingStatus === 'COMPLETED' && !reviewSubmitted && (
         <div className="rounded-2xl border border-slate-100 bg-white p-6 space-y-4">
@@ -335,6 +442,15 @@ export default function BookingDetailPage() {
           </Button>
         </div>
       )}
+
+      <ConfirmDialog
+        open={showCancelDialog}
+        onOpenChange={setShowCancelDialog}
+        title="Cancel booking?"
+        description="This action cannot be undone. The booking will be permanently cancelled."
+        confirmText="Cancel booking"
+        onConfirm={handleCancel}
+      />
     </div>
   );
 }
