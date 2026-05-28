@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { portalApi } from '@/lib/portalApi';
 import { formatDate, formatCurrency } from '@/lib/utils';
 import type { PortalBookingRow } from '@/lib/portalTypes';
+import VerifyBanners from '@/components/portal/VerifyBanners';
 
 const STATUS_COLORS: Record<string, string> = {
   RESERVED: 'bg-blue-50 text-blue-700 border-blue-100',
@@ -131,6 +132,7 @@ export default function AccountPage() {
 
   return (
     <div className="space-y-10">
+      <VerifyBanners />
       {loading ? (
         <div className="space-y-10">
           <div className="space-y-3">
