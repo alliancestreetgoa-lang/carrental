@@ -11,11 +11,30 @@ const createPaymentSchema = z.object({
   notes: z.string().optional(),
 });
 
+const listQuerySchema = z.object({
+  bookingId: z.string().optional(),
+  method: z.enum(['CASH', 'UPI', 'CARD', 'BANK_TRANSFER']).optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
+  search: z.string().optional(),
+});
+
 export const getPayments = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const bookingId = req.query.bookingId ? String(req.query.bookingId) : undefined;
-    res.json({ success: true, data: await paymentService.getAllPayments(bookingId) });
+    const q = listQuerySchema.parse(req.query);
+    const data = await paymentService.getAllPayments({
+      bookingId: q.bookingId,
+      method: q.method,
+      from: q.from ? new Date(q.from) : undefined,
+      to: q.to ? new Date(q.to) : undefined,
+      search: q.search,
+    });
+    res.json({ success: true, data });
   } catch (e) { next(e); }
+};
+
+export const getSummary = async (_req: Request, res: Response, next: NextFunction) => {
+  try { res.json({ success: true, data: await paymentService.getBillingSummary() }); } catch (e) { next(e); }
 };
 
 export const createPayment = async (req: Request, res: Response, next: NextFunction) => {

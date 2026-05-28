@@ -129,6 +129,27 @@ export interface Payment {
   notes: string | null;
 }
 
+export interface BillingPayment {
+  id: string;
+  amount: string;
+  paymentMethod: 'CASH' | 'UPI' | 'CARD' | 'BANK_TRANSFER';
+  paymentDate: string;
+  notes: string | null;
+  booking: {
+    id: string;
+    customer: { fullName: string };
+    car: { carName: string; brand: string; registrationNumber: string };
+  };
+}
+
+export interface BillingSummary {
+  totalRevenue: number;
+  monthRevenue: number;
+  paymentCount: number;
+  outstanding: number;
+  byMethod: { method: string; total: number }[];
+}
+
 export interface BookingInvoice {
   rentTotal: number;
   lateFee: number;
