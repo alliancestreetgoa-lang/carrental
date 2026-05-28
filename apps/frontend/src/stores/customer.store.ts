@@ -17,6 +17,10 @@ interface CustomerStore {
   resendVerification: () => Promise<void>;
   sendMobileOtp: () => Promise<void>;
   verifyMobileOtp: (code: string) => Promise<void>;
+  updateProfile: (data: {
+    fullName?: string; mobile?: string; whatsapp?: string | null;
+    address?: string | null; licenseNumber?: string; licenseExpiry?: string | null;
+  }) => Promise<void>;
 }
 
 export const useCustomerStore = create<CustomerStore>((set) => ({
@@ -43,4 +47,5 @@ export const useCustomerStore = create<CustomerStore>((set) => ({
   resendVerification: async () => { await portalApi.post('/auth/resend-verification'); },
   sendMobileOtp: async () => { await portalApi.post('/auth/send-mobile-otp'); },
   verifyMobileOtp: async (code) => { await portalApi.post('/auth/verify-mobile-otp', { code }); await useCustomerStore.getState().fetchMe(); },
+  updateProfile: async (data) => { const { data: res } = await portalApi.patch('/auth/me', data); set({ customer: res.data }); },
 }));

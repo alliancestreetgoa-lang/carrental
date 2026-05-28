@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma';
 import { signCustomerToken } from '../lib/jwt';
 import { AppError } from '../middleware/error.middleware';
@@ -106,4 +107,33 @@ export const confirmMobileOtp = async (customerId: string, code: string) => {
   if (result === 'locked') throw new AppError(429, 'Too many attempts — request a new code');
   if (result !== 'ok') throw new AppError(400, 'Incorrect or expired code');
   await prisma.customer.update({ where: { id: customerId }, data: { mobileVerifiedAt: new Date() } });
+};
+
+export const updateProfile = async (
+  customerId: string,
+  data: {
+    fullName?: string;
+    mobile?: string;
+    whatsapp?: string | null;
+    address?: string | null;
+    licenseNumber?: string;
+    licenseExpiry?: Date | null;
+  }
+) => {
+  const current = await prisma.customer.findFirst({ where: { id: customerId, deletedAt: null } });
+  if (!current) throw new AppError(404, 'Account not found');
+  // A changed mobile number is no longer verified — reopen the verify prompt.
+  const mobileChanged = data.mobile !== undefined && data.mobile !== current.mobile;
+  try {
+    return await prisma.customer.update({
+      where: { id: customerId },
+      data: { ...data, ...(mobileChanged ? { mobileVerifiedAt: null } : {}) },
+      select: publicCustomer,
+    });
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+      throw new AppError(409, 'That license number is already in use');
+    }
+    throw e;
+  }
 };

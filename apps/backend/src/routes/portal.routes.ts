@@ -9,6 +9,7 @@ router.post('/auth/register', authLimiter, portal.register);
 router.post('/auth/login', authLimiter, portal.login);
 router.post('/auth/logout', portal.logout);
 router.get('/auth/me', authenticateCustomer, portal.me);
+router.patch('/auth/me', authenticateCustomer, portal.updateProfile);
 router.post('/auth/verify-email', authLimiter, portal.verifyEmail);
 router.post('/auth/resend-verification', authLimiter, authenticateCustomer, portal.resendVerification);
 router.post('/auth/forgot-password', authLimiter, portal.forgotPassword);

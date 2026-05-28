@@ -209,3 +209,22 @@ export const verifyMobileOtp = async (req: Request, res: Response, next: NextFun
   try { await portalAuth.confirmMobileOtp(req.customer!.customerId, otpSchema.parse(req.body).code); res.json({ success: true }); }
   catch (e) { next(e); }
 };
+
+const updateProfileSchema = z.object({
+  fullName: z.string().min(2).optional(),
+  mobile: z.string().min(7).optional(),
+  whatsapp: z.string().nullable().optional(),
+  address: z.string().nullable().optional(),
+  licenseNumber: z.string().min(3).optional(),
+  licenseExpiry: z.string().nullable().optional(),
+});
+export const updateProfile = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const p = updateProfileSchema.parse(req.body);
+    const c = await portalAuth.updateProfile(req.customer!.customerId, {
+      ...p,
+      licenseExpiry: p.licenseExpiry === undefined ? undefined : p.licenseExpiry ? new Date(p.licenseExpiry) : null,
+    });
+    res.json({ success: true, data: { ...c, emailVerified: !!c.emailVerifiedAt, mobileVerified: !!c.mobileVerifiedAt } });
+  } catch (e) { next(e); }
+};
