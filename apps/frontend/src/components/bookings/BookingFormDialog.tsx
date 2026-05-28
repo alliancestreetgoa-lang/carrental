@@ -61,7 +61,7 @@ export function BookingFormDialog({ open, onOpenChange, booking, prefill, onSave
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [cars, setCars] = useState<Car[]>([]);
 
-  const { register, handleSubmit, reset, watch, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { register, handleSubmit, reset, watch, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: { customerId: '', carId: '', fuelLevel: '' },
   });
@@ -97,6 +97,15 @@ export function BookingFormDialog({ open, onOpenChange, booking, prefill, onSave
       });
     }
   }, [open, booking, prefill, reset]);
+
+  // Re-apply the selected car/customer once the <option>s have loaded, so the
+  // native selects visually reflect the value set by reset()/prefill.
+  useEffect(() => {
+    if (!open) return;
+    const desiredCar = booking?.carId ?? prefill?.carId;
+    if (desiredCar && cars.some((c) => c.id === desiredCar)) setValue('carId', desiredCar);
+    if (booking?.customerId && customers.some((c) => c.id === booking.customerId)) setValue('customerId', booking.customerId);
+  }, [open, cars, customers, booking, prefill, setValue]);
 
   const carId = watch('carId');
   const pickup = watch('pickupDate');
