@@ -11,6 +11,7 @@ import { streamInvoicePdf } from '../lib/invoice';
 import { streamAgreementPdf } from '../lib/agreementPdf';
 import { FuelType, Transmission } from '@prisma/client';
 import { emitRealtime } from '../socket';
+import * as payments from '../lib/payments';
 
 const isDev = process.env.NODE_ENV !== 'production';
 
@@ -292,4 +293,32 @@ export const updateProfile = async (req: Request, res: Response, next: NextFunct
     });
     res.json({ success: true, data: { ...c, emailVerified: !!c.emailVerifiedAt, mobileVerified: !!c.mobileVerifiedAt } });
   } catch (e) { next(e); }
+};
+
+const paySchema = z.object({ type: z.enum(['advance', 'full']) });
+export const payBooking = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const b = await ownedBooking(String(req.params.id), req.customer!.customerId);
+    if (b.bookingStatus === 'CANCELLED') throw new AppError(400, 'This booking is cancelled');
+    const { type } = paySchema.parse(req.body);
+    const balanceDue = b.invoice.balanceDue;
+    if (balanceDue <= 0) throw new AppError(400, 'This booking is already fully paid');
+    const amount = type === 'advance'
+      ? Math.min(balanceDue, Math.round(b.invoice.grandTotal * 0.25 * 100) / 100)
+      : balanceDue;
+    // Mock gateway: create an order then record the captured payment.
+    const order = await payments.createOrder(amount, b.id);
+    await prisma.payment.create({
+      data: { bookingId: b.id, amount, paymentMethod: 'CARD', notes: `[Online ${type}] order ${order.id}${('mock' in order && order.mock) ? ' (mock)' : ''}` },
+    });
+    const updated = await bookingService.getBookingById(b.id);
+    res.json({ success: true, data: { invoice: updated.invoice, mock: ('mock' in order ? order.mock : false) } });
+  } catch (e) { next(e); }
+};
+
+// Gateway webhook (scaffold). Real provider posts here; verify + record.
+export const paymentsWebhook = async (req: Request, res: Response) => {
+  const ok = payments.verifyPaymentSignature(req.body ?? {});
+  // TODO: when real, look up the order, record the Payment if not already recorded.
+  res.json({ received: true, verified: ok });
 };

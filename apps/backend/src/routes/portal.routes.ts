@@ -32,6 +32,8 @@ router.get('/bookings/:id/agreement.pdf', authenticateCustomer, portal.agreement
 router.post('/bookings/:id/cancel', authenticateCustomer, portal.cancelMyBooking);
 router.patch('/bookings/:id/extend', authenticateCustomer, portal.extendMyBooking);
 router.get('/payments', authenticateCustomer, portal.myPayments);
+router.post('/bookings/:id/pay', authenticateCustomer, portal.payBooking);
+router.post('/payments/webhook', portal.paymentsWebhook); // public (gateway callback); mock no-op
 
 router.get('/testimonials', portal.testimonials);
 router.post('/reviews', authenticateCustomer, portal.createReview);
