@@ -1,6 +1,7 @@
 'use client';
 
-import { Suspense, useCallback, useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
+import { useFetch } from '@/hooks/useFetch';
 import { useParams, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -95,55 +96,38 @@ function SpecTile({
 function CarDetailInner() {
   const { id } = useParams<{ id: string }>();
 
-  const [car, setCar] = useState<PortalCar | null>(null);
-  const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
-  const [reviews, setReviews] = useState<CarReviewsData | null>(null);
-  const [relatedCars, setRelatedCars] = useState<PortalCar[]>([]);
-  const [relatedLoading, setRelatedLoading] = useState(true);
 
-  const fetchCar = useCallback(() => {
-    if (!id) return;
-    setLoading(true);
-    portalApi
+  const { data: car, loading, refetch: refetchCar } = useFetch<PortalCar | null>(
+    () => portalApi
       .get<{ success: boolean; data: PortalCar }>(`/cars/${id}`)
-      .then((res) => {
-        if (res.data.success) {
-          setCar(res.data.data);
-        } else {
-          setNotFound(true);
-        }
-      })
-      .catch((err) => {
-        if (err.response?.status === 404) setNotFound(true);
-        else setNotFound(true);
-      })
-      .finally(() => setLoading(false));
-  }, [id]);
+      .then((r) => {
+        if (r.data.success) return r.data.data;
+        throw new Error('not found');
+      }),
+    [id],
+    null,
+    () => setNotFound(true),
+  );
 
-  useEffect(() => {
-    if (!id) return;
-    fetchCar();
-
-    portalApi
+  const { data: reviews } = useFetch<CarReviewsData | null>(
+    () => portalApi
       .get<{ success: boolean; data: CarReviewsData }>(`/cars/${id}/reviews`)
-      .then((res) => {
-        if (res.data.success) setReviews(res.data.data);
-      })
-      .catch(() => {/* silently fail — reviews are supplementary */});
+      .then((r) => (r.data.success ? r.data.data : null)),
+    [id],
+    null,
+  );
 
-    setRelatedLoading(true);
-    portalApi
+  const { data: relatedCars, loading: relatedLoading } = useFetch<PortalCar[]>(
+    () => portalApi
       .get<{ success: boolean; data: PortalCar[] }>(`/cars/${id}/related`)
-      .then((res) => {
-        if (res.data.success) setRelatedCars(res.data.data ?? []);
-      })
-      .catch(() => {/* silently fail */})
-      .finally(() => setRelatedLoading(false));
-  }, [id, fetchCar]);
+      .then((r) => (r.data.success ? (r.data.data ?? []) : [])),
+    [id],
+    [],
+  );
 
-  useRealtime([...CAR_EVENTS, ...BOOKING_EVENTS], fetchCar);
+  useRealtime([...CAR_EVENTS, ...BOOKING_EVENTS], refetchCar);
 
   useEffect(() => {
     if (car) {

@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+import { useFetch } from '@/hooks/useFetch';
 import { toast } from 'sonner';
 import { FileText, Trash2, Upload, Info } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -47,8 +48,6 @@ function DocSkeleton() {
 }
 
 export default function DocumentsPage() {
-  const [docs, setDocs] = useState<DocumentRow[]>([]);
-  const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState<string | null>(null);
 
   // Upload form state
@@ -59,16 +58,14 @@ export default function DocumentsPage() {
   const [saving, setSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const fetchDocs = () => {
-    setLoading(true);
-    portalApi
+  const { data: docs, loading, refetch, setData: setDocs } = useFetch<DocumentRow[]>(
+    () => portalApi
       .get<{ success: boolean; data: DocumentRow[] }>('/documents')
-      .then((res) => { if (res.data.success) setDocs(res.data.data); })
-      .catch(() => toast.error('Failed to load documents'))
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => { fetchDocs(); }, []);
+      .then((r) => (r.data.success ? r.data.data : [])),
+    [],
+    [],
+    () => toast.error('Failed to load documents'),
+  );
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -108,7 +105,7 @@ export default function DocumentsPage() {
       setFileUrl('');
       setPasteMode(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
-      fetchDocs();
+      refetch();
     } catch {
       toast.error('Failed to save document.');
     } finally {

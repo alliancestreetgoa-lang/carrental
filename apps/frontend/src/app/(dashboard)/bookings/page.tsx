@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
@@ -7,6 +7,7 @@ import { Plus } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { BookingFormDialog } from '@/components/bookings/BookingFormDialog';
+import { useFetch } from '@/hooks/useFetch';
 import { useRealtime, BOOKING_EVENTS } from '@/hooks/useRealtime';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -22,23 +23,20 @@ const selectClass =
 
 export default function BookingsPage() {
   const router = useRouter();
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState('');
   const [formOpen, setFormOpen] = useState(false);
 
-  const load = useCallback(() => {
-    setLoading(true);
-    const params = new URLSearchParams();
-    if (status) params.set('status', status);
-    api.get(`/bookings?${params.toString()}`)
-      .then((res) => setBookings(res.data.data))
-      .catch(() => toast.error('Failed to load bookings'))
-      .finally(() => setLoading(false));
-  }, [status]);
-
-  useEffect(() => { load(); }, [load]);
-  useRealtime(BOOKING_EVENTS, load);
+  const { data: bookings, loading, refetch } = useFetch<Booking[]>(
+    () => {
+      const params = new URLSearchParams();
+      if (status) params.set('status', status);
+      return api.get(`/bookings?${params.toString()}`).then((r) => r.data.data);
+    },
+    [status],
+    [],
+    () => toast.error('Failed to load bookings'),
+  );
+  useRealtime(BOOKING_EVENTS, refetch);
 
   return (
     <div>
@@ -107,7 +105,7 @@ export default function BookingsPage() {
         </CardContent>
       </Card>
 
-      <BookingFormDialog open={formOpen} onOpenChange={setFormOpen} onSaved={load} />
+      <BookingFormDialog open={formOpen} onOpenChange={setFormOpen} onSaved={refetch} />
     </div>
   );
 }

@@ -1,8 +1,9 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import { Plus, Pencil, UserX, ShieldCheck } from 'lucide-react';
+import { useFetch } from '@/hooks/useFetch';
 import { useAuthStore } from '@/stores/auth.store';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { UserFormDialog } from '@/components/settings/UserFormDialog';
@@ -26,26 +27,20 @@ const ROLE_COLOR: Record<string, string> = {
 export default function SettingsPage() {
   const { user } = useAuthStore();
   const isAdmin = user?.role === 'SUPER_ADMIN';
-  const [users, setUsers] = useState<AdminUser[]>([]);
-  const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<AdminUser | null>(null);
   const [deactivateTarget, setDeactivateTarget] = useState<AdminUser | null>(null);
 
-  const load = useCallback(() => {
-    if (!isAdmin) { setLoading(false); return; }
-    setLoading(true);
-    api.get('/users')
-      .then((res) => setUsers(res.data.data))
-      .catch(() => toast.error('Failed to load users'))
-      .finally(() => setLoading(false));
-  }, [isAdmin]);
-
-  useEffect(() => { load(); }, [load]);
+  const { data: users, loading, refetch } = useFetch<AdminUser[]>(
+    () => (isAdmin ? api.get('/users').then((r) => r.data.data) : Promise.resolve([])),
+    [isAdmin],
+    [],
+    () => toast.error('Failed to load users'),
+  );
 
   const deactivate = async () => {
     if (!deactivateTarget) return;
-    try { await api.delete(`/users/${deactivateTarget.id}`); toast.success('User deactivated'); load(); }
+    try { await api.delete(`/users/${deactivateTarget.id}`); toast.success('User deactivated'); refetch(); }
     catch (e: unknown) { toast.error((e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed'); }
   };
 
@@ -113,7 +108,7 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      <UserFormDialog open={formOpen} onOpenChange={setFormOpen} user={editing} onSaved={load} />
+      <UserFormDialog open={formOpen} onOpenChange={setFormOpen} user={editing} onSaved={refetch} />
       <ConfirmDialog
         open={!!deactivateTarget}
         onOpenChange={(o) => !o && setDeactivateTarget(null)}

@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useCallback, useEffect, useState, useMemo } from 'react';
+import { Suspense, useEffect, useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -11,6 +11,7 @@ import { CarFilters } from '@/components/portal/CarFilters';
 import { portalApi } from '@/lib/portalApi';
 import { formatDate, cn } from '@/lib/utils';
 import type { PortalCar } from '@/lib/portalTypes';
+import { useFetch } from '@/hooks/useFetch';
 import { useRealtime, CAR_EVENTS, BOOKING_EVENTS } from '@/hooks/useRealtime';
 
 const PAGE_SIZE = 9;
@@ -68,36 +69,24 @@ function CarsBrowser() {
     document.title = 'Browse cars | Alliance Car Rental';
   }, []);
 
-  const [cars, setCars] = useState<PortalCar[]>([]);
-  const [loading, setLoading] = useState(true);
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [page, setPage] = useState(1);
 
-  const fetchCars = useCallback(() => {
-    setLoading(true);
-    portalApi
+  // Reset to page 1 whenever the result set changes (folded into the fetch
+  // so there is no synchronous setState in an effect).
+  const { data: cars, loading, refetch } = useFetch<PortalCar[]>(
+    () => portalApi
       .get<{ success: boolean; data: PortalCar[] }>('/cars' + (qs ? '?' + qs : ''))
-      .then((res) => {
-        if (res.data.success) setCars(res.data.data);
-        else setCars([]);
-      })
-      .catch(() => {
-        toast.error('Failed to load cars');
-        setCars([]);
-      })
-      .finally(() => setLoading(false));
-  }, [qs]);
+      .then((r) => {
+        setPage(1);
+        return r.data.success ? r.data.data : [];
+      }),
+    [qs],
+    [],
+    () => toast.error('Failed to load cars'),
+  );
 
-  useEffect(() => {
-    fetchCars();
-  }, [fetchCars]);
-
-  useRealtime([...CAR_EVENTS, ...BOOKING_EVENTS], fetchCars);
-
-  // Reset to page 1 whenever the result set changes
-  useEffect(() => {
-    setPage(1);
-  }, [cars]);
+  useRealtime([...CAR_EVENTS, ...BOOKING_EVENTS], refetch);
 
   const totalPages = Math.max(1, Math.ceil(cars.length / PAGE_SIZE));
   const pagedCars = cars.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);

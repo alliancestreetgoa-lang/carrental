@@ -11,6 +11,7 @@ import { PageHeader } from '@/components/shared/PageHeader';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { CarFormDialog } from '@/components/fleet/CarFormDialog';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
+import { useFetch } from '@/hooks/useFetch';
 import { useRealtime, CAR_EVENTS, BOOKING_EVENTS } from '@/hooks/useRealtime';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,10 +36,6 @@ const csvCell = (v: unknown) => {
 
 export default function FleetPage() {
   const router = useRouter();
-  const [cars, setCars] = useState<Car[]>([]);
-  const [meta, setMeta] = useState<ListMeta | null>(null);
-  const [loading, setLoading] = useState(true);
-
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
@@ -74,23 +71,26 @@ export default function FleetPage() {
     return params;
   }, [page, search, status, sort, filters]);
 
-  const load = useCallback(() => {
-    setLoading(true);
-    api.get(`/cars?${buildParams(PAGE_SIZE).toString()}`)
-      .then((res) => { setCars(res.data.data); setMeta(res.data.meta); setSelected(new Set()); })
-      .catch(() => toast.error('Failed to load vehicles'))
-      .finally(() => setLoading(false));
-  }, [buildParams]);
+  const { data, loading, refetch } = useFetch<{ items: Car[]; meta: ListMeta | null }>(
+    () => api.get(`/cars?${buildParams(PAGE_SIZE).toString()}`).then((r) => {
+      setSelected(new Set());
+      return { items: r.data.data, meta: r.data.meta };
+    }),
+    [buildParams],
+    { items: [], meta: null },
+    () => toast.error('Failed to load vehicles'),
+  );
+  const cars = data.items;
+  const meta = data.meta;
 
-  useEffect(() => { load(); }, [load]);
-  useRealtime([...CAR_EVENTS, ...BOOKING_EVENTS], load);
+  useRealtime([...CAR_EVENTS, ...BOOKING_EVENTS], refetch);
 
   const openAdd = () => { setEditing(null); setFormOpen(true); };
   const openEdit = (car: Car) => { setEditing(car); setFormOpen(true); };
 
   const confirmDelete = async () => {
     if (!deleteTarget) return;
-    try { await api.delete(`/cars/${deleteTarget.id}`); toast.success('Vehicle deleted'); load(); }
+    try { await api.delete(`/cars/${deleteTarget.id}`); toast.success('Vehicle deleted'); refetch(); }
     catch { toast.error('Failed to delete vehicle'); }
   };
 
@@ -107,7 +107,7 @@ export default function FleetPage() {
     try {
       const { data } = await api.patch('/cars/bulk/status', { ids: [...selected], status: newStatus });
       toast.success(`${data.data.count} vehicle(s) updated`);
-      load();
+      refetch();
     } catch { toast.error('Bulk update failed'); }
   };
 
@@ -115,7 +115,7 @@ export default function FleetPage() {
     try {
       const { data } = await api.post('/cars/bulk/delete', { ids: [...selected] });
       toast.success(`${data.data.count} vehicle(s) deleted`);
-      load();
+      refetch();
     } catch { toast.error('Bulk delete failed'); }
   };
 
@@ -325,7 +325,7 @@ export default function FleetPage() {
         </div>
       )}
 
-      <CarFormDialog open={formOpen} onOpenChange={setFormOpen} car={editing} onSaved={load} />
+      <CarFormDialog open={formOpen} onOpenChange={setFormOpen} car={editing} onSaved={refetch} />
       <ConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(o) => !o && setDeleteTarget(null)}

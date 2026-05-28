@@ -1,6 +1,7 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { api } from '@/lib/api';
+import { useFetch } from '@/hooks/useFetch';
 import { toast } from 'sonner';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -29,24 +30,21 @@ const csvCell = (v: unknown) => {
 const isoDay = (d: Date) => d.toISOString().slice(0, 10);
 
 export default function ReportsPage() {
-  const [report, setReport] = useState<ReportData | null>(null);
-  const [loading, setLoading] = useState(true);
   const now = new Date();
   const [from, setFrom] = useState(isoDay(new Date(now.getFullYear(), now.getMonth() - 5, 1)));
   const [to, setTo] = useState(isoDay(now));
 
-  const load = useCallback(() => {
-    setLoading(true);
-    const params = new URLSearchParams();
-    if (from) params.set('from', new Date(from).toISOString());
-    if (to) params.set('to', new Date(`${to}T23:59:59`).toISOString());
-    api.get(`/reports?${params.toString()}`)
-      .then((res) => setReport(res.data.data))
-      .catch((e) => toast.error(e?.response?.data?.message ?? 'Failed to load reports'))
-      .finally(() => setLoading(false));
-  }, [from, to]);
-
-  useEffect(() => { load(); }, [load]);
+  const { data: report, loading } = useFetch<ReportData | null>(
+    () => {
+      const params = new URLSearchParams();
+      if (from) params.set('from', new Date(from).toISOString());
+      if (to) params.set('to', new Date(`${to}T23:59:59`).toISOString());
+      return api.get(`/reports?${params.toString()}`).then((r) => r.data.data);
+    },
+    [from, to],
+    null,
+    (e) => toast.error((e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to load reports'),
+  );
 
   const exportCsv = () => {
     if (!report) return;

@@ -1,11 +1,12 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import { IndianRupee, TrendingUp, AlertCircle, Receipt } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { RecordPaymentDialog } from '@/components/billing/RecordPaymentDialog';
+import { useFetch } from '@/hooks/useFetch';
 import { useRealtime, BOOKING_EVENTS, PAYMENT_EVENTS } from '@/hooks/useRealtime';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -29,10 +30,6 @@ const METHOD_COLOR: Record<string, string> = {
 
 export default function BillingPage() {
   const router = useRouter();
-  const [summary, setSummary] = useState<BillingSummary | null>(null);
-  const [payments, setPayments] = useState<BillingPayment[]>([]);
-  const [loading, setLoading] = useState(true);
-
   const [method, setMethod] = useState('');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
@@ -44,26 +41,29 @@ export default function BillingPage() {
     return () => clearTimeout(t);
   }, [searchInput]);
 
-  const loadSummary = useCallback(() => {
-    api.get('/payments/summary').then((res) => setSummary(res.data.data)).catch(() => toast.error('Failed to load summary'));
-  }, []);
+  const { data: summary, refetch: refetchSummary } = useFetch<BillingSummary | null>(
+    () => api.get('/payments/summary').then((r) => r.data.data),
+    [],
+    null,
+    () => toast.error('Failed to load summary'),
+  );
 
-  const loadPayments = useCallback(() => {
-    setLoading(true);
-    const params = new URLSearchParams();
-    if (method) params.set('method', method);
-    if (from) params.set('from', new Date(from).toISOString());
-    if (to) params.set('to', new Date(`${to}T23:59:59`).toISOString());
-    if (search) params.set('search', search);
-    api.get(`/payments?${params.toString()}`)
-      .then((res) => setPayments(res.data.data))
-      .catch(() => toast.error('Failed to load payments'))
-      .finally(() => setLoading(false));
-  }, [method, from, to, search]);
+  const { data: payments, loading, refetch: refetchPayments } = useFetch<BillingPayment[]>(
+    () => {
+      const params = new URLSearchParams();
+      if (method) params.set('method', method);
+      if (from) params.set('from', new Date(from).toISOString());
+      if (to) params.set('to', new Date(`${to}T23:59:59`).toISOString());
+      if (search) params.set('search', search);
+      return api.get(`/payments?${params.toString()}`).then((r) => r.data.data);
+    },
+    [method, from, to, search],
+    [],
+    () => toast.error('Failed to load payments'),
+  );
 
-  useEffect(() => { loadSummary(); }, [loadSummary]);
-  useEffect(() => { loadPayments(); }, [loadPayments]);
-  useRealtime([...PAYMENT_EVENTS, ...BOOKING_EVENTS], useCallback(() => { loadSummary(); loadPayments(); }, [loadSummary, loadPayments]));
+  const reload = () => { refetchSummary(); refetchPayments(); };
+  useRealtime([...PAYMENT_EVENTS, ...BOOKING_EVENTS], reload);
 
   const maxMethod = Math.max(1, ...(summary?.byMethod.map((m) => m.total) ?? [1]));
 
@@ -72,7 +72,7 @@ export default function BillingPage() {
       <PageHeader
         title="Billing"
         description="Payments, revenue and outstanding balances"
-        action={<RecordPaymentDialog onRecorded={() => { loadSummary(); loadPayments(); }} />}
+        action={<RecordPaymentDialog onRecorded={reload} />}
       />
 
       {/* Summary cards */}

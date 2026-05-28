@@ -1,9 +1,10 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import { ArrowLeft, Pencil, Ban, CreditCard, Wallet, CalendarDays, FileText } from 'lucide-react';
+import { useFetch } from '@/hooks/useFetch';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { CustomerFormDialog } from '@/components/customers/CustomerFormDialog';
 import { CustomerDocuments } from '@/components/customers/CustomerDocuments';
@@ -41,20 +42,15 @@ const Stat = ({ icon: Icon, label, value, tone }: { icon: typeof Wallet; label: 
 export default function CustomerDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const [customer, setCustomer] = useState<CustomerDetail | null>(null);
-  const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>('overview');
   const [editOpen, setEditOpen] = useState(false);
 
-  const load = useCallback(() => {
-    setLoading(true);
-    api.get(`/customers/${id}`)
-      .then((res) => setCustomer(res.data.data))
-      .catch(() => toast.error('Failed to load customer'))
-      .finally(() => setLoading(false));
-  }, [id]);
-
-  useEffect(() => { load(); }, [load]);
+  const { data: customer, loading, refetch } = useFetch<CustomerDetail | null>(
+    () => api.get(`/customers/${id}`).then((r) => r.data.data),
+    [id],
+    null,
+    () => toast.error('Failed to load customer'),
+  );
 
   if (loading) return (
     <div className="space-y-4">
@@ -188,12 +184,12 @@ export default function CustomerDetailPage() {
       {tab === 'documents' && (
         <Card>
           <CardContent className="p-6">
-            <CustomerDocuments customerId={customer.id} documents={customer.documents} onChanged={load} />
+            <CustomerDocuments customerId={customer.id} documents={customer.documents} onChanged={refetch} />
           </CardContent>
         </Card>
       )}
 
-      <CustomerFormDialog open={editOpen} onOpenChange={setEditOpen} customer={customer} onSaved={load} />
+      <CustomerFormDialog open={editOpen} onOpenChange={setEditOpen} customer={customer} onSaved={refetch} />
     </div>
   );
 }

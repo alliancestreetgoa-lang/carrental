@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useFetch } from '@/hooks/useFetch';
 import Link from 'next/link';
 import Image from 'next/image';
 import { toast } from 'sonner';
@@ -162,32 +163,24 @@ function Section({ title, bookings, empty, onCancel }: { title: string; bookings
 }
 
 export default function AccountPage() {
-  const [bookings, setBookings] = useState<PortalBookingRow[]>([]);
-  const [loading, setLoading] = useState(true);
   const [cancelId, setCancelId] = useState<string | null>(null);
   const { cancelBooking } = useCustomerStore();
 
-  const fetchBookings = () => {
-    setLoading(true);
-    portalApi
+  const { data: bookings, loading, refetch } = useFetch<PortalBookingRow[]>(
+    () => portalApi
       .get<{ success: boolean; data: PortalBookingRow[] }>('/bookings')
-      .then((res) => {
-        if (res.data.success) setBookings(res.data.data);
-      })
-      .catch(() => toast.error('Failed to load bookings'))
-      .finally(() => setLoading(false));
-  };
-
-  useEffect(() => {
-    fetchBookings();
-  }, []);
+      .then((r) => (r.data.success ? r.data.data : [])),
+    [],
+    [],
+    () => toast.error('Failed to load bookings'),
+  );
 
   const handleCancel = async () => {
     if (!cancelId) return;
     try {
       await cancelBooking(cancelId);
       toast.success('Booking cancelled');
-      fetchBookings();
+      refetch();
     } catch (e) {
       const msg = (e as { response?: { data?: { message?: string } } }).response?.data?.message;
       toast.error(msg ?? 'Could not cancel booking');

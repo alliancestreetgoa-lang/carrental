@@ -1,10 +1,11 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import { Plus, Search, Eye, Pencil, ChevronLeft, ChevronRight, Ban } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { useFetch } from '@/hooks/useFetch';
 import { CustomerFormDialog } from '@/components/customers/CustomerFormDialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -23,10 +24,6 @@ const selectClass =
 
 export default function CustomersPage() {
   const router = useRouter();
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [meta, setMeta] = useState<ListMeta | null>(null);
-  const [loading, setLoading] = useState(true);
-
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [blacklisted, setBlacklisted] = useState('');
@@ -40,18 +37,19 @@ export default function CustomersPage() {
     return () => clearTimeout(t);
   }, [searchInput]);
 
-  const load = useCallback(() => {
-    setLoading(true);
-    const params = new URLSearchParams({ page: String(page), pageSize: String(PAGE_SIZE) });
-    if (search) params.set('search', search);
-    if (blacklisted) params.set('blacklisted', blacklisted);
-    api.get(`/customers?${params.toString()}`)
-      .then((res) => { setCustomers(res.data.data); setMeta(res.data.meta); })
-      .catch(() => toast.error('Failed to load customers'))
-      .finally(() => setLoading(false));
-  }, [page, search, blacklisted]);
-
-  useEffect(() => { load(); }, [load]);
+  const { data, loading, refetch } = useFetch<{ items: Customer[]; meta: ListMeta | null }>(
+    () => {
+      const params = new URLSearchParams({ page: String(page), pageSize: String(PAGE_SIZE) });
+      if (search) params.set('search', search);
+      if (blacklisted) params.set('blacklisted', blacklisted);
+      return api.get(`/customers?${params.toString()}`).then((r) => ({ items: r.data.data, meta: r.data.meta }));
+    },
+    [page, search, blacklisted],
+    { items: [], meta: null },
+    () => toast.error('Failed to load customers'),
+  );
+  const customers = data.items;
+  const meta = data.meta;
 
   const openAdd = () => { setEditing(null); setFormOpen(true); };
   const openEdit = (c: Customer) => { setEditing(c); setFormOpen(true); };
@@ -132,7 +130,7 @@ export default function CustomersPage() {
         </div>
       )}
 
-      <CustomerFormDialog open={formOpen} onOpenChange={setFormOpen} customer={editing} onSaved={load} />
+      <CustomerFormDialog open={formOpen} onOpenChange={setFormOpen} customer={editing} onSaved={refetch} />
     </div>
   );
 }

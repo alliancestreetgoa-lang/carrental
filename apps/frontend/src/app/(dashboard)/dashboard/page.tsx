@@ -1,7 +1,7 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
+import { useFetch } from '@/hooks/useFetch';
 import { useRealtime, BOOKING_EVENTS, CAR_EVENTS, PAYMENT_EVENTS } from '@/hooks/useRealtime';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { StatsCard } from '@/components/dashboard/StatsCard';
@@ -17,18 +17,13 @@ import { formatCurrency } from '@/lib/utils';
 import type { DashboardStats } from '@/lib/types';
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState<DashboardStats | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  const load = useCallback(() => {
-    api.get('/dashboard/stats')
-      .then((res) => setStats(res.data.data))
-      .catch(() => toast.error('Failed to load dashboard stats'))
-      .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => { load(); }, [load]);
-  useRealtime([...BOOKING_EVENTS, ...CAR_EVENTS, ...PAYMENT_EVENTS], load);
+  const { data: stats, loading, refetch } = useFetch<DashboardStats | null>(
+    () => api.get('/dashboard/stats').then((r) => r.data.data),
+    [],
+    null,
+    () => toast.error('Failed to load dashboard stats'),
+  );
+  useRealtime([...BOOKING_EVENTS, ...CAR_EVENTS, ...PAYMENT_EVENTS], refetch);
 
   if (loading || !stats) return (
     <div>

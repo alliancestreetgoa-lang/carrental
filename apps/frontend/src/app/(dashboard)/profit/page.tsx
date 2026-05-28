@@ -1,10 +1,11 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell,
 } from 'recharts';
+import { useFetch } from '@/hooks/useFetch';
 import { IndianRupee, TrendingDown, Wallet, CarFront, Download, FileText, ArrowUp, ArrowDown } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { StatsCard } from '@/components/dashboard/StatsCard';
@@ -26,8 +27,6 @@ const csvCell = (v: unknown) => {
 const isoDay = (d: Date) => d.toISOString().slice(0, 10);
 
 export default function ProfitPage() {
-  const [data, setData] = useState<ProfitPerCar | null>(null);
-  const [loading, setLoading] = useState(true);
   const now = new Date();
   const [from, setFrom] = useState(isoDay(new Date(now.getFullYear(), now.getMonth() - 5, 1)));
   const [to, setTo] = useState(isoDay(now));
@@ -39,15 +38,12 @@ export default function ProfitPage() {
     return p;
   }, [from, to]);
 
-  const load = useCallback(() => {
-    setLoading(true);
-    api.get(`/reports/profit-per-car?${params().toString()}`)
-      .then((res) => setData(res.data.data))
-      .catch((e) => toast.error(e?.response?.data?.message ?? 'Failed to load analytics'))
-      .finally(() => setLoading(false));
-  }, [params]);
-
-  useEffect(() => { load(); }, [load]);
+  const { data, loading } = useFetch<ProfitPerCar | null>(
+    () => api.get(`/reports/profit-per-car?${params().toString()}`).then((r) => r.data.data),
+    [params],
+    null,
+    (e) => toast.error((e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to load analytics'),
+  );
 
   const exportCsv = () => {
     if (!data) return;

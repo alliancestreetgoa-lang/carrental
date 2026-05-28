@@ -1,8 +1,9 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, Wrench, CalendarClock, AlertTriangle, CheckCircle2, Banknote, FileWarning, Check } from 'lucide-react';
+import { useFetch } from '@/hooks/useFetch';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { StatsCard } from '@/components/dashboard/StatsCard';
 import { MaintenanceFormDialog } from '@/components/maintenance/MaintenanceFormDialog';
@@ -23,33 +24,31 @@ const TYPE_COLOR: Record<string, string> = {
 };
 
 export default function MaintenancePage() {
-  const [summary, setSummary] = useState<MaintenanceSummary | null>(null);
-  const [records, setRecords] = useState<MaintenanceRecord[]>([]);
-  const [loading, setLoading] = useState(true);
   const [type, setType] = useState('');
   const [status, setStatus] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<MaintenanceRecord | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<MaintenanceRecord | null>(null);
 
-  const loadSummary = useCallback(() => {
-    api.get('/maintenance/summary').then((res) => setSummary(res.data.data)).catch(() => toast.error('Failed to load summary'));
-  }, []);
-  const loadRecords = useCallback(() => {
-    setLoading(true);
-    const params = new URLSearchParams();
-    if (type) params.set('type', type);
-    if (status) params.set('status', status);
-    api.get(`/maintenance?${params.toString()}`)
-      .then((res) => setRecords(res.data.data))
-      .catch(() => toast.error('Failed to load records'))
-      .finally(() => setLoading(false));
-  }, [type, status]);
+  const { data: summary, refetch: refetchSummary } = useFetch<MaintenanceSummary | null>(
+    () => api.get('/maintenance/summary').then((r) => r.data.data),
+    [],
+    null,
+    () => toast.error('Failed to load summary'),
+  );
+  const { data: records, loading, refetch: refetchRecords } = useFetch<MaintenanceRecord[]>(
+    () => {
+      const params = new URLSearchParams();
+      if (type) params.set('type', type);
+      if (status) params.set('status', status);
+      return api.get(`/maintenance?${params.toString()}`).then((r) => r.data.data);
+    },
+    [type, status],
+    [],
+    () => toast.error('Failed to load records'),
+  );
 
-  useEffect(() => { loadSummary(); }, [loadSummary]);
-  useEffect(() => { loadRecords(); }, [loadRecords]);
-
-  const reload = useCallback(() => { loadSummary(); loadRecords(); }, [loadSummary, loadRecords]);
+  const reload = () => { refetchSummary(); refetchRecords(); };
   useRealtime(MAINTENANCE_EVENTS, reload);
 
   const markDone = async (id: string) => {

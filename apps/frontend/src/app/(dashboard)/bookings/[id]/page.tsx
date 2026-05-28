@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
@@ -12,6 +12,7 @@ import { CompleteBookingDialog } from '@/components/bookings/CompleteBookingDial
 import { AddPaymentDialog } from '@/components/bookings/AddPaymentDialog';
 import { SignatureDialog } from '@/components/bookings/SignatureDialog';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
+import { useFetch } from '@/hooks/useFetch';
 import { useRealtime } from '@/hooks/useRealtime';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -43,8 +44,6 @@ const InvoiceRow = ({ label, value, bold, tone }: { label: string; value: string
 export default function BookingDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const [booking, setBooking] = useState<BookingDetail | null>(null);
-  const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
   const [completeOpen, setCompleteOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
@@ -54,23 +53,20 @@ export default function BookingDetailPage() {
   const [rejectReason, setRejectReason] = useState('');
   const [approvalLoading, setApprovalLoading] = useState(false);
 
-  const load = useCallback(() => {
-    setLoading(true);
-    api.get(`/bookings/${id}`)
-      .then((res) => setBooking(res.data.data))
-      .catch(() => toast.error('Failed to load booking'))
-      .finally(() => setLoading(false));
-  }, [id]);
-
-  useEffect(() => { load(); }, [load]);
-  useRealtime(['booking:updated', 'booking:cancelled', 'payment:added'], load);
+  const { data: booking, loading, refetch } = useFetch<BookingDetail | null>(
+    () => api.get(`/bookings/${id}`).then((r) => r.data.data),
+    [id],
+    null,
+    () => toast.error('Failed to load booking'),
+  );
+  useRealtime(['booking:updated', 'booking:cancelled', 'payment:added'], refetch);
 
   const activate = async () => {
-    try { await api.patch(`/bookings/${id}/status`, { status: 'ACTIVE' }); toast.success('Booking activated'); load(); }
+    try { await api.patch(`/bookings/${id}/status`, { status: 'ACTIVE' }); toast.success('Booking activated'); refetch(); }
     catch (e: unknown) { toast.error((e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed'); }
   };
   const cancel = async () => {
-    try { await api.patch(`/bookings/${id}/cancel`); toast.success('Booking cancelled'); load(); }
+    try { await api.patch(`/bookings/${id}/cancel`); toast.success('Booking cancelled'); refetch(); }
     catch (e: unknown) { toast.error((e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed'); }
   };
   const downloadBlob = async (urlPath: string, filename: string) => {
@@ -90,7 +86,7 @@ export default function BookingDetailPage() {
     try {
       await api.post('/agreements', { bookingId: id });
       toast.success('Agreement generated');
-      load();
+      refetch();
     } catch (e: unknown) {
       toast.error((e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to generate agreement');
     }
@@ -109,7 +105,7 @@ export default function BookingDetailPage() {
     try {
       await api.post(`/agreements/${agreementId}/store`, {});
       toast.success('Agreement PDF stored');
-      load();
+      refetch();
     } catch (e: unknown) {
       toast.error((e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to store agreement');
     }
@@ -120,7 +116,7 @@ export default function BookingDetailPage() {
     try {
       await api.patch(`/bookings/${id}/approve`);
       toast.success('Booking approved');
-      load();
+      refetch();
     } catch (e: unknown) {
       toast.error((e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to approve');
     } finally {
@@ -135,7 +131,7 @@ export default function BookingDetailPage() {
       toast.success('Booking rejected');
       setRejectOpen(false);
       setRejectReason('');
-      load();
+      refetch();
     } catch (e: unknown) {
       toast.error((e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to reject');
     } finally {
@@ -332,11 +328,11 @@ export default function BookingDetailPage() {
       </div>
 
       {b.agreement && !b.agreement.signed && (
-        <SignatureDialog open={signOpen} onOpenChange={setSignOpen} agreementId={b.agreement.id} defaultName={b.customer.fullName} onSigned={load} />
+        <SignatureDialog open={signOpen} onOpenChange={setSignOpen} agreementId={b.agreement.id} defaultName={b.customer.fullName} onSigned={refetch} />
       )}
-      <BookingFormDialog open={editOpen} onOpenChange={setEditOpen} booking={b} onSaved={load} />
-      <CompleteBookingDialog open={completeOpen} onOpenChange={setCompleteOpen} booking={b} onCompleted={load} />
-      <AddPaymentDialog open={paymentOpen} onOpenChange={setPaymentOpen} bookingId={b.id} onAdded={load} />
+      <BookingFormDialog open={editOpen} onOpenChange={setEditOpen} booking={b} onSaved={refetch} />
+      <CompleteBookingDialog open={completeOpen} onOpenChange={setCompleteOpen} booking={b} onCompleted={refetch} />
+      <AddPaymentDialog open={paymentOpen} onOpenChange={setPaymentOpen} bookingId={b.id} onAdded={refetch} />
       <ConfirmDialog
         open={cancelOpen}
         onOpenChange={setCancelOpen}

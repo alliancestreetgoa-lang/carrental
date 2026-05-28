@@ -1,11 +1,12 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import {
   ArrowLeft, Pencil, Trash2, Car as CarIcon, Fuel, Settings2, Users, Gauge, Calendar, Wrench,
 } from 'lucide-react';
+import { useFetch } from '@/hooks/useFetch';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { CarFormDialog } from '@/components/fleet/CarFormDialog';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
@@ -41,21 +42,16 @@ const expiryClass = (v: string | null) => {
 export default function CarDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
-  const [car, setCar] = useState<CarDetail | null>(null);
-  const [loading, setLoading] = useState(true);
   const [editOpen, setEditOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [activeImg, setActiveImg] = useState(0);
 
-  const load = useCallback(() => {
-    setLoading(true);
-    api.get(`/cars/${id}`)
-      .then((res) => setCar(res.data.data))
-      .catch(() => toast.error('Failed to load vehicle'))
-      .finally(() => setLoading(false));
-  }, [id]);
-
-  useEffect(() => { load(); }, [load]);
+  const { data: car, loading, refetch } = useFetch<CarDetail | null>(
+    () => api.get(`/cars/${id}`).then((r) => r.data.data),
+    [id],
+    null,
+    () => toast.error('Failed to load vehicle'),
+  );
 
   const handleDelete = async () => {
     try {
@@ -219,7 +215,7 @@ export default function CarDetailPage() {
         </CardContent>
       </Card>
 
-      <CarFormDialog open={editOpen} onOpenChange={setEditOpen} car={car} onSaved={load} />
+      <CarFormDialog open={editOpen} onOpenChange={setEditOpen} car={car} onSaved={refetch} />
       <ConfirmDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}

@@ -1,11 +1,12 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useState } from 'react';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend,
 } from 'recharts';
+import { useFetch } from '@/hooks/useFetch';
 import { Plus, Pencil, Trash2, Wallet, TrendingDown, Receipt, Tag } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { StatsCard } from '@/components/dashboard/StatsCard';
@@ -29,31 +30,29 @@ const CAT_COLOR: Record<string, string> = {
 };
 
 export default function ExpensesPage() {
-  const [summary, setSummary] = useState<ExpenseSummary | null>(null);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState('');
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Expense | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Expense | null>(null);
 
-  const loadSummary = useCallback(() => {
-    api.get('/expenses/summary').then((res) => setSummary(res.data.data)).catch(() => toast.error('Failed to load summary'));
-  }, []);
-  const loadExpenses = useCallback(() => {
-    setLoading(true);
-    const params = new URLSearchParams();
-    if (category) params.set('category', category);
-    api.get(`/expenses?${params.toString()}`)
-      .then((res) => setExpenses(res.data.data))
-      .catch(() => toast.error('Failed to load expenses'))
-      .finally(() => setLoading(false));
-  }, [category]);
+  const { data: summary, refetch: refetchSummary } = useFetch<ExpenseSummary | null>(
+    () => api.get('/expenses/summary').then((r) => r.data.data),
+    [],
+    null,
+    () => toast.error('Failed to load summary'),
+  );
+  const { data: expenses, loading, refetch: refetchExpenses } = useFetch<Expense[]>(
+    () => {
+      const params = new URLSearchParams();
+      if (category) params.set('category', category);
+      return api.get(`/expenses?${params.toString()}`).then((r) => r.data.data);
+    },
+    [category],
+    [],
+    () => toast.error('Failed to load expenses'),
+  );
 
-  useEffect(() => { loadSummary(); }, [loadSummary]);
-  useEffect(() => { loadExpenses(); }, [loadExpenses]);
-
-  const reload = () => { loadSummary(); loadExpenses(); };
+  const reload = () => { refetchSummary(); refetchExpenses(); };
 
   const remove = async () => {
     if (!deleteTarget) return;
