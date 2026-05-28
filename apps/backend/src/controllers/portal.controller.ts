@@ -71,6 +71,9 @@ const listQuery = z.object({
   seats: z.coerce.number().int().positive().optional(),
   q: z.string().optional(),
   sort: z.enum(['price_asc', 'price_desc', 'newest']).optional(),
+  brand: z.string().optional(),
+  minPrice: z.coerce.number().nonnegative().optional(),
+  maxPrice: z.coerce.number().nonnegative().optional(),
 });
 export const listCars = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -86,6 +89,16 @@ export const listCars = async (req: Request, res: Response, next: NextFunction) 
 
 export const getCar = async (req: Request, res: Response, next: NextFunction) => {
   try { res.json({ success: true, data: await catalog.getCar(String(req.params.id)) }); }
+  catch (e) { next(e); }
+};
+
+export const listBrands = async (_req: Request, res: Response, next: NextFunction) => {
+  try { res.json({ success: true, data: await catalog.listBrands() }); }
+  catch (e) { next(e); }
+};
+
+export const relatedCars = async (req: Request, res: Response, next: NextFunction) => {
+  try { res.json({ success: true, data: await catalog.getRelatedCars(String(req.params.id)) }); }
   catch (e) { next(e); }
 };
 

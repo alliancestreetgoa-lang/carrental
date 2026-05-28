@@ -21,6 +21,7 @@ const bookedCarIds = async (from: Date, to: Date) => {
 export const listCars = async (f: {
   from?: Date; to?: Date; fuelType?: FuelType; transmission?: Transmission; seats?: number; q?: string;
   sort?: 'price_asc' | 'price_desc' | 'newest';
+  brand?: string; minPrice?: number; maxPrice?: number;
 }) => {
   const where: Prisma.CarWhereInput = {
     deletedAt: null,
@@ -32,6 +33,8 @@ export const listCars = async (f: {
     ...(f.transmission ? { transmission: f.transmission } : {}),
     ...(f.seats ? { seatingCapacity: { gte: f.seats } } : {}),
     ...(f.q ? { OR: [{ carName: { contains: f.q, mode: 'insensitive' } }, { brand: { contains: f.q, mode: 'insensitive' } }] } : {}),
+    ...(f.brand ? { brand: f.brand } : {}),
+    ...((f.minPrice != null || f.maxPrice != null) ? { dailyRent: { ...(f.minPrice != null ? { gte: f.minPrice } : {}), ...(f.maxPrice != null ? { lte: f.maxPrice } : {}) } } : {}),
   };
   if (f.from && f.to) {
     if (f.to <= f.from) throw new AppError(400, 'Return date must be after pickup date');
@@ -46,6 +49,32 @@ export const getCar = async (id: string) => {
   const car = await prisma.car.findFirst({ where: { id, deletedAt: null }, select: publicCarSelect });
   if (!car) throw new AppError(404, 'Car not found');
   return car;
+};
+
+export const listBrands = async () => {
+  const rows = await prisma.car.findMany({
+    where: { deletedAt: null, status: { notIn: ['OUT_OF_SERVICE', 'MAINTENANCE'] } },
+    select: { brand: true },
+    distinct: ['brand'],
+    orderBy: { brand: 'asc' },
+  });
+  return rows.map((r) => r.brand);
+};
+
+export const getRelatedCars = async (carId: string) => {
+  const car = await prisma.car.findFirst({ where: { id: carId, deletedAt: null } });
+  if (!car) return [];
+  const sameBrand = await prisma.car.findMany({
+    where: { deletedAt: null, id: { not: carId }, brand: car.brand, status: { notIn: ['OUT_OF_SERVICE', 'MAINTENANCE'] } },
+    select: publicCarSelect, take: 4, orderBy: { createdAt: 'desc' },
+  });
+  if (sameBrand.length >= 3) return sameBrand;
+  // top up with other bookable cars
+  const others = await prisma.car.findMany({
+    where: { deletedAt: null, id: { notIn: [carId, ...sameBrand.map((c) => c.id)] }, status: { notIn: ['OUT_OF_SERVICE', 'MAINTENANCE'] } },
+    select: publicCarSelect, take: 4 - sameBrand.length, orderBy: { createdAt: 'desc' },
+  });
+  return [...sameBrand, ...others];
 };
 
 export const getAvailability = async (carId: string, from: Date, to: Date) => {

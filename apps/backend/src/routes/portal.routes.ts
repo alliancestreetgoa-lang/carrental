@@ -17,7 +17,9 @@ router.post('/auth/reset-password', authLimiter, portal.resetPassword);
 router.post('/auth/send-mobile-otp', authLimiter, authenticateCustomer, portal.sendMobileOtp);
 router.post('/auth/verify-mobile-otp', authLimiter, authenticateCustomer, portal.verifyMobileOtp);
 
+router.get('/car-brands', portal.listBrands);
 router.get('/cars', portal.listCars);
+router.get('/cars/:id/related', portal.relatedCars);
 router.get('/cars/:id', portal.getCar);
 router.get('/cars/:id/availability', portal.availability);
 router.get('/cars/:id/reviews', portal.carReviews);
