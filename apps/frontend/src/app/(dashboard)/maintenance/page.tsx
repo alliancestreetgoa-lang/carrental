@@ -187,7 +187,7 @@ export default function MaintenancePage() {
                           : <Badge variant="outline" className="text-xs">Scheduled</Badge>}
                       </TableCell>
                       <TableCell className="text-right text-sm">{r.odometer != null ? `${r.odometer.toLocaleString('en-IN')} km` : '—'}</TableCell>
-                      <TableCell className="text-right font-medium">{Number(r.cost) > 0 ? formatCurrency(r.cost) : '—'}</TableCell>
+                      <TableCell className="text-right font-medium">{r.status === 'COMPLETED' ? formatCurrency(r.cost) : '—'}</TableCell>
                       <TableCell className="pr-6">
                         <div className="flex justify-end gap-1">
                           {r.status === 'SCHEDULED' && (

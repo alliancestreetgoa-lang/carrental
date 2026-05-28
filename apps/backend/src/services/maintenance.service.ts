@@ -38,7 +38,7 @@ const syncExpense = async (record: Maintenance): Promise<string | null> => {
     carId: record.carId,
     amount: cost,
     category: EXPENSE_CATEGORY[record.type],
-    expenseDate: record.serviceDate ?? record.updatedAt,
+    expenseDate: record.serviceDate ?? record.createdAt,
     notes: record.notes ? `${label} — ${record.notes}` : label,
   };
 

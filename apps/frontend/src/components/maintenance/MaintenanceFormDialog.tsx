@@ -62,7 +62,7 @@ export function MaintenanceFormDialog({
         serviceDate: isScheduled ? null : iso,
         dueDate: isScheduled ? iso : null,
         odometer: odometer ? Number(odometer) : undefined,
-        cost: cost ? Number(cost) : 0,
+        cost: isScheduled ? 0 : cost ? Number(cost) : 0,
         serviceCenter: serviceCenter || undefined,
         notes: notes || undefined,
       };
