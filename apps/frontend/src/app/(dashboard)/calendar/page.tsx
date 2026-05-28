@@ -9,6 +9,7 @@ import type { EventResizeDoneArg } from '@fullcalendar/interaction';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { useRealtime, BOOKING_EVENTS, CAR_EVENTS } from '@/hooks/useRealtime';
+import { formatCurrency } from '@/lib/utils';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { BookingFormDialog } from '@/components/bookings/BookingFormDialog';
 import { Card, CardContent } from '@/components/ui/card';
@@ -178,7 +179,7 @@ export default function CalendarPage() {
             }}
             eventDidMount={(arg) => {
               const p = arg.event.extendedProps as { status: string; car: string; amount: string };
-              arg.el.title = `${arg.event.title}\n${p.car}\n${p.status} · $${p.amount}\n${arg.event.start?.toLocaleString()} → ${arg.event.end?.toLocaleString()}`;
+              arg.el.title = `${arg.event.title}\n${p.car}\n${p.status} · ${formatCurrency(Number(p.amount))}\n${arg.event.start?.toLocaleString()} → ${arg.event.end?.toLocaleString()}`;
             }}
             eventClick={(arg) => router.push(`/bookings/${arg.event.id}`)}
             eventDrop={persistMove}

@@ -12,7 +12,7 @@ import { RecentBookingsTable } from '@/components/dashboard/RecentBookingsTable'
 import { BookingListCard } from '@/components/dashboard/BookingListCard';
 import { MaintenanceAlerts } from '@/components/dashboard/MaintenanceAlerts';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Car, CarFront, KeyRound, CreditCard, Users, DollarSign, CalendarClock, RotateCcw } from 'lucide-react';
+import { Car, CarFront, KeyRound, CreditCard, Users, IndianRupee, CalendarClock, RotateCcw } from 'lucide-react';
 import { formatCurrency } from '@/lib/utils';
 import type { DashboardStats } from '@/lib/types';
 
@@ -60,7 +60,7 @@ export default function DashboardPage() {
         <StatsCard title="Active Rentals" value={cards.activeRentals} icon={KeyRound} />
         <StatsCard title="Pending Payments" value={formatCurrency(cards.pendingPaymentsAmount)} description={`${cards.pendingPaymentsCount} booking${cards.pendingPaymentsCount === 1 ? '' : 's'}`} icon={CreditCard} />
         <StatsCard title="Total Customers" value={cards.totalCustomers} icon={Users} />
-        <StatsCard title="Monthly Revenue" value={formatCurrency(cards.monthlyRevenue)} icon={DollarSign} />
+        <StatsCard title="Monthly Revenue" value={formatCurrency(cards.monthlyRevenue)} icon={IndianRupee} />
       </div>
 
       {/* Charts row 1 */}

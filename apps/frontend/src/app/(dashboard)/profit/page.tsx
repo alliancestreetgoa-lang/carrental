@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Cell,
 } from 'recharts';
-import { DollarSign, TrendingDown, Wallet, CarFront, Download, FileText, ArrowUp, ArrowDown } from 'lucide-react';
+import { IndianRupee, TrendingDown, Wallet, CarFront, Download, FileText, ArrowUp, ArrowDown } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { StatsCard } from '@/components/dashboard/StatsCard';
 import { Button } from '@/components/ui/button';
@@ -104,7 +104,7 @@ export default function ProfitPage() {
       ) : (
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-            <StatsCard title="Total Revenue" value={formatCurrency(data.totals.revenue)} icon={DollarSign} />
+            <StatsCard title="Total Revenue" value={formatCurrency(data.totals.revenue)} icon={IndianRupee} />
             <StatsCard title="Total Expenses" value={formatCurrency(data.totals.expenses)} icon={TrendingDown} />
             <StatsCard title="Net Profit" value={formatCurrency(data.totals.profit)} icon={Wallet} className={data.totals.profit < 0 ? 'border-red-200 dark:border-red-900/40' : 'border-emerald-200 dark:border-emerald-900/40'} />
             <StatsCard title="Idle Cars" value={idle.length} description={`of ${data.cars.length} vehicles`} icon={CarFront} />

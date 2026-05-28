@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
-import { DollarSign, TrendingUp, AlertCircle, Receipt } from 'lucide-react';
+import { IndianRupee, TrendingUp, AlertCircle, Receipt } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { RecordPaymentDialog } from '@/components/billing/RecordPaymentDialog';
 import { useRealtime, BOOKING_EVENTS, PAYMENT_EVENTS } from '@/hooks/useRealtime';
@@ -77,7 +77,7 @@ export default function BillingPage() {
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        <StatsCard title="Total Revenue" value={formatCurrency(summary?.totalRevenue ?? 0)} icon={DollarSign} />
+        <StatsCard title="Total Revenue" value={formatCurrency(summary?.totalRevenue ?? 0)} icon={IndianRupee} />
         <StatsCard title="This Month" value={formatCurrency(summary?.monthRevenue ?? 0)} icon={TrendingUp} />
         <StatsCard title="Outstanding" value={formatCurrency(summary?.outstanding ?? 0)} icon={AlertCircle} className={summary && summary.outstanding > 0 ? 'border-red-200 dark:border-red-900/40' : ''} />
         <StatsCard title="Payments" value={summary?.paymentCount ?? 0} icon={Receipt} />

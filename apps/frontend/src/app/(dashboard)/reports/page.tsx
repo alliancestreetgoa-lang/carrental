@@ -6,7 +6,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
   PieChart, Pie, Cell,
 } from 'recharts';
-import { DollarSign, TrendingDown, Wallet, CalendarCheck, Gauge, Download } from 'lucide-react';
+import { IndianRupee, TrendingDown, Wallet, CalendarCheck, Gauge, Download } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { StatsCard } from '@/components/dashboard/StatsCard';
 import { Button } from '@/components/ui/button';
@@ -98,11 +98,11 @@ export default function ReportsPage() {
         <>
           {/* Summary cards */}
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4 mb-4">
-            <StatsCard title="Revenue" value={formatCurrency(t.revenue)} icon={DollarSign} />
+            <StatsCard title="Revenue" value={formatCurrency(t.revenue)} icon={IndianRupee} />
             <StatsCard title="Expenses" value={formatCurrency(t.expenses)} icon={TrendingDown} />
             <StatsCard title="Profit" value={formatCurrency(t.profit)} icon={Wallet} className={t.profit < 0 ? 'border-red-200 dark:border-red-900/40' : ''} />
             <StatsCard title="Bookings" value={t.bookings} icon={CalendarCheck} />
-            <StatsCard title="Avg Booking" value={formatCurrency(t.avgBookingValue)} icon={DollarSign} />
+            <StatsCard title="Avg Booking" value={formatCurrency(t.avgBookingValue)} icon={IndianRupee} />
             <StatsCard title="Utilization" value={`${t.utilization}%`} icon={Gauge} />
           </div>
 
@@ -115,7 +115,7 @@ export default function ReportsPage() {
                   <BarChart data={report.revenueByMonth} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border" />
                     <XAxis dataKey="month" tick={{ fontSize: 12 }} className="text-muted-foreground" />
-                    <YAxis tick={{ fontSize: 12 }} className="text-muted-foreground" tickFormatter={(v) => `$${Number(v) / 1000}k`} />
+                    <YAxis tick={{ fontSize: 12 }} className="text-muted-foreground" tickFormatter={(v) => `₹${Number(v) / 1000}k`} />
                     <Tooltip formatter={(v) => formatCurrency(Number(v))} />
                     <Legend />
                     <Bar dataKey="revenue" name="Revenue" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={28} />

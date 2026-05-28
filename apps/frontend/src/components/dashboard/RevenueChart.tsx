@@ -1,6 +1,7 @@
 'use client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { formatCurrency } from '@/lib/utils';
 
 export function RevenueChart({ data }: { data: { month: string; revenue: number }[] }) {
   return (
@@ -19,8 +20,8 @@ export function RevenueChart({ data }: { data: { month: string; revenue: number 
             </defs>
             <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
             <XAxis dataKey="month" tick={{ fontSize: 12 }} className="text-muted-foreground" />
-            <YAxis tick={{ fontSize: 12 }} className="text-muted-foreground" tickFormatter={(v) => `$${Number(v) / 1000}k`} />
-            <Tooltip formatter={(v) => [`$${Number(v).toLocaleString()}`, 'Revenue']} />
+            <YAxis tick={{ fontSize: 12 }} className="text-muted-foreground" tickFormatter={(v) => `₹${Number(v) / 1000}k`} />
+            <Tooltip formatter={(v) => [formatCurrency(Number(v)), 'Revenue']} />
             <Area type="monotone" dataKey="revenue" stroke="#dc2626" fill="url(#revenueGradient)" strokeWidth={2} />
           </AreaChart>
         </ResponsiveContainer>
