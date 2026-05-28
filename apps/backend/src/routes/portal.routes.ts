@@ -5,10 +5,16 @@ import { authLimiter } from '../middleware/rateLimit.middleware';
 
 const router = Router();
 
-router.post('/auth/register', portal.register);
+router.post('/auth/register', authLimiter, portal.register);
 router.post('/auth/login', authLimiter, portal.login);
 router.post('/auth/logout', portal.logout);
 router.get('/auth/me', authenticateCustomer, portal.me);
+router.post('/auth/verify-email', authLimiter, portal.verifyEmail);
+router.post('/auth/resend-verification', authLimiter, authenticateCustomer, portal.resendVerification);
+router.post('/auth/forgot-password', authLimiter, portal.forgotPassword);
+router.post('/auth/reset-password', authLimiter, portal.resetPassword);
+router.post('/auth/send-mobile-otp', authLimiter, authenticateCustomer, portal.sendMobileOtp);
+router.post('/auth/verify-mobile-otp', authLimiter, authenticateCustomer, portal.verifyMobileOtp);
 
 router.get('/cars', portal.listCars);
 router.get('/cars/:id', portal.getCar);
