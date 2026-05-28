@@ -10,7 +10,9 @@ import { useSocketContext } from '@/providers/SocketProvider';
 export function useRealtime(events: string[], handler: () => void) {
   const socket = useSocketContext();
   const handlerRef = useRef(handler);
-  handlerRef.current = handler;
+  useEffect(() => {
+    handlerRef.current = handler;
+  });
   const key = events.join(',');
 
   useEffect(() => {

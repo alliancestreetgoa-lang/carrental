@@ -19,9 +19,9 @@ export function BookingWidget({ car }: BookingWidgetProps) {
   const searchParams = useSearchParams();
   const { customer, hydrated } = useCustomerStore();
 
-  const todayStr = toDateInput();
-  const tomorrowStr = toDateInput(
-    new Date(Date.now() + 86400000).toISOString()
+  const [todayStr] = useState(() => toDateInput());
+  const [tomorrowStr] = useState(() =>
+    toDateInput(new Date(Date.now() + 86400000).toISOString())
   );
 
   const [from, setFrom] = useState<string>(() => {

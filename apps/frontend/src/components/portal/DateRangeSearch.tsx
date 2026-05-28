@@ -18,9 +18,9 @@ const inputClass =
 
 export function DateRangeSearch() {
   const router = useRouter();
-  const today = toDateInput();
-  const tomorrow = toDateInput(
-    new Date(Date.now() + 86_400_000).toISOString()
+  const [today] = useState(() => toDateInput());
+  const [tomorrow] = useState(() =>
+    toDateInput(new Date(Date.now() + 86_400_000).toISOString())
   );
 
   const [from, setFrom] = useState(today);

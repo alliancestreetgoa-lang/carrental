@@ -242,7 +242,7 @@ export default function BookingDetailPage() {
         </div>
         <div>
           <p className="font-semibold text-slate-800 text-lg">Booking not found</p>
-          <p className="text-slate-400 text-sm mt-1">This booking doesn't exist or you don't have access.</p>
+          <p className="text-slate-400 text-sm mt-1">{"This booking doesn't exist or you don't have access."}</p>
         </div>
         <Link
           href="/account"

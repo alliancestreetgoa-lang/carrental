@@ -39,6 +39,5 @@ jobs:
           NEXT_PUBLIC_SOCKET_URL: http://localhost:4000
           NEXT_PUBLIC_SITE_URL: http://localhost:3000
 
-      - name: Lint frontend (non-blocking)
+      - name: Lint frontend
         run: npm run lint --workspace=apps/frontend
-        continue-on-error: true

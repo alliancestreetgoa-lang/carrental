@@ -134,7 +134,7 @@ export function CarFormDialog({ open, onOpenChange, car, onSaved }: Props) {
     }
   });
 
-  const Err = ({ name }: { name: keyof FormData }) =>
+  const renderErr = (name: keyof FormData) =>
     errors[name] ? <p className="text-xs text-destructive mt-1">{String(errors[name]?.message)}</p> : null;
 
   return (
@@ -178,32 +178,32 @@ export function CarFormDialog({ open, onOpenChange, car, onSaved }: Props) {
           <div>
             <Label htmlFor="carName">Car Name</Label>
             <Input id="carName" placeholder="Swift VXi" {...register('carName')} />
-            <Err name="carName" />
+            {renderErr('carName')}
           </div>
           <div>
             <Label htmlFor="brand">Brand</Label>
             <Input id="brand" placeholder="Maruti Suzuki" {...register('brand')} />
-            <Err name="brand" />
+            {renderErr('brand')}
           </div>
           <div>
             <Label htmlFor="model">Model</Label>
             <Input id="model" placeholder="Swift" {...register('model')} />
-            <Err name="model" />
+            {renderErr('model')}
           </div>
           <div>
             <Label htmlFor="year">Year</Label>
             <Input id="year" type="number" {...register('year')} />
-            <Err name="year" />
+            {renderErr('year')}
           </div>
           <div>
             <Label htmlFor="registrationNumber">Registration No.</Label>
             <Input id="registrationNumber" placeholder="GA-01-AB-1234" {...register('registrationNumber')} />
-            <Err name="registrationNumber" />
+            {renderErr('registrationNumber')}
           </div>
           <div>
             <Label htmlFor="chassisNumber">Chassis No.</Label>
             <Input id="chassisNumber" {...register('chassisNumber')} />
-            <Err name="chassisNumber" />
+            {renderErr('chassisNumber')}
           </div>
           <div>
             <Label htmlFor="fuelType">Fuel Type</Label>
@@ -226,7 +226,7 @@ export function CarFormDialog({ open, onOpenChange, car, onSaved }: Props) {
           <div>
             <Label htmlFor="seatingCapacity">Seating Capacity</Label>
             <Input id="seatingCapacity" type="number" {...register('seatingCapacity')} />
-            <Err name="seatingCapacity" />
+            {renderErr('seatingCapacity')}
           </div>
           <div>
             <Label htmlFor="currentKilometer">Current KM</Label>
@@ -235,7 +235,7 @@ export function CarFormDialog({ open, onOpenChange, car, onSaved }: Props) {
           <div>
             <Label htmlFor="dailyRent">Daily Rent</Label>
             <Input id="dailyRent" type="number" {...register('dailyRent')} />
-            <Err name="dailyRent" />
+            {renderErr('dailyRent')}
           </div>
           <div>
             <Label htmlFor="weeklyRent">Weekly Rent</Label>
