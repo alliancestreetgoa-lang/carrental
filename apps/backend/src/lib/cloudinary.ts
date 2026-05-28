@@ -21,3 +21,15 @@ export const uploadBuffer = (buffer: Buffer, folder = 'alliance-car-rental'): Pr
     });
     stream.end(buffer);
   });
+
+export const uploadPdfBuffer = (buffer: Buffer, publicId: string, folder = 'alliance-car-rental/agreements'): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder, resource_type: 'raw', public_id: publicId, format: 'pdf' },
+      (err, result) => {
+        if (err || !result) return reject(err ?? new Error('Upload failed'));
+        resolve(result.secure_url);
+      }
+    );
+    stream.end(buffer);
+  });

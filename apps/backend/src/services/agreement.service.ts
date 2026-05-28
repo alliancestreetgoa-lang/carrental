@@ -11,11 +11,22 @@ export const getAllAgreements = () =>
 export const getAgreementById = async (id: string) => {
   const agreement = await prisma.agreement.findFirst({
     where: { id, deletedAt: null },
-    include: { booking: { include: { customer: true, car: true } } },
+    include: {
+      booking: {
+        include: {
+          customer: true,
+          car: true,
+          payments: { where: { deletedAt: null }, select: { amount: true } },
+        },
+      },
+    },
   });
   if (!agreement) throw new AppError(404, 'Agreement not found');
   return agreement;
 };
+
+export const setPdfUrl = (id: string, pdfUrl: string) =>
+  prisma.agreement.update({ where: { id }, data: { pdfUrl } });
 
 const generateAgreementNumber = async () => {
   const year = new Date().getFullYear();

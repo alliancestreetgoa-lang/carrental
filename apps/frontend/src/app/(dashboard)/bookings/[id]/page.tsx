@@ -4,7 +4,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import {
-  ArrowLeft, Pencil, CheckCircle, XCircle, KeyRound, Download, Plus, FileText, FileSignature, PenLine,
+  ArrowLeft, Pencil, CheckCircle, XCircle, KeyRound, Download, Plus, FileText, FileSignature, PenLine, Mail, UploadCloud,
 } from 'lucide-react';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { BookingFormDialog } from '@/components/bookings/BookingFormDialog';
@@ -47,6 +47,7 @@ export default function BookingDetailPage() {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [signOpen, setSignOpen] = useState(false);
+  const [agreementLang, setAgreementLang] = useState('en');
 
   const load = useCallback(() => {
     setLoading(true);
@@ -87,6 +88,25 @@ export default function BookingDetailPage() {
       load();
     } catch (e: unknown) {
       toast.error((e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to generate agreement');
+    }
+  };
+
+  const emailAgreement = async (agreementId: string) => {
+    try {
+      const { data } = await api.post(`/agreements/${agreementId}/email`, { lang: agreementLang });
+      toast.success(data.message ?? 'Agreement emailed');
+    } catch (e: unknown) {
+      toast.error((e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to email agreement');
+    }
+  };
+
+  const storeAgreement = async (agreementId: string) => {
+    try {
+      await api.post(`/agreements/${agreementId}/store`, { lang: agreementLang });
+      toast.success('Agreement PDF stored');
+      load();
+    } catch (e: unknown) {
+      toast.error((e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to store agreement');
     }
   };
 
@@ -233,12 +253,29 @@ export default function BookingDetailPage() {
                       ? <Badge className="bg-emerald-100 text-emerald-700 border-0 dark:bg-emerald-900/30 dark:text-emerald-400">Signed</Badge>
                       : <Badge className="bg-amber-100 text-amber-700 border-0 dark:bg-amber-900/30 dark:text-amber-400">Unsigned</Badge>}
                   </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="cursor-pointer flex-1" onClick={() => downloadBlob(`/agreements/${b.agreement!.id}/pdf`, `agreement-${b.agreement!.agreementNumber}.pdf`)}>
+                  <div className="flex items-center gap-2">
+                    <label className="text-xs text-muted-foreground">Language</label>
+                    <select
+                      className="h-8 rounded-lg border border-input bg-transparent px-2 text-xs cursor-pointer dark:bg-input/30"
+                      value={agreementLang}
+                      onChange={(e) => setAgreementLang(e.target.value)}
+                    >
+                      <option value="en">English</option>
+                      <option value="es">Español</option>
+                    </select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => downloadBlob(`/agreements/${b.agreement!.id}/pdf?lang=${agreementLang}`, `agreement-${b.agreement!.agreementNumber}.pdf`)}>
                       <Download className="w-4 h-4 mr-1" /> PDF
                     </Button>
+                    <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => emailAgreement(b.agreement!.id)}>
+                      <Mail className="w-4 h-4 mr-1" /> Email
+                    </Button>
+                    <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => storeAgreement(b.agreement!.id)}>
+                      <UploadCloud className="w-4 h-4 mr-1" /> Store
+                    </Button>
                     {!b.agreement.signed && (
-                      <Button size="sm" className="cursor-pointer flex-1 bg-red-600 hover:bg-red-700 text-white" onClick={() => setSignOpen(true)}>
+                      <Button size="sm" className="cursor-pointer bg-red-600 hover:bg-red-700 text-white" onClick={() => setSignOpen(true)}>
                         <PenLine className="w-4 h-4 mr-1" /> Sign
                       </Button>
                     )}
