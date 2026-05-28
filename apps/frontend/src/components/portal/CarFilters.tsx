@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -40,6 +40,17 @@ export function CarFilters() {
     [params, router]
   );
 
+  // Debounce the free-text search so we don't re-navigate (and refetch +
+  // lose input focus) on every keystroke; keep the input locally controlled.
+  const [qInput, setQInput] = useState(q);
+  useEffect(() => { setQInput(q); }, [q]);
+  const qTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onSearchChange = (value: string) => {
+    setQInput(value);
+    if (qTimer.current) clearTimeout(qTimer.current);
+    qTimer.current = setTimeout(() => push({ q: value }), 400);
+  };
+
   const hasFilters = !!(q || from || to || fuelType || transmission || seats || sort);
 
   return (
@@ -52,8 +63,8 @@ export function CarFilters() {
           <Input
             type="search"
             placeholder="Brand, model…"
-            value={q}
-            onChange={(e) => push({ q: e.target.value })}
+            value={qInput}
+            onChange={(e) => onSearchChange(e.target.value)}
             className="h-9 rounded-lg text-sm"
           />
         </div>
