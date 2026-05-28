@@ -29,12 +29,12 @@ export const useCustomerStore = create<CustomerStore>((set) => ({
     catch { set({ customer: null, hydrated: true }); }
   },
   login: async (email, password) => {
-    const { data } = await portalApi.post('/auth/login', { email, password });
-    set({ customer: data.data.customer });
+    await portalApi.post('/auth/login', { email, password });
+    await useCustomerStore.getState().fetchMe(); // normalize: load emailVerified/mobileVerified flags
   },
   register: async (payload) => {
-    const { data } = await portalApi.post('/auth/register', payload);
-    set({ customer: data.data.customer });
+    await portalApi.post('/auth/register', payload);
+    await useCustomerStore.getState().fetchMe();
   },
   logout: async () => { await portalApi.post('/auth/logout'); set({ customer: null }); },
   forgotPassword: async (email) => { const { data } = await portalApi.post('/auth/forgot-password', { email }); return { devSecret: data.devSecret }; },
