@@ -2,6 +2,66 @@ import { prisma } from '../lib/prisma';
 
 const DAY_MS = 1000 * 60 * 60 * 24;
 
+export const getProfitPerCar = async (fromInput?: Date, toInput?: Date) => {
+  const to = toInput ?? new Date();
+  const from = fromInput ?? new Date(to.getFullYear(), to.getMonth() - 5, 1);
+  const rangeDays = Math.max(1, Math.ceil((to.getTime() - from.getTime()) / DAY_MS));
+
+  const [cars, payments, expenses, overlapBookings] = await Promise.all([
+    prisma.car.findMany({ where: { deletedAt: null }, select: { id: true, carName: true, brand: true, registrationNumber: true } }),
+    prisma.payment.findMany({
+      where: { deletedAt: null, paymentDate: { gte: from, lte: to } },
+      select: { amount: true, booking: { select: { carId: true } } },
+    }),
+    prisma.expense.findMany({
+      where: { deletedAt: null, expenseDate: { gte: from, lte: to } },
+      select: { amount: true, carId: true },
+    }),
+    prisma.booking.findMany({
+      where: { deletedAt: null, bookingStatus: { not: 'CANCELLED' }, pickupDate: { lte: to }, returnDate: { gte: from } },
+      select: { carId: true, pickupDate: true, returnDate: true },
+    }),
+  ]);
+
+  const revByCar = new Map<string, number>();
+  for (const p of payments) revByCar.set(p.booking.carId, (revByCar.get(p.booking.carId) ?? 0) + Number(p.amount));
+  const expByCar = new Map<string, number>();
+  for (const e of expenses) expByCar.set(e.carId, (expByCar.get(e.carId) ?? 0) + Number(e.amount));
+  const daysByCar = new Map<string, number>();
+  const bookingsByCar = new Map<string, number>();
+  for (const b of overlapBookings) {
+    bookingsByCar.set(b.carId, (bookingsByCar.get(b.carId) ?? 0) + 1);
+    const start = Math.max(b.pickupDate.getTime(), from.getTime());
+    const end = Math.min(b.returnDate.getTime(), to.getTime());
+    if (end > start) daysByCar.set(b.carId, (daysByCar.get(b.carId) ?? 0) + (end - start) / DAY_MS);
+  }
+
+  const rows = cars.map((c) => {
+    const revenue = revByCar.get(c.id) ?? 0;
+    const exp = expByCar.get(c.id) ?? 0;
+    const bookings = bookingsByCar.get(c.id) ?? 0;
+    const utilization = Math.min(100, Math.round(((daysByCar.get(c.id) ?? 0) / rangeDays) * 1000) / 10);
+    return {
+      id: c.id,
+      label: `${c.brand} ${c.carName}`,
+      registrationNumber: c.registrationNumber,
+      revenue,
+      expenses: exp,
+      profit: revenue - exp,
+      bookings,
+      utilization,
+      idle: bookings === 0,
+    };
+  }).sort((a, b) => b.profit - a.profit);
+
+  const totals = rows.reduce(
+    (acc, r) => ({ revenue: acc.revenue + r.revenue, expenses: acc.expenses + r.expenses, profit: acc.profit + r.profit }),
+    { revenue: 0, expenses: 0, profit: 0 }
+  );
+
+  return { from: from.toISOString(), to: to.toISOString(), totals, cars: rows };
+};
+
 export const getReport = async (fromInput?: Date, toInput?: Date) => {
   const to = toInput ?? new Date();
   const from = fromInput ?? new Date(to.getFullYear(), to.getMonth() - 5, 1);

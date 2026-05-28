@@ -201,6 +201,25 @@ export interface ReportData {
   topCustomers: { id: string; name: string; spent: number }[];
 }
 
+export interface ProfitCarRow {
+  id: string;
+  label: string;
+  registrationNumber: string;
+  revenue: number;
+  expenses: number;
+  profit: number;
+  bookings: number;
+  utilization: number;
+  idle: boolean;
+}
+
+export interface ProfitPerCar {
+  from: string;
+  to: string;
+  totals: { revenue: number; expenses: number; profit: number };
+  cars: ProfitCarRow[];
+}
+
 export interface BillingSummary {
   totalRevenue: number;
   monthRevenue: number;
