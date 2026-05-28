@@ -24,7 +24,7 @@ export const listCars = async (f: {
 }) => {
   const where: Prisma.CarWhereInput = {
     deletedAt: null,
-    status: { not: 'OUT_OF_SERVICE' },
+    status: 'AVAILABLE',
     ...(f.fuelType ? { fuelType: f.fuelType } : {}),
     ...(f.transmission ? { transmission: f.transmission } : {}),
     ...(f.seats ? { seatingCapacity: { gte: f.seats } } : {}),

@@ -18,6 +18,7 @@ import reportsRoutes from './routes/reports.routes';
 import userRoutes from './routes/user.routes';
 import notificationRoutes from './routes/notification.routes';
 import maintenanceRoutes from './routes/maintenance.routes';
+import portalRoutes from './routes/portal.routes';
 
 export const createApp = () => {
   const app = express();
@@ -49,6 +50,7 @@ export const createApp = () => {
   app.use('/api/users', userRoutes);
   app.use('/api/notifications', notificationRoutes);
   app.use('/api/maintenance', maintenanceRoutes);
+  app.use('/api/portal', portalRoutes);
 
   app.use(errorHandler);
 
