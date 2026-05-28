@@ -16,7 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, formatAxisCurrency } from '@/lib/utils';
 import type { ReportData } from '@/lib/types';
 
 const STATUS_COLOR: Record<string, string> = {
@@ -115,7 +115,7 @@ export default function ReportsPage() {
                   <BarChart data={report.revenueByMonth} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border" />
                     <XAxis dataKey="month" tick={{ fontSize: 12 }} className="text-muted-foreground" />
-                    <YAxis tick={{ fontSize: 12 }} className="text-muted-foreground" tickFormatter={(v) => `₹${Number(v) / 1000}k`} />
+                    <YAxis tick={{ fontSize: 12 }} className="text-muted-foreground" tickFormatter={formatAxisCurrency} />
                     <Tooltip formatter={(v) => formatCurrency(Number(v))} />
                     <Legend />
                     <Bar dataKey="revenue" name="Revenue" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={28} />

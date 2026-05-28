@@ -19,7 +19,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatCurrency, formatDate, formatAxisCurrency, selectClass } from '@/lib/utils';
 import type { Expense, ExpenseSummary } from '@/lib/types';
 
 const CATEGORIES = ['FUEL', 'SERVICE', 'REPAIR', 'INSURANCE', 'CLEANING', 'EMI', 'OTHER'];
@@ -27,8 +27,6 @@ const CAT_COLOR: Record<string, string> = {
   FUEL: '#3b82f6', SERVICE: '#f59e0b', REPAIR: '#ef4444', INSURANCE: '#8b5cf6',
   CLEANING: '#06b6d4', EMI: '#10b981', OTHER: '#94a3b8',
 };
-const selectClass =
-  'h-9 rounded-lg border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer dark:bg-input/30';
 
 export default function ExpensesPage() {
   const [summary, setSummary] = useState<ExpenseSummary | null>(null);
@@ -88,7 +86,7 @@ export default function ExpensesPage() {
               <BarChart data={summary?.byMonth ?? []} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border" />
                 <XAxis dataKey="month" tick={{ fontSize: 12 }} className="text-muted-foreground" />
-                <YAxis tick={{ fontSize: 12 }} className="text-muted-foreground" tickFormatter={(v) => `₹${Number(v) / 1000}k`} />
+                <YAxis tick={{ fontSize: 12 }} className="text-muted-foreground" tickFormatter={formatAxisCurrency} />
                 <Tooltip formatter={(v) => formatCurrency(Number(v))} cursor={{ fill: 'rgba(100,116,139,0.1)' }} />
                 <Bar dataKey="total" name="Expenses" fill="#ef4444" radius={[4, 4, 0, 0]} maxBarSize={36} />
               </BarChart>

@@ -1,4 +1,5 @@
 import { prisma } from '../lib/prisma';
+import { carDocumentExpiries, expiryThresholdFrom } from '../lib/expiryAlerts';
 
 const bookingCardSelect = {
   id: true,
@@ -18,7 +19,7 @@ export const getDashboardStats = async () => {
   const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
   const todayStart = startOfDay(now);
   const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
-  const expiryThreshold = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+  const expiryThreshold = expiryThresholdFrom(now);
 
   // Build the last 6 month buckets (oldest -> current)
   const monthBuckets = Array.from({ length: 6 }, (_, i) => {
@@ -131,17 +132,10 @@ export const getDashboardStats = async () => {
   const maintenanceAlerts: Array<{
     carId: string; carName: string; brand: string; registrationNumber: string; type: string; detail: string;
   }> = [];
-  const daysUntil = (d: Date) => Math.ceil((d.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-  const expiryDetail = (d: Date) => {
-    const days = daysUntil(d);
-    return days < 0 ? `Expired ${Math.abs(days)}d ago` : `Expires in ${days}d`;
-  };
   for (const c of alertCars) {
     const base = { carId: c.id, carName: c.carName, brand: c.brand, registrationNumber: c.registrationNumber };
     if (c.status === 'MAINTENANCE') maintenanceAlerts.push({ ...base, type: 'MAINTENANCE', detail: 'Under maintenance' });
-    if (c.insuranceExpiry && c.insuranceExpiry <= expiryThreshold) maintenanceAlerts.push({ ...base, type: 'INSURANCE', detail: `Insurance ${expiryDetail(c.insuranceExpiry)}` });
-    if (c.pollutionExpiry && c.pollutionExpiry <= expiryThreshold) maintenanceAlerts.push({ ...base, type: 'POLLUTION', detail: `Pollution ${expiryDetail(c.pollutionExpiry)}` });
-    if (c.rcExpiry && c.rcExpiry <= expiryThreshold) maintenanceAlerts.push({ ...base, type: 'RC', detail: `RC ${expiryDetail(c.rcExpiry)}` });
+    for (const e of carDocumentExpiries(c, now)) maintenanceAlerts.push({ ...base, type: e.kind, detail: e.detail });
   }
 
   const pendingReturnsWithFlag = pendingReturns.map((b) => ({ ...b, overdue: b.returnDate < now }));

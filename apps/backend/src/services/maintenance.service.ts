@@ -1,8 +1,8 @@
 import { prisma } from '../lib/prisma';
 import { AppError } from '../middleware/error.middleware';
+import { carDocumentExpiries, expiryThresholdFrom } from '../lib/expiryAlerts';
 import { MaintenanceType, MaintenanceStatus, ExpenseCategory, Prisma, Maintenance } from '@prisma/client';
 
-const DAY_MS = 24 * 60 * 60 * 1000;
 const carInclude = { car: { select: { carName: true, brand: true, registrationNumber: true } } };
 
 // Maintenance cost is mirrored into the expense ledger so it flows into
@@ -53,13 +53,15 @@ const syncExpense = async (record: Maintenance): Promise<string | null> => {
   return created.id;
 };
 
-const applySync = async (id: string) => {
-  const record = await prisma.maintenance.findUniqueOrThrow({ where: { id } });
+// Reconciles the linked expense for an already-written record and returns it
+// with its car included. Takes the freshly created/updated row so callers
+// don't pay an extra read.
+const applySync = async (record: Maintenance) => {
   const expenseId = await syncExpense(record);
   if (expenseId !== record.expenseId) {
-    await prisma.maintenance.update({ where: { id }, data: { expenseId } });
+    return prisma.maintenance.update({ where: { id: record.id }, data: { expenseId }, include: carInclude });
   }
-  return prisma.maintenance.findUnique({ where: { id }, include: carInclude });
+  return prisma.maintenance.findUnique({ where: { id: record.id }, include: carInclude });
 };
 
 export const getAllMaintenance = (
@@ -84,7 +86,7 @@ export const getAllMaintenance = (
 export const getMaintenanceSummary = async () => {
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const expiryThreshold = new Date(now.getTime() + 30 * DAY_MS);
+  const expiryThreshold = expiryThresholdFrom(now);
 
   const [scheduled, completed, alertCars] = await Promise.all([
     prisma.maintenance.findMany({
@@ -131,25 +133,19 @@ export const getMaintenanceSummary = async () => {
     if (c.serviceDate && c.serviceDate >= startOfMonth) completedThisMonth += 1;
   }
 
-  const daysUntil = (d: Date) => Math.ceil((d.getTime() - now.getTime()) / DAY_MS);
-  const expiryDetail = (d: Date) => {
-    const days = daysUntil(d);
-    return days < 0 ? `Expired ${Math.abs(days)}d ago` : `Expires in ${days}d`;
-  };
-  const expiryAlerts: Array<{
-    carId: string; carLabel: string; registrationNumber: string;
-    kind: 'INSURANCE' | 'POLLUTION' | 'RC'; date: Date; detail: string; expired: boolean;
-  }> = [];
-  for (const c of alertCars) {
-    const base = { carId: c.id, carLabel: `${c.brand} ${c.carName}`, registrationNumber: c.registrationNumber };
-    if (c.insuranceExpiry && c.insuranceExpiry <= expiryThreshold)
-      expiryAlerts.push({ ...base, kind: 'INSURANCE', date: c.insuranceExpiry, detail: `Insurance ${expiryDetail(c.insuranceExpiry)}`, expired: c.insuranceExpiry < now });
-    if (c.pollutionExpiry && c.pollutionExpiry <= expiryThreshold)
-      expiryAlerts.push({ ...base, kind: 'POLLUTION', date: c.pollutionExpiry, detail: `Pollution ${expiryDetail(c.pollutionExpiry)}`, expired: c.pollutionExpiry < now });
-    if (c.rcExpiry && c.rcExpiry <= expiryThreshold)
-      expiryAlerts.push({ ...base, kind: 'RC', date: c.rcExpiry, detail: `RC ${expiryDetail(c.rcExpiry)}`, expired: c.rcExpiry < now });
-  }
-  expiryAlerts.sort((a, b) => a.date.getTime() - b.date.getTime());
+  const expiryAlerts = alertCars
+    .flatMap((c) =>
+      carDocumentExpiries(c, now).map((e) => ({
+        carId: c.id,
+        carLabel: `${c.brand} ${c.carName}`,
+        registrationNumber: c.registrationNumber,
+        kind: e.kind,
+        date: e.date,
+        detail: e.detail,
+        expired: e.expired,
+      }))
+    )
+    .sort((a, b) => a.date.getTime() - b.date.getTime());
 
   return { upcomingCount: upcoming.length, overdueCount, completedThisMonth, totalCost, upcoming, expiryAlerts };
 };
@@ -168,7 +164,7 @@ export const createMaintenance = async (data: {
   const car = await prisma.car.findFirst({ where: { id: data.carId, deletedAt: null } });
   if (!car) throw new AppError(404, 'Car not found');
   const created = await prisma.maintenance.create({ data });
-  return applySync(created.id);
+  return applySync(created);
 };
 
 export const updateMaintenance = async (
@@ -186,8 +182,8 @@ export const updateMaintenance = async (
 ) => {
   const record = await prisma.maintenance.findFirst({ where: { id, deletedAt: null } });
   if (!record) throw new AppError(404, 'Maintenance record not found');
-  await prisma.maintenance.update({ where: { id }, data });
-  return applySync(id);
+  const updated = await prisma.maintenance.update({ where: { id }, data });
+  return applySync(updated);
 };
 
 export const markComplete = async (
@@ -196,7 +192,7 @@ export const markComplete = async (
 ) => {
   const record = await prisma.maintenance.findFirst({ where: { id, deletedAt: null } });
   if (!record) throw new AppError(404, 'Maintenance record not found');
-  await prisma.maintenance.update({
+  const updated = await prisma.maintenance.update({
     where: { id },
     data: {
       status: 'COMPLETED',
@@ -205,7 +201,7 @@ export const markComplete = async (
       ...(data.cost !== undefined ? { cost: data.cost } : {}),
     },
   });
-  return applySync(id);
+  return applySync(updated);
 };
 
 export const deleteMaintenance = async (id: string) => {

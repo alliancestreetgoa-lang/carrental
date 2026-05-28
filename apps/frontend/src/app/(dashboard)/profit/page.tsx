@@ -16,7 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
-import { cn, formatCurrency } from '@/lib/utils';
+import { cn, formatCurrency, formatAxisCurrency } from '@/lib/utils';
 import type { ProfitPerCar } from '@/lib/types';
 
 const csvCell = (v: unknown) => {
@@ -118,7 +118,7 @@ export default function ProfitPage() {
                 <BarChart data={profitData} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border" />
                   <XAxis dataKey="reg" tick={{ fontSize: 11 }} className="text-muted-foreground" />
-                  <YAxis tick={{ fontSize: 12 }} className="text-muted-foreground" tickFormatter={(v) => `₹${Number(v) / 1000}k`} />
+                  <YAxis tick={{ fontSize: 12 }} className="text-muted-foreground" tickFormatter={formatAxisCurrency} />
                   <Tooltip formatter={(v) => formatCurrency(Number(v))} cursor={{ fill: 'rgba(100,116,139,0.1)' }} />
                   <Bar dataKey="profit" name="Profit" radius={[4, 4, 0, 0]} maxBarSize={60}>
                     {profitData.map((d) => <Cell key={d.reg} fill={d.profit >= 0 ? '#10b981' : '#ef4444'} />)}
@@ -136,7 +136,7 @@ export default function ProfitPage() {
                 <BarChart data={data.cars} margin={{ top: 5, right: 5, bottom: 5, left: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} className="stroke-border" />
                   <XAxis dataKey="registrationNumber" tick={{ fontSize: 11 }} className="text-muted-foreground" />
-                  <YAxis tick={{ fontSize: 12 }} className="text-muted-foreground" tickFormatter={(v) => `₹${Number(v) / 1000}k`} />
+                  <YAxis tick={{ fontSize: 12 }} className="text-muted-foreground" tickFormatter={formatAxisCurrency} />
                   <Tooltip formatter={(v) => formatCurrency(Number(v))} />
                   <Legend />
                   <Bar dataKey="revenue" name="Revenue" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={28} />

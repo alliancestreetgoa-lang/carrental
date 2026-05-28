@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useRealtime, MAINTENANCE_EVENTS } from '@/hooks/useRealtime';
-import { formatCurrency, formatDate } from '@/lib/utils';
+import { formatCurrency, formatDate, selectClass } from '@/lib/utils';
 import type { MaintenanceRecord, MaintenanceSummary } from '@/lib/types';
 
 const TYPES = ['SERVICE', 'OIL_CHANGE', 'TYRE', 'BRAKES', 'BATTERY', 'REPAIR', 'INSPECTION', 'CLEANING', 'OTHER'];
@@ -21,8 +21,6 @@ const TYPE_COLOR: Record<string, string> = {
   SERVICE: '#f59e0b', OIL_CHANGE: '#3b82f6', TYRE: '#6366f1', BRAKES: '#ef4444',
   BATTERY: '#10b981', REPAIR: '#dc2626', INSPECTION: '#8b5cf6', CLEANING: '#06b6d4', OTHER: '#94a3b8',
 };
-const selectClass =
-  'h-9 rounded-lg border border-input bg-transparent px-3 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer dark:bg-input/30';
 
 export default function MaintenancePage() {
   const [summary, setSummary] = useState<MaintenanceSummary | null>(null);

@@ -9,12 +9,10 @@ import { Label } from '@/components/ui/label';
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
 } from '@/components/ui/dialog';
+import { formSelectClass, toDateInput } from '@/lib/utils';
 import type { Car, Expense } from '@/lib/types';
 
 const CATEGORIES = ['FUEL', 'SERVICE', 'REPAIR', 'INSURANCE', 'CLEANING', 'EMI', 'OTHER'];
-const selectClass =
-  'flex h-9 w-full rounded-lg border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer dark:bg-input/30';
-const toDateInput = (v?: string) => (v ? new Date(v).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10));
 
 export function ExpenseFormDialog({
   open, onOpenChange, expense, onSaved,
@@ -70,7 +68,7 @@ export function ExpenseFormDialog({
         <div className="space-y-3">
           <div>
             <Label htmlFor="excar">Vehicle</Label>
-            <select id="excar" className={selectClass} value={carId} onChange={(e) => setCarId(e.target.value)} disabled={isEdit}>
+            <select id="excar" className={formSelectClass} value={carId} onChange={(e) => setCarId(e.target.value)} disabled={isEdit}>
               <option value="" disabled>Select vehicle</option>
               {cars.map((c) => <option key={c.id} value={c.id}>{c.brand} {c.carName} · {c.registrationNumber}</option>)}
             </select>
@@ -78,7 +76,7 @@ export function ExpenseFormDialog({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label htmlFor="excat">Category</Label>
-              <select id="excat" className={selectClass} value={category} onChange={(e) => setCategory(e.target.value)}>
+              <select id="excat" className={formSelectClass} value={category} onChange={(e) => setCategory(e.target.value)}>
                 {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
               </select>
             </div>
