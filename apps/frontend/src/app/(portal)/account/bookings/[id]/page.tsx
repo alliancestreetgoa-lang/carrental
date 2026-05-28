@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, Download, MapPin, Calendar, Clock, Car } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
+import { StarRating } from '@/components/portal/StarRating';
 import { portalApi } from '@/lib/portalApi';
 import { formatDate, formatCurrency } from '@/lib/utils';
 
@@ -73,6 +74,32 @@ export default function BookingDetailPage() {
   const [booking, setBooking] = useState<BookingDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewSubmitted, setReviewSubmitted] = useState(false);
+
+  const submitReview = async () => {
+    if (!id) return;
+    setReviewSubmitting(true);
+    try {
+      await portalApi.post('/reviews', { bookingId: id, rating: reviewRating, comment: reviewComment || undefined });
+      toast.success('Thanks for your review!');
+      setReviewSubmitted(true);
+    } catch (e) {
+      const status = (e as { response?: { status?: number } }).response?.status;
+      if (status === 409) {
+        toast.error("You've already reviewed this booking");
+        setReviewSubmitted(true);
+      } else if (status === 400) {
+        toast.error('Reviews can only be submitted after the booking is completed.');
+      } else {
+        toast.error('Could not submit review. Please try again.');
+      }
+    } finally {
+      setReviewSubmitting(false);
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
@@ -276,6 +303,38 @@ export default function BookingDetailPage() {
           Download agreement
         </Button>
       </div>
+
+      {/* Leave a review — only for completed bookings */}
+      {booking.bookingStatus === 'COMPLETED' && !reviewSubmitted && (
+        <div className="rounded-2xl border border-slate-100 bg-white p-6 space-y-4">
+          <div>
+            <h3 className="text-base font-semibold text-slate-800">Leave a review</h3>
+            <p className="text-sm text-slate-400 mt-0.5">
+              Share your experience with this rental.
+            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <StarRating value={reviewRating} onChange={setReviewRating} size={22} />
+            <span className="text-sm text-slate-600 font-medium">
+              {reviewRating} / 5
+            </span>
+          </div>
+          <textarea
+            value={reviewComment}
+            onChange={(e) => setReviewComment(e.target.value)}
+            placeholder="Tell us what you thought (optional)…"
+            rows={3}
+            className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-red-500/40 focus:border-red-400 resize-none transition"
+          />
+          <Button
+            onClick={submitReview}
+            disabled={reviewSubmitting}
+            className="bg-red-600 hover:bg-red-700 text-white rounded-xl cursor-pointer"
+          >
+            {reviewSubmitting ? 'Submitting…' : 'Submit review'}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }

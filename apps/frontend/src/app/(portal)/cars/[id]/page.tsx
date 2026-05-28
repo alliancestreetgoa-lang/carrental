@@ -16,8 +16,24 @@ import {
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BookingWidget } from '@/components/portal/BookingWidget';
+import { StarRating } from '@/components/portal/StarRating';
 import { portalApi } from '@/lib/portalApi';
+import { formatDate } from '@/lib/utils';
 import type { PortalCar } from '@/lib/portalTypes';
+
+interface CarReview {
+  id: string;
+  rating: number;
+  comment?: string | null;
+  reviewer: string;
+  createdAt: string;
+}
+
+interface CarReviewsData {
+  average: number;
+  count: number;
+  reviews: CarReview[];
+}
 
 /* ── Skeleton ──────────────────────────────────────────────────────────── */
 function DetailSkeleton() {
@@ -77,6 +93,7 @@ function CarDetailInner() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
+  const [reviews, setReviews] = useState<CarReviewsData | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -95,6 +112,13 @@ function CarDetailInner() {
         else setNotFound(true);
       })
       .finally(() => setLoading(false));
+
+    portalApi
+      .get<{ success: boolean; data: CarReviewsData }>(`/cars/${id}/reviews`)
+      .then((res) => {
+        if (res.data.success) setReviews(res.data.data);
+      })
+      .catch(() => {/* silently fail — reviews are supplementary */});
   }, [id]);
 
   if (loading) return <DetailSkeleton />;
@@ -258,6 +282,53 @@ function CarDetailInner() {
               }).format(Number(car.dailyRent))}{' '}
               per day. Perfect for day trips, weekend getaways, and long-term rentals across Goa.
             </p>
+          </div>
+
+          {/* Reviews */}
+          <div className="rounded-2xl border border-slate-100 bg-white p-5 space-y-5">
+            <div className="flex flex-wrap items-center gap-3">
+              <h2 className="text-base font-semibold text-slate-800">Reviews</h2>
+              {reviews && reviews.count > 0 && (
+                <div className="flex items-center gap-2">
+                  <StarRating value={reviews.average} size={15} />
+                  <span className="text-sm text-slate-600 font-medium">
+                    {reviews.average.toFixed(1)}
+                    <span className="text-slate-400 font-normal ml-1">
+                      ({reviews.count} {reviews.count === 1 ? 'review' : 'reviews'})
+                    </span>
+                  </span>
+                </div>
+              )}
+            </div>
+            {!reviews ? (
+              <div className="space-y-3">
+                {Array.from({ length: 2 }).map((_, i) => (
+                  <Skeleton key={i} className="h-16 rounded-xl" />
+                ))}
+              </div>
+            ) : reviews.count === 0 ? (
+              <p className="text-sm text-slate-400">No reviews yet.</p>
+            ) : (
+              <div className="space-y-4">
+                {reviews.reviews.map((review) => (
+                  <div
+                    key={review.id}
+                    className="rounded-xl border border-slate-100 bg-slate-50 p-4 space-y-1.5"
+                  >
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <div className="flex items-center gap-2">
+                        <StarRating value={review.rating} size={13} />
+                        <span className="text-sm font-semibold text-slate-800">{review.reviewer}</span>
+                      </div>
+                      <span className="text-xs text-slate-400">{formatDate(review.createdAt)}</span>
+                    </div>
+                    {review.comment && (
+                      <p className="text-sm text-slate-600 leading-relaxed">{review.comment}</p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

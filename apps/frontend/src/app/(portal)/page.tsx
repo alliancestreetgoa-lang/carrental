@@ -6,8 +6,18 @@ import { ShieldCheck, Clock, IndianRupee } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CarCard } from '@/components/portal/CarCard';
 import { DateRangeSearch } from '@/components/portal/DateRangeSearch';
+import { StarRating } from '@/components/portal/StarRating';
 import { portalApi } from '@/lib/portalApi';
 import type { PortalCar } from '@/lib/portalTypes';
+
+interface Testimonial {
+  id: string;
+  rating: number;
+  comment: string;
+  reviewer: string;
+  car: string;
+  createdAt: string;
+}
 
 const TRUST_ITEMS = [
   {
@@ -49,6 +59,7 @@ export default function StorefrontHome() {
   const [cars, setCars] = useState<PortalCar[]>([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
 
   useEffect(() => {
     portalApi
@@ -60,6 +71,13 @@ export default function StorefrontHome() {
       })
       .catch(() => setFetchError(true))
       .finally(() => setLoading(false));
+
+    portalApi
+      .get<{ success: boolean; data: Testimonial[] }>('/testimonials')
+      .then((res) => {
+        if (res.data.success) setTestimonials(res.data.data.slice(0, 6));
+      })
+      .catch(() => {/* silently ignore */});
   }, []);
 
   return (
@@ -151,6 +169,30 @@ export default function StorefrontHome() {
           </div>
         </div>
       </section>
+
+      {/* ─── TESTIMONIALS ─────────────────────────────────────── */}
+      {testimonials.length > 0 && (
+        <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 text-center mb-12">
+            What our customers say
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {testimonials.map((t) => (
+              <div
+                key={t.id}
+                className="rounded-2xl border border-slate-100 bg-white p-6 space-y-3 shadow-sm hover:shadow-md transition-shadow"
+              >
+                <StarRating value={t.rating} size={15} />
+                <p className="text-sm text-slate-600 leading-relaxed line-clamp-4">{t.comment}</p>
+                <p className="text-xs font-semibold text-slate-500">
+                  — {t.reviewer}
+                  {t.car ? `, ${t.car}` : ''}
+                </p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ─── CTA BAND ─────────────────────────────────────────── */}
       <section className="bg-slate-900 text-white">
