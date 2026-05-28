@@ -27,6 +27,9 @@ router.get('/bookings', authenticateCustomer, portal.myBookings);
 router.get('/bookings/:id', authenticateCustomer, portal.myBookingDetail);
 router.get('/bookings/:id/invoice.pdf', authenticateCustomer, portal.invoicePdf);
 router.get('/bookings/:id/agreement.pdf', authenticateCustomer, portal.agreementPdf);
+router.post('/bookings/:id/cancel', authenticateCustomer, portal.cancelMyBooking);
+router.patch('/bookings/:id/extend', authenticateCustomer, portal.extendMyBooking);
+router.get('/payments', authenticateCustomer, portal.myPayments);
 
 router.get('/testimonials', portal.testimonials);
 router.post('/reviews', authenticateCustomer, portal.createReview);

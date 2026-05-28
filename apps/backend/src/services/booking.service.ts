@@ -283,6 +283,19 @@ export const deleteBooking = async (id: string) => {
   });
 };
 
+export const extendBooking = async (id: string, newReturnDate: Date) => {
+  const booking = await prisma.booking.findFirst({ where: { id, deletedAt: null }, include: { car: { select: { dailyRent: true } } } });
+  if (!booking) throw new AppError(404, 'Booking not found');
+  if (booking.bookingStatus === 'COMPLETED' || booking.bookingStatus === 'CANCELLED') throw new AppError(400, 'This booking can no longer be extended');
+  if (newReturnDate <= booking.returnDate) throw new AppError(400, 'New return date must be after the current return date');
+  await assertNoOverlap(booking.carId, booking.pickupDate, newReturnDate, id);
+  const currentDays = daysBetween(booking.pickupDate, booking.returnDate);
+  const lockedDailyRate = Number(booking.totalAmount) > 0 ? Number(booking.totalAmount) / currentDays : Number(booking.car.dailyRent);
+  const totalDays = daysBetween(booking.pickupDate, newReturnDate);
+  const totalAmount = Math.round(lockedDailyRate * totalDays * 100) / 100;
+  return prisma.booking.update({ where: { id }, data: { returnDate: newReturnDate, totalAmount }, include: bookingInclude });
+};
+
 export const approveBooking = async (id: string) => {
   const booking = await prisma.booking.findFirst({ where: { id, deletedAt: null } });
   if (!booking) throw new AppError(404, 'Booking not found');

@@ -141,6 +141,36 @@ const ownedBooking = async (id: string, customerId: string) => {
   return booking;
 };
 
+export const cancelMyBooking = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const b = await ownedBooking(String(req.params.id), req.customer!.customerId);
+    if (b.bookingStatus !== 'RESERVED') throw new AppError(400, 'Only upcoming (reserved) bookings can be cancelled');
+    const updated = await bookingService.updateBookingStatus(b.id, 'CANCELLED');
+    res.json({ success: true, data: updated });
+  } catch (e) { next(e); }
+};
+
+const extendSchema = z.object({ returnDate: z.string() });
+export const extendMyBooking = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const b = await ownedBooking(String(req.params.id), req.customer!.customerId);
+    const { returnDate } = extendSchema.parse(req.body);
+    const updated = await bookingService.extendBooking(b.id, new Date(returnDate));
+    res.json({ success: true, data: updated });
+  } catch (e) { next(e); }
+};
+
+export const myPayments = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const data = await prisma.payment.findMany({
+      where: { deletedAt: null, booking: { customerId: req.customer!.customerId, deletedAt: null } },
+      orderBy: { paymentDate: 'desc' },
+      include: { booking: { select: { id: true, car: { select: { carName: true, brand: true, registrationNumber: true } } } } },
+    });
+    res.json({ success: true, data });
+  } catch (e) { next(e); }
+};
+
 export const myBookingDetail = async (req: Request, res: Response, next: NextFunction) => {
   try { res.json({ success: true, data: await ownedBooking(String(req.params.id), req.customer!.customerId) }); }
   catch (e) { next(e); }
