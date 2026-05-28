@@ -1,0 +1,80 @@
+# ============================================================
+# Alliance Car Rental — Render Blueprint
+# Deploy via: Render Dashboard → New → Blueprint → point to repo
+# ============================================================
+
+databases:
+  - name: alliance-db
+    databaseName: alliance_car_rental
+    user: alliance
+    plan: free          # change to starter/standard for production
+
+services:
+  # ------ Backend (Web Service) ------------------------------
+  - type: web
+    name: alliance-backend
+    runtime: node
+    rootDir: apps/backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: alliance-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true      # Render generates a secure random value
+      - key: FRONTEND_URL
+        sync: false              # Set manually to the frontend URL after deploy
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: PORT
+        value: 4000
+      # Optional — set via Render dashboard after deploy
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      - key: WHATSAPP_TOKEN
+        sync: false
+      - key: SMS_PROVIDER
+        sync: false
+
+  # ------ Frontend (Web Service — Next.js) -------------------
+  - type: web
+    name: alliance-frontend
+    runtime: node
+    rootDir: apps/frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Set these to the real backend URL after the backend service is deployed
+      - key: NEXT_PUBLIC_API_URL
+        sync: false
+      - key: NEXT_PUBLIC_SOCKET_URL
+        sync: false
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false

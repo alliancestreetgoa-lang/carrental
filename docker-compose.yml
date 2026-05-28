@@ -1,0 +1,77 @@
+# ============================================================
+# Alliance Car Rental — Docker Compose (local / VPS)
+#
+# NOTE: NEXT_PUBLIC_* variables are build-time for the frontend.
+# Update them here before running `docker compose up --build`.
+# ============================================================
+
+version: '3.9'
+
+services:
+  # ------ PostgreSQL -----------------------------------------
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: alliance_car_rental
+      POSTGRES_USER: alliance
+      POSTGRES_PASSWORD: changeme_strong_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alliance -d alliance_car_rental"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ------ Backend (Express + Socket.IO) ----------------------
+  backend:
+    build:
+      context: ./apps/backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: "postgresql://alliance:changeme_strong_password@db:5432/alliance_car_rental?schema=public"
+      JWT_SECRET: "change-me-to-a-strong-random-secret-min-32-chars"
+      JWT_EXPIRES_IN: "7d"
+      PORT: 4000
+      FRONTEND_URL: "http://localhost:3000"
+      # Optional — set to enable Cloudinary, payments, email, etc.
+      # CLOUDINARY_CLOUD_NAME:
+      # CLOUDINARY_API_KEY:
+      # CLOUDINARY_API_SECRET:
+      # RAZORPAY_KEY_ID:
+      # RAZORPAY_KEY_SECRET:
+      # STRIPE_SECRET_KEY:
+      # SMTP_HOST:
+      # SMTP_PORT:
+      # SMTP_USER:
+      # SMTP_PASS:
+      # SMTP_FROM:
+      # WHATSAPP_TOKEN:
+      # SMS_PROVIDER:
+
+  # ------ Frontend (Next.js standalone) ----------------------
+  frontend:
+    build:
+      context: ./apps/frontend
+      # NEXT_PUBLIC_* are BUILD-TIME — changing them requires rebuild
+      args:
+        NEXT_PUBLIC_API_URL: "http://localhost:4000/api"
+        NEXT_PUBLIC_SOCKET_URL: "http://localhost:4000"
+        NEXT_PUBLIC_SITE_URL: "http://localhost:3000"
+    restart: unless-stopped
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+
+volumes:
+  postgres_data:

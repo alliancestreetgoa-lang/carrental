@@ -23,6 +23,10 @@ import portalRoutes from './routes/portal.routes';
 export const createApp = () => {
   const app = express();
 
+  // Trust the first proxy (Render/Railway/Vercel/nginx) so that
+  // express-rate-limit reads the real client IP and secure cookies work.
+  app.set('trust proxy', 1);
+
   app.use(helmet());
   app.use(cors({
     origin: process.env.FRONTEND_URL || 'http://localhost:3000',
