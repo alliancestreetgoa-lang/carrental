@@ -90,6 +90,12 @@ enum MaintenanceStatus {
   COMPLETED
 }
 
+enum VerificationType {
+  EMAIL_VERIFY
+  PASSWORD_RESET
+  MOBILE_OTP
+}
+
 // ============================================================
 // Models
 // ============================================================
@@ -160,6 +166,8 @@ model Customer {
   licenseExpiry    DateTime?
   aadhaarNumber    String?   @unique
   password         String?
+  emailVerifiedAt  DateTime?
+  mobileVerifiedAt DateTime?
   emergencyContact String?
   notes            String?
   blacklisted      Boolean   @default(false)
@@ -168,8 +176,9 @@ model Customer {
   updatedAt        DateTime  @updatedAt
   deletedAt        DateTime?
 
-  bookings  Booking[]
-  documents Document[]
+  bookings           Booking[]
+  documents          Document[]
+  verificationTokens VerificationToken[]
 
   @@index([mobile])
   @@index([fullName])
@@ -321,4 +330,22 @@ model Maintenance {
   @@index([dueDate])
   @@index([deletedAt])
   @@map("maintenance_records")
+}
+
+model VerificationToken {
+  id         String           @id @default(cuid())
+  customerId String
+  type       VerificationType
+  secretHash String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  attempts   Int              @default(0)
+  createdAt  DateTime         @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@index([type])
+  @@index([secretHash])
+  @@map("verification_tokens")
 }
