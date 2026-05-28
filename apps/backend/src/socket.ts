@@ -21,6 +21,13 @@ export const getIO = (): SocketServer => {
   return io;
 };
 
-export const emitBookingChanged = () => {
-  io?.emit('booking:changed');
+export type RealtimeEvent =
+  | 'booking:created'
+  | 'booking:updated'
+  | 'booking:cancelled'
+  | 'car:changed'
+  | 'payment:added';
+
+export const emitRealtime = (event: RealtimeEvent, payload: Record<string, unknown> = {}) => {
+  io?.emit(event, payload);
 };

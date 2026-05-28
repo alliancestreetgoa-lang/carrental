@@ -8,7 +8,7 @@ import type { EventDropArg, EventInput, EventContentArg, DateSelectArg } from '@
 import type { EventResizeDoneArg } from '@fullcalendar/interaction';
 import { toast } from 'sonner';
 import { api } from '@/lib/api';
-import { useSocketContext } from '@/providers/SocketProvider';
+import { useRealtime, BOOKING_EVENTS, CAR_EVENTS } from '@/hooks/useRealtime';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { BookingFormDialog } from '@/components/bookings/BookingFormDialog';
 import { Card, CardContent } from '@/components/ui/card';
@@ -39,7 +39,6 @@ const LegendDot = ({ color, label }: { color: string; label: string }) => (
 
 export default function CalendarPage() {
   const router = useRouter();
-  const socket = useSocketContext();
   const [cars, setCars] = useState<Car[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [statusFilter, setStatusFilter] = useState('');
@@ -56,12 +55,7 @@ export default function CalendarPage() {
   useEffect(() => { loadCars(); loadBookings(); }, [loadCars, loadBookings]);
 
   // Real-time updates
-  useEffect(() => {
-    if (!socket) return;
-    const handler = () => { loadBookings(); loadCars(); };
-    socket.on('booking:changed', handler);
-    return () => { socket.off('booking:changed', handler); };
-  }, [socket, loadBookings, loadCars]);
+  useRealtime([...BOOKING_EVENTS, ...CAR_EVENTS], useCallback(() => { loadBookings(); loadCars(); }, [loadBookings, loadCars]));
 
   const resources = cars.map((c) => ({
     id: c.id,

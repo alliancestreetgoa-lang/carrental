@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import * as paymentService from '../services/payment.service';
+import { emitRealtime } from '../socket';
 import { z } from 'zod';
 
 const createPaymentSchema = z.object({
@@ -24,13 +25,17 @@ export const createPayment = async (req: Request, res: Response, next: NextFunct
       ...parsed,
       paymentDate: parsed.paymentDate ? new Date(parsed.paymentDate) : undefined,
     };
-    res.status(201).json({ success: true, data: await paymentService.createPayment(data) });
+    const created = await paymentService.createPayment(data);
+    emitRealtime('payment:added', { bookingId: data.bookingId });
+    emitRealtime('booking:updated', { id: data.bookingId });
+    res.status(201).json({ success: true, data: created });
   } catch (e) { next(e); }
 };
 
 export const deletePayment = async (req: Request, res: Response, next: NextFunction) => {
   try {
     await paymentService.deletePayment(String(req.params.id));
+    emitRealtime('payment:added');
     res.json({ success: true, message: 'Payment deleted' });
   } catch (e) { next(e); }
 };

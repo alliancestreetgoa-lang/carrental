@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import * as bookingService from '../services/booking.service';
 import { streamInvoicePdf } from '../lib/invoice';
-import { emitBookingChanged } from '../socket';
+import { emitRealtime } from '../socket';
 import { z } from 'zod';
 
 const emptyToUndef = (v: unknown) => (v === '' || v === null ? undefined : v);
@@ -61,7 +61,8 @@ export const createBooking = async (req: Request, res: Response, next: NextFunct
     const parsed = createBookingSchema.parse(req.body);
     const data = { ...parsed, pickupDate: new Date(parsed.pickupDate), returnDate: new Date(parsed.returnDate) };
     const created = await bookingService.createBooking(data);
-    emitBookingChanged();
+    emitRealtime('booking:created', { id: created.id });
+    emitRealtime('car:changed', { id: created.carId });
     res.status(201).json({ success: true, data: created });
   } catch (e) { next(e); }
 };
@@ -75,7 +76,8 @@ export const updateBooking = async (req: Request, res: Response, next: NextFunct
       returnDate: parsed.returnDate ? new Date(parsed.returnDate) : undefined,
     };
     const updated = await bookingService.updateBooking(String(req.params.id), data);
-    emitBookingChanged();
+    emitRealtime('booking:updated', { id: updated.id });
+    emitRealtime('car:changed', { id: updated.carId });
     res.json({ success: true, data: updated });
   } catch (e) { next(e); }
 };
@@ -84,7 +86,8 @@ export const updateStatus = async (req: Request, res: Response, next: NextFuncti
   try {
     const { status } = statusSchema.parse(req.body);
     const updated = await bookingService.updateBookingStatus(String(req.params.id), status);
-    emitBookingChanged();
+    emitRealtime(status === 'CANCELLED' ? 'booking:cancelled' : 'booking:updated', { id: updated.id });
+    emitRealtime('car:changed', { id: updated.carId });
     res.json({ success: true, data: updated });
   } catch (e) { next(e); }
 };
@@ -98,7 +101,8 @@ export const completeBooking = async (req: Request, res: Response, next: NextFun
       actualReturnDate: parsed.actualReturnDate ? new Date(parsed.actualReturnDate as string) : undefined,
     };
     const updated = await bookingService.completeBooking(String(req.params.id), data);
-    emitBookingChanged();
+    emitRealtime('booking:updated', { id: updated.id });
+    emitRealtime('car:changed', { id: updated.carId });
     res.json({ success: true, data: updated });
   } catch (e) { next(e); }
 };
@@ -106,7 +110,8 @@ export const completeBooking = async (req: Request, res: Response, next: NextFun
 export const cancelBooking = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const updated = await bookingService.updateBookingStatus(String(req.params.id), 'CANCELLED');
-    emitBookingChanged();
+    emitRealtime('booking:cancelled', { id: updated.id });
+    emitRealtime('car:changed', { id: updated.carId });
     res.json({ success: true, data: updated });
   } catch (e) { next(e); }
 };

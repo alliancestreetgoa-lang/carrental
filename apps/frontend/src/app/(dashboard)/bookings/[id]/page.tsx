@@ -11,6 +11,7 @@ import { BookingFormDialog } from '@/components/bookings/BookingFormDialog';
 import { CompleteBookingDialog } from '@/components/bookings/CompleteBookingDialog';
 import { AddPaymentDialog } from '@/components/bookings/AddPaymentDialog';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
+import { useRealtime } from '@/hooks/useRealtime';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -54,6 +55,7 @@ export default function BookingDetailPage() {
   }, [id]);
 
   useEffect(() => { load(); }, [load]);
+  useRealtime(['booking:updated', 'booking:cancelled', 'payment:added'], load);
 
   const activate = async () => {
     try { await api.patch(`/bookings/${id}/status`, { status: 'ACTIVE' }); toast.success('Booking activated'); load(); }

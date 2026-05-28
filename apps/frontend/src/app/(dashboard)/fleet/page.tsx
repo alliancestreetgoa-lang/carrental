@@ -11,6 +11,7 @@ import { PageHeader } from '@/components/shared/PageHeader';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { CarFormDialog } from '@/components/fleet/CarFormDialog';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
+import { useRealtime, CAR_EVENTS, BOOKING_EVENTS } from '@/hooks/useRealtime';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -82,6 +83,7 @@ export default function FleetPage() {
   }, [buildParams]);
 
   useEffect(() => { load(); }, [load]);
+  useRealtime([...CAR_EVENTS, ...BOOKING_EVENTS], load);
 
   const openAdd = () => { setEditing(null); setFormOpen(true); };
   const openEdit = (car: Car) => { setEditing(car); setFormOpen(true); };

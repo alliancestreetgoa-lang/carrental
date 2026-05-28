@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import * as carService from '../services/car.service';
+import { emitRealtime } from '../socket';
 import { z } from 'zod';
 
 const carBaseSchema = z.object({
@@ -52,14 +53,18 @@ const bulkDeleteSchema = z.object({
 export const bulkUpdateStatus = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { ids, status } = bulkStatusSchema.parse(req.body);
-    res.json({ success: true, data: await carService.bulkUpdateStatus(ids, status) });
+    const result = await carService.bulkUpdateStatus(ids, status);
+    emitRealtime('car:changed');
+    res.json({ success: true, data: result });
   } catch (e) { next(e); }
 };
 
 export const bulkDelete = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { ids } = bulkDeleteSchema.parse(req.body);
-    res.json({ success: true, data: await carService.bulkDeleteCars(ids) });
+    const result = await carService.bulkDeleteCars(ids);
+    emitRealtime('car:changed');
+    res.json({ success: true, data: result });
   } catch (e) { next(e); }
 };
 
@@ -88,7 +93,9 @@ export const createCar = async (req: Request, res: Response, next: NextFunction)
       pollutionExpiry: parsed.pollutionExpiry ? new Date(parsed.pollutionExpiry) : undefined,
       rcExpiry: parsed.rcExpiry ? new Date(parsed.rcExpiry) : undefined,
     };
-    res.status(201).json({ success: true, data: await carService.createCar(data) });
+    const created = await carService.createCar(data);
+    emitRealtime('car:changed', { id: created.id });
+    res.status(201).json({ success: true, data: created });
   } catch (e) { next(e); }
 };
 
@@ -101,13 +108,16 @@ export const updateCar = async (req: Request, res: Response, next: NextFunction)
       pollutionExpiry: parsed.pollutionExpiry ? new Date(parsed.pollutionExpiry) : undefined,
       rcExpiry: parsed.rcExpiry ? new Date(parsed.rcExpiry) : undefined,
     };
-    res.json({ success: true, data: await carService.updateCar(String(req.params.id), data) });
+    const updated = await carService.updateCar(String(req.params.id), data);
+    emitRealtime('car:changed', { id: updated.id });
+    res.json({ success: true, data: updated });
   } catch (e) { next(e); }
 };
 
 export const deleteCar = async (req: Request, res: Response, next: NextFunction) => {
   try {
     await carService.deleteCar(String(req.params.id));
+    emitRealtime('car:changed', { id: String(req.params.id) });
     res.json({ success: true, message: 'Car deleted' });
   } catch (e) { next(e); }
 };

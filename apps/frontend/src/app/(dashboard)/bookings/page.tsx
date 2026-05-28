@@ -7,6 +7,7 @@ import { Plus } from 'lucide-react';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { BookingFormDialog } from '@/components/bookings/BookingFormDialog';
+import { useRealtime, BOOKING_EVENTS } from '@/hooks/useRealtime';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -37,6 +38,7 @@ export default function BookingsPage() {
   }, [status]);
 
   useEffect(() => { load(); }, [load]);
+  useRealtime(BOOKING_EVENTS, load);
 
   return (
     <div>
