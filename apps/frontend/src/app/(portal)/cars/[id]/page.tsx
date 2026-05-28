@@ -13,10 +13,15 @@ import {
   Calendar,
   ArrowLeft,
   ChevronRight,
+  Share2,
+  CheckCircle2,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BookingWidget } from '@/components/portal/BookingWidget';
 import { StarRating } from '@/components/portal/StarRating';
+import { AvailabilityCalendar } from '@/components/portal/AvailabilityCalendar';
+import { CarCard } from '@/components/portal/CarCard';
 import { portalApi } from '@/lib/portalApi';
 import { formatDate } from '@/lib/utils';
 import type { PortalCar } from '@/lib/portalTypes';
@@ -94,6 +99,8 @@ function CarDetailInner() {
   const [notFound, setNotFound] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
   const [reviews, setReviews] = useState<CarReviewsData | null>(null);
+  const [relatedCars, setRelatedCars] = useState<PortalCar[]>([]);
+  const [relatedLoading, setRelatedLoading] = useState(true);
 
   useEffect(() => {
     if (!id) return;
@@ -119,7 +126,31 @@ function CarDetailInner() {
         if (res.data.success) setReviews(res.data.data);
       })
       .catch(() => {/* silently fail — reviews are supplementary */});
+
+    setRelatedLoading(true);
+    portalApi
+      .get<{ success: boolean; data: PortalCar[] }>(`/cars/${id}/related`)
+      .then((res) => {
+        if (res.data.success) setRelatedCars(res.data.data ?? []);
+      })
+      .catch(() => {/* silently fail */})
+      .finally(() => setRelatedLoading(false));
   }, [id]);
+
+  function handleShare() {
+    const url = window.location.href;
+    const title = car ? `${car.brand} ${car.carName}` : 'Car Rental';
+    const text = car ? `Check out this ${car.year} ${car.brand} ${car.carName} for rent!` : '';
+    if (navigator.share) {
+      navigator.share({ title, text, url }).catch(() => {/* user cancelled */});
+    } else {
+      navigator.clipboard.writeText(url).then(() => {
+        toast.success('Link copied');
+      }).catch(() => {
+        toast.error('Could not copy link');
+      });
+    }
+  }
 
   if (loading) return <DetailSkeleton />;
 
@@ -169,9 +200,21 @@ function CarDetailInner() {
         <div className="lg:col-span-2 space-y-6">
           {/* Heading (mobile shows here, above gallery) */}
           <div className="lg:hidden">
-            <p className="text-xs text-slate-500 font-semibold uppercase tracking-wide">{car.brand}</p>
-            <h1 className="text-2xl font-bold text-slate-900 leading-tight">{car.carName}</h1>
-            <p className="text-slate-500 text-sm mt-0.5">{car.year}</p>
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs text-slate-500 font-semibold uppercase tracking-wide">{car.brand}</p>
+                <h1 className="text-2xl font-bold text-slate-900 leading-tight">{car.carName}</h1>
+                <p className="text-slate-500 text-sm mt-0.5">{car.year}</p>
+              </div>
+              <button
+                onClick={handleShare}
+                aria-label="Share this car"
+                className="mt-1 flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-slate-300 hover:text-slate-800 transition-colors cursor-pointer shadow-sm"
+              >
+                <Share2 className="size-4" />
+                Share
+              </button>
+            </div>
           </div>
 
           {/* Main image */}
@@ -224,9 +267,21 @@ function CarDetailInner() {
 
           {/* Heading (desktop, below gallery) */}
           <div className="hidden lg:block">
-            <p className="text-xs text-slate-500 font-semibold uppercase tracking-wide">{car.brand}</p>
-            <h1 className="text-3xl font-bold text-slate-900 leading-tight">{car.carName}</h1>
-            <p className="text-slate-500 text-sm mt-0.5">{car.year}</p>
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs text-slate-500 font-semibold uppercase tracking-wide">{car.brand}</p>
+                <h1 className="text-3xl font-bold text-slate-900 leading-tight">{car.carName}</h1>
+                <p className="text-slate-500 text-sm mt-0.5">{car.year}</p>
+              </div>
+              <button
+                onClick={handleShare}
+                aria-label="Share this car"
+                className="mt-1 flex shrink-0 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 hover:border-slate-300 hover:text-slate-800 transition-colors cursor-pointer shadow-sm"
+              >
+                <Share2 className="size-4" />
+                Share
+              </button>
+            </div>
           </div>
 
           {/* Specs grid */}
@@ -337,6 +392,51 @@ function CarDetailInner() {
           <BookingWidget car={car} />
         </div>
       </div>
+
+      {/* Availability calendar */}
+      <div className="rounded-2xl border border-slate-100 bg-white p-5 space-y-4">
+        <h2 className="text-base font-semibold text-slate-800">Availability</h2>
+        <AvailabilityCalendar carId={id} />
+      </div>
+
+      {/* Rental policies */}
+      <div className="rounded-2xl border border-slate-100 bg-slate-50 p-5 space-y-4">
+        <h2 className="text-base font-semibold text-slate-800">Rental policies</h2>
+        <ul className="space-y-2.5">
+          {[
+            'Valid driving license required at pickup',
+            'Security deposit is fully refundable after return',
+            'Fuel: return at the same level as pickup',
+            'Free cancellation while the booking is Reserved (before approval)',
+            'Late returns may incur a late fee',
+          ].map((policy) => (
+            <li key={policy} className="flex items-start gap-2.5">
+              <CheckCircle2 className="size-4 shrink-0 text-red-600 mt-0.5" strokeWidth={2} />
+              <span className="text-sm text-slate-700 leading-snug">{policy}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Related / similar cars */}
+      {(relatedLoading || relatedCars.length > 0) && (
+        <div className="space-y-4">
+          <h2 className="text-base font-semibold text-slate-800">Similar cars</h2>
+          {relatedLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <Skeleton key={i} className="h-64 rounded-2xl" />
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {relatedCars.map((relCar) => (
+                <CarCard key={relCar.id} car={relCar} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
