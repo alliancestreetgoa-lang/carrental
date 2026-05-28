@@ -4,6 +4,7 @@ import * as portalAuth from '../services/portalAuth.service';
 import * as catalog from '../services/portalCatalog.service';
 import * as bookingService from '../services/booking.service';
 import * as agreementService from '../services/agreement.service';
+import * as reviewService from '../services/review.service';
 import { prisma } from '../lib/prisma';
 import { AppError } from '../middleware/error.middleware';
 import { streamInvoicePdf } from '../lib/invoice';
@@ -208,6 +209,20 @@ export const sendMobileOtp = async (req: Request, res: Response, next: NextFunct
 
 export const verifyMobileOtp = async (req: Request, res: Response, next: NextFunction) => {
   try { await portalAuth.confirmMobileOtp(req.customer!.customerId, otpSchema.parse(req.body).code); res.json({ success: true }); }
+  catch (e) { next(e); }
+};
+
+const reviewSchema = z.object({ bookingId: z.string().min(1), rating: z.number().int().min(1).max(5), comment: z.string().max(1000).optional() });
+export const createReview = async (req: Request, res: Response, next: NextFunction) => {
+  try { res.status(201).json({ success: true, data: await reviewService.createReview({ customerId: req.customer!.customerId, ...reviewSchema.parse(req.body) }) }); }
+  catch (e) { next(e); }
+};
+export const carReviews = async (req: Request, res: Response, next: NextFunction) => {
+  try { res.json({ success: true, data: await reviewService.getCarReviews(String(req.params.id)) }); }
+  catch (e) { next(e); }
+};
+export const testimonials = async (_req: Request, res: Response, next: NextFunction) => {
+  try { res.json({ success: true, data: await reviewService.getTestimonials() }); }
   catch (e) { next(e); }
 };
 

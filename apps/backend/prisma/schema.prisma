@@ -153,6 +153,7 @@ model Car {
   expenses    Expense[]
   documents   Document[]
   maintenance Maintenance[]
+  reviews     Review[]
 
   @@index([status])
   @@index([brand])
@@ -185,6 +186,7 @@ model Customer {
   bookings           Booking[]
   documents          Document[]
   verificationTokens VerificationToken[]
+  reviews            Review[]
 
   @@index([mobile])
   @@index([fullName])
@@ -221,6 +223,7 @@ model Booking {
   car       Car        @relation(fields: [carId], references: [id], onDelete: Restrict)
   payments  Payment[]
   agreement Agreement?
+  review    Review?
 
   @@index([customerId])
   @@index([carId])
@@ -356,4 +359,24 @@ model VerificationToken {
   @@index([type])
   @@index([secretHash])
   @@map("verification_tokens")
+}
+
+model Review {
+  id         String    @id @default(cuid())
+  customerId String
+  carId      String
+  bookingId  String    @unique
+  rating     Int
+  comment    String?
+  createdAt  DateTime  @default(now())
+  deletedAt  DateTime?
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  car      Car      @relation(fields: [carId], references: [id], onDelete: Cascade)
+  booking  Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([carId])
+  @@index([customerId])
+  @@index([deletedAt])
+  @@map("reviews")
 }

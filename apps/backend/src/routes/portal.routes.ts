@@ -20,11 +20,15 @@ router.post('/auth/verify-mobile-otp', authLimiter, authenticateCustomer, portal
 router.get('/cars', portal.listCars);
 router.get('/cars/:id', portal.getCar);
 router.get('/cars/:id/availability', portal.availability);
+router.get('/cars/:id/reviews', portal.carReviews);
 
 router.post('/bookings', authenticateCustomer, portal.createBooking);
 router.get('/bookings', authenticateCustomer, portal.myBookings);
 router.get('/bookings/:id', authenticateCustomer, portal.myBookingDetail);
 router.get('/bookings/:id/invoice.pdf', authenticateCustomer, portal.invoicePdf);
 router.get('/bookings/:id/agreement.pdf', authenticateCustomer, portal.agreementPdf);
+
+router.get('/testimonials', portal.testimonials);
+router.post('/reviews', authenticateCustomer, portal.createReview);
 
 export default router;
