@@ -10,6 +10,8 @@ import { streamInvoicePdf } from '../lib/invoice';
 import { streamAgreementPdf } from '../lib/agreementPdf';
 import { FuelType, Transmission } from '@prisma/client';
 
+const isDev = process.env.NODE_ENV !== 'production';
+
 const cookieOpts = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
@@ -28,7 +30,11 @@ export const register = async (req: Request, res: Response, next: NextFunction) 
   try {
     const { token, customer } = await portalAuth.registerCustomer(registerSchema.parse(req.body));
     res.cookie('customer_token', token, cookieOpts);
-    res.status(201).json({ success: true, data: { customer, token } });
+    const secrets = await portalAuth.issueRegistrationSecrets({ id: customer.id, email: customer.email, mobile: customer.mobile });
+    res.status(201).json({
+      success: true,
+      data: { customer, token, ...(isDev ? { devSecret: { emailToken: secrets.emailToken, mobileOtp: secrets.mobileOtp } } : {}) },
+    });
   } catch (e) { next(e); }
 };
 
@@ -48,8 +54,13 @@ export const logout = (_req: Request, res: Response) => {
 };
 
 export const me = async (req: Request, res: Response, next: NextFunction) => {
-  try { res.json({ success: true, data: await portalAuth.getCustomerById(req.customer!.customerId) }); }
-  catch (e) { next(e); }
+  try {
+    const c = await portalAuth.getCustomerById(req.customer!.customerId);
+    res.json({
+      success: true,
+      data: c ? { ...c, emailVerified: !!c.emailVerifiedAt, mobileVerified: !!c.mobileVerifiedAt } : null,
+    });
+  } catch (e) { next(e); }
 };
 
 const listQuery = z.object({
@@ -156,4 +167,45 @@ export const agreementPdf = async (req: Request, res: Response, next: NextFuncti
     const a = await agreementService.getAgreementById(b.agreement.id);
     streamAgreementPdf(res, a);
   } catch (e) { next(e); }
+};
+
+const tokenSchema = z.object({ token: z.string().min(1) });
+const emailSchema = z.object({ email: z.string().email() });
+const resetSchema = z.object({ token: z.string().min(1), password: z.string().min(6) });
+const otpSchema = z.object({ code: z.string().min(4).max(8) });
+
+export const verifyEmail = async (req: Request, res: Response, next: NextFunction) => {
+  try { await portalAuth.verifyEmail(tokenSchema.parse(req.body).token); res.json({ success: true }); }
+  catch (e) { next(e); }
+};
+
+export const resendVerification = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const raw = await portalAuth.resendVerification(req.customer!.customerId);
+    res.json({ success: true, ...(isDev && raw ? { devSecret: raw } : {}) });
+  } catch (e) { next(e); }
+};
+
+export const forgotPassword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const raw = await portalAuth.forgotPassword(emailSchema.parse(req.body).email);
+    res.json({ success: true, ...(isDev && raw ? { devSecret: raw } : {}) });
+  } catch (e) { next(e); }
+};
+
+export const resetPassword = async (req: Request, res: Response, next: NextFunction) => {
+  try { const p = resetSchema.parse(req.body); await portalAuth.resetPassword(p.token, p.password); res.json({ success: true }); }
+  catch (e) { next(e); }
+};
+
+export const sendMobileOtp = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const code = await portalAuth.requestMobileOtp(req.customer!.customerId);
+    res.json({ success: true, ...(isDev ? { devSecret: code } : {}) });
+  } catch (e) { next(e); }
+};
+
+export const verifyMobileOtp = async (req: Request, res: Response, next: NextFunction) => {
+  try { await portalAuth.confirmMobileOtp(req.customer!.customerId, otpSchema.parse(req.body).code); res.json({ success: true }); }
+  catch (e) { next(e); }
 };
