@@ -23,7 +23,7 @@ import { StarRating } from '@/components/portal/StarRating';
 import { AvailabilityCalendar } from '@/components/portal/AvailabilityCalendar';
 import { CarCard } from '@/components/portal/CarCard';
 import { portalApi } from '@/lib/portalApi';
-import { formatDate } from '@/lib/utils';
+import { formatCurrency, formatDate } from '@/lib/utils';
 import type { PortalCar } from '@/lib/portalTypes';
 import { useRealtime, CAR_EVENTS, BOOKING_EVENTS } from '@/hooks/useRealtime';
 
@@ -188,7 +188,7 @@ function CarDetailInner() {
   const displayedImage = hasImages ? car.images[activeImage] ?? car.images[0] : null;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-8 pb-28 lg:pb-8">
       {/* Breadcrumb / back link */}
       <nav className="flex items-center gap-1.5 text-sm text-slate-500" aria-label="Breadcrumb">
         <Link
@@ -396,7 +396,7 @@ function CarDetailInner() {
         </div>
 
         {/* RIGHT: Booking widget */}
-        <div className="lg:col-span-1">
+        <div id="book" className="lg:col-span-1">
           <BookingWidget car={car} />
         </div>
       </div>
@@ -445,6 +445,23 @@ function CarDetailInner() {
           )}
         </div>
       )}
+
+      {/* Sticky mobile Book bar */}
+      <div className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-slate-200 bg-white px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] flex items-center justify-between gap-4 shadow-[0_-2px_12px_rgba(0,0,0,0.06)]">
+        <div className="min-w-0">
+          <p className="text-xs text-slate-500 font-medium leading-none mb-0.5">from</p>
+          <p className="text-lg font-bold text-slate-900 leading-none">
+            {formatCurrency(car.dailyRent)}
+            <span className="text-sm font-medium text-slate-500 ml-1">/day</span>
+          </p>
+        </div>
+        <button
+          onClick={() => document.getElementById('book')?.scrollIntoView({ behavior: 'smooth' })}
+          className="inline-flex items-center justify-center h-10 px-6 text-sm font-semibold rounded-xl bg-red-600 hover:bg-red-700 active:bg-red-800 text-white transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2 shrink-0"
+        >
+          Book now
+        </button>
+      </div>
     </div>
   );
 }
