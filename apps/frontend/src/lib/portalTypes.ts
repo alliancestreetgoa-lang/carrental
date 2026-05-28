@@ -7,6 +7,8 @@ export interface PortalCar {
 export interface PortalCustomer {
   id: string; fullName: string; email: string | null; mobile: string;
   whatsapp: string | null; address: string | null; licenseNumber: string; licenseExpiry: string | null; createdAt: string;
+  emailVerified?: boolean;
+  mobileVerified?: boolean;
 }
 export interface PortalBookingRow {
   id: string; pickupDate: string; returnDate: string; totalAmount: string; bookingStatus: string;
