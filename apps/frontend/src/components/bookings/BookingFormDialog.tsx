@@ -107,6 +107,9 @@ export function BookingFormDialog({ open, onOpenChange, booking, prefill, onSave
     if (booking?.customerId && customers.some((c) => c.id === booking.customerId)) setValue('customerId', booking.customerId);
   }, [open, cars, customers, booking, prefill, setValue]);
 
+  // react-hook-form's watch() isn't analyzable by the React Compiler; opt this
+  // component out of compilation rather than dropping the library.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const carId = watch('carId');
   const pickup = watch('pickupDate');
   const ret = watch('returnDate');

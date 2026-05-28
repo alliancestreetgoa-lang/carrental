@@ -29,6 +29,8 @@ export function MaintenanceFormDialog({
   const [notes, setNotes] = useState('');
   const [saving, setSaving] = useState(false);
 
+  // Populate form fields from props when the dialog opens / target changes.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!open) return;
     api.get('/cars?pageSize=100').then((res) => setCars(res.data.data)).catch(() => {});
@@ -46,6 +48,7 @@ export function MaintenanceFormDialog({
       setOdometer(''); setCost(''); setServiceCenter(''); setNotes('');
     }
   }, [open, record]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const isScheduled = status === 'SCHEDULED';
 

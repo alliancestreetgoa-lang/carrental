@@ -43,6 +43,8 @@ export function BookingWidget({ car }: BookingWidgetProps) {
 
   useEffect(() => {
     if (!validRange) {
+      // Clear stale availability when the date range becomes invalid.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setAvailability(null);
       return;
     }

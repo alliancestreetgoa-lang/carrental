@@ -26,6 +26,8 @@ export function UserFormDialog({
   const [isActive, setIsActive] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  // Populate form fields from props when the dialog opens / target changes.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!open) return;
     if (user) {
@@ -35,6 +37,7 @@ export function UserFormDialog({
       setName(''); setEmail(''); setMobile(''); setRole('STAFF'); setIsActive(true); setPassword('');
     }
   }, [open, user]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const submit = async () => {
     setSaving(true);

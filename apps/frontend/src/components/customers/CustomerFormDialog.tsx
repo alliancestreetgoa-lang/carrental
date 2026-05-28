@@ -66,6 +66,9 @@ export function CustomerFormDialog({ open, onOpenChange, customer, onSaved }: Pr
     }
   }, [open, customer, reset]);
 
+  // react-hook-form's watch() isn't analyzable by the React Compiler; opt this
+  // component out of compilation rather than dropping the library.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const blacklisted = watch('blacklisted');
 
   const onSubmit = handleSubmit(async (raw) => {

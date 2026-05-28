@@ -23,7 +23,9 @@ export default function ProfilePage() {
   const [licenseExpiry, setLicenseExpiry] = useState('');
   const [saving, setSaving] = useState(false);
 
-  // Prefill from the loaded customer (license placeholder shown blank so it can be set).
+  // Prefill local form fields from the async-loaded customer. Syncing fetched
+  // data into editable local state is an intended use of an effect here.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!customer) return;
     setFullName(customer.fullName ?? '');
@@ -33,6 +35,7 @@ export default function ProfilePage() {
     setLicenseNumber(customer.licenseNumber?.startsWith('PENDING-') ? '' : customer.licenseNumber ?? '');
     setLicenseExpiry(toDateValue(customer.licenseExpiry));
   }, [customer]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   if (!hydrated || !customer) {
     return (

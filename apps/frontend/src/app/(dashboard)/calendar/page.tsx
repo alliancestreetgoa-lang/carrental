@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import FullCalendar from '@fullcalendar/react';
 import resourceTimelinePlugin from '@fullcalendar/resource-timeline';
@@ -13,7 +13,6 @@ import { formatCurrency } from '@/lib/utils';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { BookingFormDialog } from '@/components/bookings/BookingFormDialog';
 import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
 import type { Booking, Car } from '@/lib/types';
 
 const STATUS_COLOR: Record<string, string> = {

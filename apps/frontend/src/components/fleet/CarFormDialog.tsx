@@ -66,6 +66,8 @@ export function CarFormDialog({ open, onOpenChange, car, onSaved }: Props) {
     defaultValues: { fuelType: 'PETROL', transmission: 'MANUAL', status: 'AVAILABLE', seatingCapacity: 5 },
   });
 
+  // Populate form fields from props when the dialog opens / target changes.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!open) return;
     if (car) {
@@ -89,6 +91,7 @@ export function CarFormDialog({ open, onOpenChange, car, onSaved }: Props) {
     }
     setUrlInput('');
   }, [open, car, reset]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const addImage = (url: string) => {
     const u = url.trim();

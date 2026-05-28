@@ -28,6 +28,8 @@ export function SignatureDialog({
   // Prepare the canvas bitmap when the dialog opens
   useEffect(() => {
     if (!open) return;
+    // Reset the signatory name to the default each time the dialog opens.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setName(defaultName);
     const canvas = canvasRef.current;
     if (!canvas) return;

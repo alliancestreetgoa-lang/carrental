@@ -7,7 +7,6 @@ import Image from 'next/image';
 import { toast } from 'sonner';
 import { ChevronRight, Calendar, Car, CalendarCheck, IndianRupee, Clock } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { portalApi } from '@/lib/portalApi';
 import { formatDate, formatCurrency } from '@/lib/utils';
@@ -148,7 +147,7 @@ function BookingCard({ booking, onCancel }: { booking: PortalBookingRow; onCance
   );
 }
 
-function Section({ title, bookings, empty, onCancel }: { title: string; bookings: PortalBookingRow[]; empty: string; onCancel: (id: string) => void }) {
+function Section({ title, bookings, onCancel }: { title: string; bookings: PortalBookingRow[]; onCancel: (id: string) => void }) {
   if (bookings.length === 0) return null;
   return (
     <div className="space-y-3">
@@ -276,8 +275,8 @@ export default function AccountPage() {
         </div>
       ) : (
         <>
-          <Section title="Upcoming" bookings={upcoming} empty="" onCancel={setCancelId} />
-          <Section title="Past" bookings={past} empty="" onCancel={setCancelId} />
+          <Section title="Upcoming" bookings={upcoming} onCancel={setCancelId} />
+          <Section title="Past" bookings={past} onCancel={setCancelId} />
           {upcoming.length === 0 && past.length === 0 && (
             <p className="text-slate-400 text-sm">No bookings to display.</p>
           )}

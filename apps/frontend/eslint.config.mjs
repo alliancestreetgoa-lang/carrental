@@ -7,11 +7,17 @@ const eslintConfig = defineConfig([
   ...nextTs,
   {
     rules: {
-      // React Compiler advisory rule. Our data-fetch-on-mount and
-      // searchParam->local-input-sync effects trip this across many pages;
-      // they're intentional and low-risk. Kept as a warning (visible, not
-      // blocking) until those effects are migrated to a shared fetch hook.
-      "react-hooks/set-state-in-effect": "warn",
+      // Data-fetch effects now use the shared useFetch hook; the remaining
+      // legitimate cases (form-reset dialogs, prop/store->local-input sync,
+      // socket setup) carry targeted eslint-disable comments, so enforce this
+      // as an error to catch new violations.
+      "react-hooks/set-state-in-effect": "error",
+      // Allow intentionally-unused identifiers prefixed with _ and the
+      // destructured-rest "omit" pattern (e.g. const { a: _a, ...rest } = obj).
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_", ignoreRestSiblings: true },
+      ],
     },
   },
   // Override default ignores of eslint-config-next.

@@ -47,6 +47,8 @@ export function CarFilters() {
   // Debounce the free-text search so we don't re-navigate (and refetch +
   // lose input focus) on every keystroke; keep the input locally controlled.
   const [qInput, setQInput] = useState(q);
+  // Re-sync the locally-controlled input when the URL param changes externally.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setQInput(q); }, [q]);
   const qTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const onSearchChange = (value: string) => {
@@ -71,7 +73,10 @@ export function CarFilters() {
   // Debounced price inputs — keep locally controlled like the search input
   const [minPriceInput, setMinPriceInput] = useState(minPrice);
   const [maxPriceInput, setMaxPriceInput] = useState(maxPrice);
+  // Re-sync locally-controlled inputs when the URL params change externally.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMinPriceInput(minPrice); }, [minPrice]);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => { setMaxPriceInput(maxPrice); }, [maxPrice]);
 
   const minTimer = useRef<ReturnType<typeof setTimeout> | null>(null);

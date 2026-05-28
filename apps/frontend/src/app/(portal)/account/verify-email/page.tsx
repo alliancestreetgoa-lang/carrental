@@ -18,17 +18,12 @@ type Status = 'verifying' | 'ok' | 'error';
 function VerifyInner() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
-  const [status, setStatus] = useState<Status>('verifying');
+  const [status, setStatus] = useState<Status>(token ? 'verifying' : 'error');
   const called = useRef(false);
 
   useEffect(() => {
-    if (called.current) return;
+    if (called.current || !token) return;
     called.current = true;
-
-    if (!token) {
-      setStatus('error');
-      return;
-    }
 
     useCustomerStore
       .getState()

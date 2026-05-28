@@ -204,6 +204,8 @@ export default function DocumentsPage() {
         {/* Preview if URL obtained from upload */}
         {fileUrl && !pasteMode && (
           <div className="flex items-center gap-3">
+            {/* User-uploaded preview of an arbitrary URL — next/image needs per-domain config. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={fileUrl}
               alt="preview"
@@ -249,7 +251,8 @@ export default function DocumentsPage() {
               key={doc.id}
               className="flex items-center gap-4 p-4 rounded-2xl border border-slate-100 bg-white hover:border-red-200 hover:shadow-sm transition-all"
             >
-              {/* Thumbnail */}
+              {/* Thumbnail — user-uploaded arbitrary URL; next/image needs per-domain config. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={doc.fileUrl}
                 alt={doc.type}
