@@ -14,6 +14,7 @@ import { FuelType, Transmission } from '@prisma/client';
 import { emitRealtime } from '../socket';
 import * as payments from '../lib/payments';
 import { cloudinaryConfigured, uploadBuffer } from '../lib/cloudinary';
+import * as notify from '../services/notify.service';
 
 const isDev = process.env.NODE_ENV !== 'production';
 
@@ -136,6 +137,10 @@ export const createBooking = async (req: Request, res: Response, next: NextFunct
     });
     emitRealtime('booking:created', { id: booking.id });
     emitRealtime('car:changed', { id: booking.carId });
+    notify.sendBookingConfirmation(
+      { fullName: booking.customer.fullName, email: booking.customer.email, mobile: booking.customer.mobile },
+      { id: booking.id, car: booking.car, pickupDate: booking.pickupDate, returnDate: booking.returnDate },
+    ).catch(() => {});
     res.status(201).json({ success: true, data: booking });
   } catch (e) { next(e); }
 };
@@ -314,6 +319,11 @@ export const payBooking = async (req: Request, res: Response, next: NextFunction
       data: { bookingId: b.id, amount, paymentMethod: 'CARD', notes: `[Online ${type}] order ${order.id}${('mock' in order && order.mock) ? ' (mock)' : ''}` },
     });
     const updated = await bookingService.getBookingById(b.id);
+    notify.sendPaymentConfirmation(
+      { fullName: b.customer.fullName, email: b.customer.email, mobile: b.customer.mobile },
+      amount,
+      b.id,
+    ).catch(() => {});
     res.json({ success: true, data: { invoice: updated.invoice, mock: ('mock' in order ? order.mock : false) } });
   } catch (e) { next(e); }
 };

@@ -3,6 +3,7 @@ import * as bookingService from '../services/booking.service';
 import { streamInvoicePdf } from '../lib/invoice';
 import { emitRealtime } from '../socket';
 import { z } from 'zod';
+import * as notify from '../services/notify.service';
 
 const emptyToUndef = (v: unknown) => (v === '' || v === null ? undefined : v);
 const optionalNumber = z.preprocess(emptyToUndef, z.coerce.number().nonnegative().optional());
@@ -129,6 +130,10 @@ export const approveBooking = async (req: Request, res: Response, next: NextFunc
   try {
     const updated = await bookingService.approveBooking(String(req.params.id));
     emitRealtime('booking:updated', { id: updated.id });
+    notify.sendBookingDecision(
+      { fullName: updated.customer.fullName, email: updated.customer.email, mobile: updated.customer.mobile },
+      true,
+    ).catch(() => {});
     res.json({ success: true, data: updated });
   } catch (e) { next(e); }
 };
@@ -139,6 +144,11 @@ export const rejectBooking = async (req: Request, res: Response, next: NextFunct
     const updated = await bookingService.rejectBooking(String(req.params.id), reason);
     emitRealtime('booking:cancelled', { id: updated.id });
     emitRealtime('car:changed', { id: updated.carId });
+    notify.sendBookingDecision(
+      { fullName: updated.customer.fullName, email: updated.customer.email, mobile: updated.customer.mobile },
+      false,
+      reason,
+    ).catch(() => {});
     res.json({ success: true, data: updated });
   } catch (e) { next(e); }
 };
