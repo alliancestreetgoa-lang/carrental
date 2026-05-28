@@ -1,7 +1,7 @@
 import PDFDocument from 'pdfkit';
 import { Response } from 'express';
 import { company } from '../config/company';
-import { getStrings } from './agreementStrings';
+import { strings as s } from './agreementStrings';
 
 interface AgreementData {
   agreementNumber: string;
@@ -23,12 +23,12 @@ interface AgreementData {
   };
 }
 
-const money = (n: unknown) => `$${Number(n).toFixed(2)}`;
-const fmtDate = (d: Date | null) => (d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—');
+const inr = new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const money = (n: unknown) => `Rs. ${inr.format(Number(n))}`;
+const fmtDate = (d: Date | null) => (d ? new Date(d).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' }) : '—');
 const daysOf = (a: Date, b: Date) => Math.max(1, Math.ceil((new Date(b).getTime() - new Date(a).getTime()) / 86400000));
 
-const buildDoc = (a: AgreementData, lang: string | undefined) => {
-  const s = getStrings(lang);
+const buildDoc = (a: AgreementData) => {
   const b = a.booking;
   const doc = new PDFDocument({ margin: 50, size: 'A4' });
 
@@ -131,17 +131,17 @@ const buildDoc = (a: AgreementData, lang: string | undefined) => {
   return doc;
 };
 
-export const streamAgreementPdf = (res: Response, a: AgreementData, lang?: string) => {
+export const streamAgreementPdf = (res: Response, a: AgreementData) => {
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `attachment; filename="agreement-${a.agreementNumber}.pdf"`);
-  const doc = buildDoc(a, lang);
+  const doc = buildDoc(a);
   doc.pipe(res);
   doc.end();
 };
 
-export const buildAgreementPdfBuffer = (a: AgreementData, lang?: string): Promise<Buffer> =>
+export const buildAgreementPdfBuffer = (a: AgreementData): Promise<Buffer> =>
   new Promise((resolve, reject) => {
-    const doc = buildDoc(a, lang);
+    const doc = buildDoc(a);
     const chunks: Buffer[] = [];
     doc.on('data', (c: Buffer) => chunks.push(c));
     doc.on('end', () => resolve(Buffer.concat(chunks)));

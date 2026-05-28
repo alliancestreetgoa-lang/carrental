@@ -47,7 +47,6 @@ export default function BookingDetailPage() {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [signOpen, setSignOpen] = useState(false);
-  const [agreementLang, setAgreementLang] = useState('en');
 
   const load = useCallback(() => {
     setLoading(true);
@@ -93,7 +92,7 @@ export default function BookingDetailPage() {
 
   const emailAgreement = async (agreementId: string) => {
     try {
-      const { data } = await api.post(`/agreements/${agreementId}/email`, { lang: agreementLang });
+      const { data } = await api.post(`/agreements/${agreementId}/email`, {});
       toast.success(data.message ?? 'Agreement emailed');
     } catch (e: unknown) {
       toast.error((e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to email agreement');
@@ -102,7 +101,7 @@ export default function BookingDetailPage() {
 
   const storeAgreement = async (agreementId: string) => {
     try {
-      await api.post(`/agreements/${agreementId}/store`, { lang: agreementLang });
+      await api.post(`/agreements/${agreementId}/store`, {});
       toast.success('Agreement PDF stored');
       load();
     } catch (e: unknown) {
@@ -253,19 +252,8 @@ export default function BookingDetailPage() {
                       ? <Badge className="bg-emerald-100 text-emerald-700 border-0 dark:bg-emerald-900/30 dark:text-emerald-400">Signed</Badge>
                       : <Badge className="bg-amber-100 text-amber-700 border-0 dark:bg-amber-900/30 dark:text-amber-400">Unsigned</Badge>}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <label className="text-xs text-muted-foreground">Language</label>
-                    <select
-                      className="h-8 rounded-lg border border-input bg-transparent px-2 text-xs cursor-pointer dark:bg-input/30"
-                      value={agreementLang}
-                      onChange={(e) => setAgreementLang(e.target.value)}
-                    >
-                      <option value="en">English</option>
-                      <option value="es">Español</option>
-                    </select>
-                  </div>
                   <div className="grid grid-cols-2 gap-2">
-                    <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => downloadBlob(`/agreements/${b.agreement!.id}/pdf?lang=${agreementLang}`, `agreement-${b.agreement!.agreementNumber}.pdf`)}>
+                    <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => downloadBlob(`/agreements/${b.agreement!.id}/pdf`, `agreement-${b.agreement!.agreementNumber}.pdf`)}>
                       <Download className="w-4 h-4 mr-1" /> PDF
                     </Button>
                     <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => emailAgreement(b.agreement!.id)}>

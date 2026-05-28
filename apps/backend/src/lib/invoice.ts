@@ -20,8 +20,9 @@ interface InvoiceData {
   };
 }
 
-const money = (n: number) => `$${n.toFixed(2)}`;
-const fmtDate = (d: Date | null) => (d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '—');
+const inr = new Intl.NumberFormat('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const money = (n: number) => `Rs. ${inr.format(n)}`;
+const fmtDate = (d: Date | null) => (d ? new Date(d).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' }) : '—');
 
 export const streamInvoicePdf = (res: Response, b: InvoiceData) => {
   const doc = new PDFDocument({ margin: 50, size: 'A4' });
