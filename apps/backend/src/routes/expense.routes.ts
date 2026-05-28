@@ -7,6 +7,7 @@ const router = Router();
 router.use(authenticate);
 
 router.get('/', expenseController.getExpenses);
+router.get('/summary', expenseController.getSummary);
 router.post('/', authorize('SUPER_ADMIN', 'ACCOUNTANT'), expenseController.createExpense);
 router.patch('/:id', authorize('SUPER_ADMIN', 'ACCOUNTANT'), expenseController.updateExpense);
 router.delete('/:id', authorize('SUPER_ADMIN', 'ACCOUNTANT'), expenseController.deleteExpense);

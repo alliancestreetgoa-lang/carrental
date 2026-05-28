@@ -142,6 +142,27 @@ export interface BillingPayment {
   };
 }
 
+export type ExpenseCategory = 'FUEL' | 'SERVICE' | 'REPAIR' | 'INSURANCE' | 'CLEANING' | 'EMI' | 'OTHER';
+
+export interface Expense {
+  id: string;
+  carId: string;
+  category: ExpenseCategory;
+  amount: string;
+  expenseDate: string;
+  notes: string | null;
+  car: { carName: string; brand: string; registrationNumber: string };
+}
+
+export interface ExpenseSummary {
+  total: number;
+  monthTotal: number;
+  count: number;
+  byMonth: { month: string; total: number }[];
+  byCategory: { category: string; total: number }[];
+  byCar: { id: string; label: string; total: number }[];
+}
+
 export type UserRole = 'SUPER_ADMIN' | 'STAFF' | 'ACCOUNTANT';
 
 export interface AdminUser {

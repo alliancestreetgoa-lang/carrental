@@ -19,10 +19,33 @@ const updateExpenseSchema = z.object({
   notes: z.string().optional(),
 });
 
+const listQuerySchema = z.object({
+  carId: z.string().optional(),
+  category: categoryEnum.optional(),
+  from: z.string().optional(),
+  to: z.string().optional(),
+});
+
 export const getExpenses = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const carId = req.query.carId ? String(req.query.carId) : undefined;
-    res.json({ success: true, data: await expenseService.getAllExpenses(carId) });
+    const q = listQuerySchema.parse(req.query);
+    const data = await expenseService.getAllExpenses({
+      carId: q.carId,
+      category: q.category,
+      from: q.from ? new Date(q.from) : undefined,
+      to: q.to ? new Date(q.to) : undefined,
+    });
+    res.json({ success: true, data });
+  } catch (e) { next(e); }
+};
+
+const summaryQuerySchema = z.object({ from: z.string().optional(), to: z.string().optional() });
+
+export const getSummary = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { from, to } = summaryQuerySchema.parse(req.query);
+    const data = await expenseService.getExpenseSummary(from ? new Date(from) : undefined, to ? new Date(to) : undefined);
+    res.json({ success: true, data });
   } catch (e) { next(e); }
 };
 
