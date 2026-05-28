@@ -82,6 +82,9 @@ export default function BookingDetailPage() {
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewSubmitted, setReviewSubmitted] = useState(false);
 
+  // Payment state
+  const [paying, setPaying] = useState(false);
+
   // Cancel state
   const [showCancelDialog, setShowCancelDialog] = useState(false);
 
@@ -137,6 +140,32 @@ export default function BookingDetailPage() {
     } catch (e) {
       const msg = (e as { response?: { data?: { message?: string } } }).response?.data?.message;
       toast.error(msg ?? 'Could not cancel booking');
+    }
+  };
+
+  const handlePay = async (type: 'advance' | 'full') => {
+    if (!id) return;
+    setPaying(true);
+    try {
+      const res = await portalApi.post<{
+        success: boolean;
+        data: {
+          invoice: BookingInvoice;
+          mock: boolean;
+        };
+      }>(`/bookings/${id}/pay`, { type });
+      toast.success('Payment successful' + (res.data.data.mock ? ' (demo mode)' : ''));
+      fetchBooking();
+    } catch (e) {
+      const status = (e as { response?: { status?: number; data?: { message?: string } } }).response?.status;
+      const msg = (e as { response?: { data?: { message?: string } } }).response?.data?.message;
+      if (status === 400) {
+        toast.error(msg ?? 'Payment failed');
+      } else {
+        toast.error('Could not process payment. Please try again.');
+      }
+    } finally {
+      setPaying(false);
     }
   };
 
@@ -344,6 +373,42 @@ export default function BookingDetailPage() {
           <InvoiceRow label="Balance due" value={formatCurrency(booking.invoice.balanceDue)} />
         </div>
       </div>
+
+      {/* Payment card */}
+      {booking.bookingStatus !== 'CANCELLED' && (
+        <div className="rounded-2xl border border-slate-100 bg-white p-6 space-y-4">
+          <h3 className="text-sm font-semibold text-slate-700 uppercase tracking-widest">Payment</h3>
+          {parseFloat(booking.invoice.balanceDue) > 0 ? (
+            <>
+              <p className="text-xs text-slate-400">
+                Online payments are in demo mode — no real charge is made.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  variant="outline"
+                  disabled={paying}
+                  onClick={() => handlePay('advance')}
+                  className="rounded-xl border-slate-200 hover:border-red-200 hover:text-red-600 cursor-pointer"
+                >
+                  {paying ? 'Processing…' : 'Pay 25% advance'}
+                </Button>
+                <Button
+                  disabled={paying}
+                  onClick={() => handlePay('full')}
+                  className="bg-red-600 hover:bg-red-700 text-white rounded-xl cursor-pointer"
+                >
+                  {paying ? 'Processing…' : `Pay full balance (${formatCurrency(booking.invoice.balanceDue)})`}
+                </Button>
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center gap-2 text-sm font-medium text-green-700">
+              <span className="inline-flex size-5 items-center justify-center rounded-full bg-green-100 text-green-600 text-xs font-bold">&#10003;</span>
+              Paid in full
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Download buttons */}
       <div className="flex flex-wrap gap-3">
