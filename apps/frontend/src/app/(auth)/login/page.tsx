@@ -18,13 +18,24 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
+const DEMO_ACCOUNTS = [
+  { role: 'Super Admin', email: 'admin@alliancecarrental.com', password: 'Admin@123' },
+  { role: 'Staff', email: 'staff@alliancecarrental.com', password: 'Staff@123' },
+  { role: 'Accountant', email: 'accounts@alliancecarrental.com', password: 'Accountant@123' },
+];
+
 export default function LoginPage() {
   const router = useRouter();
   const { login, isLoading } = useAuthStore();
 
-  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
   });
+
+  const fillDemo = (email: string, password: string) => {
+    setValue('email', email, { shouldValidate: true });
+    setValue('password', password, { shouldValidate: true });
+  };
 
   const onSubmit = async (data: LoginFormData) => {
     try {
@@ -86,9 +97,22 @@ export default function LoginPage() {
               {isLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Signing in...</> : 'Sign in'}
             </Button>
           </form>
-          <p className="mt-4 text-center text-sm text-slate-500">
-            Demo: admin@alliancecarrental.com / Admin@123
-          </p>
+          <div className="mt-6 pt-4 border-t border-white/10">
+            <p className="text-center text-xs uppercase tracking-wide text-slate-500 mb-2">Demo accounts — click to fill</p>
+            <div className="space-y-1.5">
+              {DEMO_ACCOUNTS.map((acc) => (
+                <button
+                  key={acc.email}
+                  type="button"
+                  onClick={() => fillDemo(acc.email, acc.password)}
+                  className="w-full flex items-center justify-between gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-left text-xs hover:bg-white/10 transition-colors cursor-pointer"
+                >
+                  <span className="font-medium text-slate-200">{acc.role}</span>
+                  <span className="font-mono text-slate-400 truncate">{acc.email}</span>
+                </button>
+              ))}
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
