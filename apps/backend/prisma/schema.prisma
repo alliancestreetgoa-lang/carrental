@@ -73,6 +73,23 @@ enum DocumentType {
   OTHER
 }
 
+enum MaintenanceType {
+  SERVICE
+  OIL_CHANGE
+  TYRE
+  BRAKES
+  BATTERY
+  REPAIR
+  INSPECTION
+  CLEANING
+  OTHER
+}
+
+enum MaintenanceStatus {
+  SCHEDULED
+  COMPLETED
+}
+
 // ============================================================
 // Models
 // ============================================================
@@ -120,9 +137,10 @@ model Car {
   updatedAt          DateTime     @updatedAt
   deletedAt          DateTime?
 
-  bookings  Booking[]
-  expenses  Expense[]
-  documents Document[]
+  bookings    Booking[]
+  expenses    Expense[]
+  documents   Document[]
+  maintenance Maintenance[]
 
   @@index([status])
   @@index([brand])
@@ -275,4 +293,31 @@ model Document {
   @@index([type])
   @@index([deletedAt])
   @@map("documents")
+}
+
+model Maintenance {
+  id            String            @id @default(cuid())
+  carId         String
+  type          MaintenanceType   @default(SERVICE)
+  status        MaintenanceStatus @default(COMPLETED)
+  serviceDate   DateTime?
+  dueDate       DateTime?
+  odometer      Int?
+  cost          Decimal           @default(0) @db.Decimal(10, 2)
+  serviceCenter String?
+  notes         String?
+  expenseId     String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  deletedAt     DateTime?
+
+  car Car @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  @@index([carId])
+  @@index([type])
+  @@index([status])
+  @@index([serviceDate])
+  @@index([dueDate])
+  @@index([deletedAt])
+  @@map("maintenance_records")
 }

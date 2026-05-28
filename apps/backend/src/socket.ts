@@ -26,7 +26,8 @@ export type RealtimeEvent =
   | 'booking:updated'
   | 'booking:cancelled'
   | 'car:changed'
-  | 'payment:added';
+  | 'payment:added'
+  | 'maintenance:changed';
 
 export const emitRealtime = (event: RealtimeEvent, payload: Record<string, unknown> = {}) => {
   io?.emit(event, payload);

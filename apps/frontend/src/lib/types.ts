@@ -220,6 +220,56 @@ export interface ProfitPerCar {
   cars: ProfitCarRow[];
 }
 
+export type MaintenanceType =
+  | 'SERVICE' | 'OIL_CHANGE' | 'TYRE' | 'BRAKES' | 'BATTERY' | 'REPAIR' | 'INSPECTION' | 'CLEANING' | 'OTHER';
+export type MaintenanceStatus = 'SCHEDULED' | 'COMPLETED';
+
+export interface MaintenanceRecord {
+  id: string;
+  carId: string;
+  type: MaintenanceType;
+  status: MaintenanceStatus;
+  serviceDate: string | null;
+  dueDate: string | null;
+  odometer: number | null;
+  cost: string;
+  serviceCenter: string | null;
+  notes: string | null;
+  expenseId: string | null;
+  createdAt: string;
+  car: { carName: string; brand: string; registrationNumber: string };
+}
+
+export interface MaintenanceUpcoming {
+  id: string;
+  carId: string;
+  carLabel: string;
+  registrationNumber: string;
+  type: MaintenanceType;
+  dueDate: string | null;
+  notes: string | null;
+  overdue: boolean;
+}
+
+export interface MaintenanceExpiryAlert {
+  carId: string;
+  carLabel: string;
+  registrationNumber: string;
+  kind: 'INSURANCE' | 'POLLUTION' | 'RC';
+  date: string;
+  detail: string;
+  expired: boolean;
+}
+
+export interface MaintenanceSummary {
+  upcomingCount: number;
+  overdueCount: number;
+  completedThisMonth: number;
+  totalCost: number;
+  upcoming: MaintenanceUpcoming[];
+  expiryAlerts: MaintenanceExpiryAlert[];
+}
+
 export interface BillingSummary {
   totalRevenue: number;
   monthRevenue: number;

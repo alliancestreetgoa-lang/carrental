@@ -25,3 +25,4 @@ export function useRealtime(events: string[], handler: () => void) {
 export const BOOKING_EVENTS = ['booking:created', 'booking:updated', 'booking:cancelled'];
 export const CAR_EVENTS = ['car:changed'];
 export const PAYMENT_EVENTS = ['payment:added'];
+export const MAINTENANCE_EVENTS = ['maintenance:changed'];

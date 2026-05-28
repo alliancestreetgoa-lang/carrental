@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils';
 import { useUIStore } from '@/stores/ui.store';
 import {
   Car, LayoutDashboard, Users, CalendarDays, CalendarRange, Receipt, BarChart3, Wallet, TrendingUp,
-  Settings, ChevronLeft, LogOut
+  Wrench, Settings, ChevronLeft, LogOut
 } from 'lucide-react';
 import { useAuthStore } from '@/stores/auth.store';
 import { toast } from 'sonner';
@@ -21,6 +21,7 @@ const navItems = [
   { href: '/customers', label: 'Customers', icon: Users },
   { href: '/billing', label: 'Billing', icon: Receipt },
   { href: '/expenses', label: 'Expenses', icon: Wallet },
+  { href: '/maintenance', label: 'Maintenance', icon: Wrench },
   { href: '/reports', label: 'Reports', icon: BarChart3 },
   { href: '/profit', label: 'Profit/Car', icon: TrendingUp },
   { href: '/settings', label: 'Settings', icon: Settings },
