@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
+import multer from 'multer';
 import * as portalAuth from '../services/portalAuth.service';
 import * as catalog from '../services/portalCatalog.service';
 import * as bookingService from '../services/booking.service';
@@ -12,6 +13,7 @@ import { streamAgreementPdf } from '../lib/agreementPdf';
 import { FuelType, Transmission } from '@prisma/client';
 import { emitRealtime } from '../socket';
 import * as payments from '../lib/payments';
+import { cloudinaryConfigured, uploadBuffer } from '../lib/cloudinary';
 
 const isDev = process.env.NODE_ENV !== 'production';
 
@@ -321,4 +323,64 @@ export const paymentsWebhook = async (req: Request, res: Response) => {
   const ok = payments.verifyPaymentSignature(req.body ?? {});
   // TODO: when real, look up the order, record the Payment if not already recorded.
   res.json({ received: true, verified: ok });
+};
+
+// ── Document upload (customer portal) ─────────────────────────────────────────
+
+export const portalUploadMiddleware = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) cb(null, true);
+    else cb(new AppError(400, 'Only image files are allowed'));
+  },
+}).single('file');
+
+export const portalUploadImage = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!cloudinaryConfigured) {
+      throw new AppError(503, 'Image upload is not configured yet. Paste an image URL instead.');
+    }
+    if (!req.file) throw new AppError(400, 'No file provided');
+    const url = await uploadBuffer(req.file.buffer);
+    res.json({ success: true, data: { url } });
+  } catch (e) { next(e); }
+};
+
+const docSchema = z.object({
+  type: z.enum(['LICENSE', 'AADHAAR', 'PASSPORT', 'PHOTO', 'OTHER']),
+  fileUrl: z.string().url(),
+});
+
+export const createDocument = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const d = docSchema.parse(req.body);
+    const doc = await prisma.document.create({
+      data: { customerId: req.customer!.customerId, type: d.type, fileUrl: d.fileUrl },
+    });
+    res.status(201).json({ success: true, data: doc });
+  } catch (e) { next(e); }
+};
+
+export const myDocuments = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.json({
+      success: true,
+      data: await prisma.document.findMany({
+        where: { customerId: req.customer!.customerId, deletedAt: null },
+        orderBy: { createdAt: 'desc' },
+      }),
+    });
+  } catch (e) { next(e); }
+};
+
+export const deleteDocument = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const doc = await prisma.document.findFirst({
+      where: { id: String(req.params.id), customerId: req.customer!.customerId, deletedAt: null },
+    });
+    if (!doc) throw new AppError(404, 'Document not found');
+    await prisma.document.update({ where: { id: doc.id }, data: { deletedAt: new Date() } });
+    res.json({ success: true });
+  } catch (e) { next(e); }
 };

@@ -38,4 +38,9 @@ router.post('/payments/webhook', portal.paymentsWebhook); // public (gateway cal
 router.get('/testimonials', portal.testimonials);
 router.post('/reviews', authenticateCustomer, portal.createReview);
 
+router.post('/uploads/image', authenticateCustomer, portal.portalUploadMiddleware, portal.portalUploadImage);
+router.get('/documents', authenticateCustomer, portal.myDocuments);
+router.post('/documents', authenticateCustomer, portal.createDocument);
+router.delete('/documents/:id', authenticateCustomer, portal.deleteDocument);
+
 export default router;
