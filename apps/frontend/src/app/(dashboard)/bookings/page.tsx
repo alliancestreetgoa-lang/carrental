@@ -72,7 +72,8 @@ export default function BookingsPage() {
                   <TableHead>Pickup</TableHead>
                   <TableHead>Return</TableHead>
                   <TableHead className="text-right">Total</TableHead>
-                  <TableHead className="pr-6">Status</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="pr-6">Approval</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -86,7 +87,18 @@ export default function BookingsPage() {
                     <TableCell className="text-sm">{formatDate(b.pickupDate)}</TableCell>
                     <TableCell className="text-sm">{formatDate(b.returnDate)}</TableCell>
                     <TableCell className="text-right font-medium">{formatCurrency(b.totalAmount)}</TableCell>
-                    <TableCell className="pr-6"><StatusBadge status={b.bookingStatus} /></TableCell>
+                    <TableCell><StatusBadge status={b.bookingStatus} /></TableCell>
+                    <TableCell className="pr-6">
+                      {b.approvalStatus === 'PENDING' && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 border border-amber-200">Pending</span>
+                      )}
+                      {b.approvalStatus === 'APPROVED' && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 border border-emerald-200">Approved</span>
+                      )}
+                      {b.approvalStatus === 'REJECTED' && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700 border border-red-200">Rejected</span>
+                      )}
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

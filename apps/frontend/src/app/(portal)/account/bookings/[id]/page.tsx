@@ -27,6 +27,8 @@ interface BookingDetail {
   pickupLocation: string;
   dropLocation: string;
   bookingStatus: string;
+  approvalStatus?: 'PENDING' | 'APPROVED' | 'REJECTED';
+  rejectionReason?: string | null;
   totalDays: number;
   car: { carName: string; brand: string; registrationNumber: string };
   customer: { fullName: string; mobile: string };
@@ -40,6 +42,12 @@ const STATUS_COLORS: Record<string, string> = {
   ACTIVE: 'bg-green-50 text-green-700 border-green-100',
   COMPLETED: 'bg-slate-100 text-slate-600 border-slate-200',
   CANCELLED: 'bg-red-50 text-red-600 border-red-100',
+};
+
+const APPROVAL_BADGE: Record<string, { cls: string; label: string }> = {
+  PENDING: { cls: 'bg-amber-50 text-amber-700 border-amber-100', label: 'Awaiting approval' },
+  APPROVED: { cls: 'bg-green-50 text-green-700 border-green-100', label: 'Approved' },
+  REJECTED: { cls: 'bg-red-50 text-red-600 border-red-100', label: 'Rejected' },
 };
 
 function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
@@ -162,12 +170,25 @@ export default function BookingDetailPage() {
             </h2>
             <p className="text-xs text-slate-400 mt-0.5">{booking.car.registrationNumber}</p>
           </div>
-          <span
-            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${statusClass}`}
-          >
-            {booking.bookingStatus}
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${statusClass}`}
+            >
+              {booking.bookingStatus}
+            </span>
+            {booking.approvalStatus && APPROVAL_BADGE[booking.approvalStatus] && (
+              <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border ${APPROVAL_BADGE[booking.approvalStatus].cls}`}>
+                {APPROVAL_BADGE[booking.approvalStatus].label}
+              </span>
+            )}
+          </div>
         </div>
+        {booking.approvalStatus === 'REJECTED' && booking.rejectionReason && (
+          <div className="rounded-xl bg-red-50 border border-red-100 px-4 py-3">
+            <p className="text-xs font-semibold text-red-600 uppercase tracking-widest mb-0.5">Rejection reason</p>
+            <p className="text-sm text-red-700">{booking.rejectionReason}</p>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
           <div className="space-y-3">

@@ -12,6 +12,8 @@ export interface PortalCustomer {
 }
 export interface PortalBookingRow {
   id: string; pickupDate: string; returnDate: string; totalAmount: string; bookingStatus: string;
+  approvalStatus?: 'PENDING' | 'APPROVED' | 'REJECTED';
+  rejectionReason?: string | null;
   car: { carName: string; brand: string; registrationNumber: string; images: string[] };
   payments: { amount: string }[];
 }

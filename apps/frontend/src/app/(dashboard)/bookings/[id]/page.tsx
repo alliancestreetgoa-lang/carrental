@@ -18,6 +18,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter,
+} from '@/components/ui/dialog';
+import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import { formatCurrency, formatDate } from '@/lib/utils';
@@ -47,6 +50,9 @@ export default function BookingDetailPage() {
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [signOpen, setSignOpen] = useState(false);
+  const [rejectOpen, setRejectOpen] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [approvalLoading, setApprovalLoading] = useState(false);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -109,6 +115,34 @@ export default function BookingDetailPage() {
     }
   };
 
+  const approve = async () => {
+    setApprovalLoading(true);
+    try {
+      await api.patch(`/bookings/${id}/approve`);
+      toast.success('Booking approved');
+      load();
+    } catch (e: unknown) {
+      toast.error((e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to approve');
+    } finally {
+      setApprovalLoading(false);
+    }
+  };
+
+  const reject = async () => {
+    setApprovalLoading(true);
+    try {
+      await api.patch(`/bookings/${id}/reject`, { reason: rejectReason || undefined });
+      toast.success('Booking rejected');
+      setRejectOpen(false);
+      setRejectReason('');
+      load();
+    } catch (e: unknown) {
+      toast.error((e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to reject');
+    } finally {
+      setApprovalLoading(false);
+    }
+  };
+
   if (loading || !booking) return (
     <div className="space-y-4">
       <Skeleton className="h-8 w-40 rounded-md" />
@@ -139,11 +173,33 @@ export default function BookingDetailPage() {
       <Card className="mb-4">
         <CardContent className="p-6 flex items-start justify-between gap-3 flex-wrap">
           <div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-wrap">
               <h2 className="text-2xl font-semibold tracking-tight text-foreground">{b.customer.fullName}</h2>
               <StatusBadge status={b.bookingStatus} />
+              {b.approvalStatus === 'PENDING' && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700 border border-amber-200">Awaiting approval</span>
+              )}
+              {b.approvalStatus === 'APPROVED' && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 border border-emerald-200">Approved</span>
+              )}
+              {b.approvalStatus === 'REJECTED' && (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-700 border border-red-200">Rejected</span>
+              )}
             </div>
             <p className="text-sm text-muted-foreground mt-1">{b.car.brand} {b.car.carName} · <span className="font-mono">{b.car.registrationNumber}</span></p>
+            {b.approvalStatus === 'REJECTED' && b.rejectionReason && (
+              <p className="text-xs text-red-600 mt-1">Reason: {b.rejectionReason}</p>
+            )}
+            {b.approvalStatus === 'PENDING' && (
+              <div className="flex gap-2 mt-3">
+                <Button size="sm" className="cursor-pointer bg-emerald-600 hover:bg-emerald-700 text-white" onClick={approve} disabled={approvalLoading}>
+                  Approve
+                </Button>
+                <Button size="sm" variant="outline" className="cursor-pointer text-red-600 hover:text-red-700 border-red-200 hover:border-red-300" onClick={() => setRejectOpen(true)} disabled={approvalLoading}>
+                  Reject
+                </Button>
+              </div>
+            )}
           </div>
           <div className="text-right">
             <p className="text-xs text-muted-foreground">Grand Total</p>
@@ -289,6 +345,28 @@ export default function BookingDetailPage() {
         confirmText="Cancel Booking"
         onConfirm={cancel}
       />
+      <Dialog open={rejectOpen} onOpenChange={(open) => { setRejectOpen(open); if (!open) setRejectReason(''); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reject booking?</DialogTitle>
+            <DialogDescription>Optionally provide a reason for the customer.</DialogDescription>
+          </DialogHeader>
+          <div className="py-2">
+            <label className="text-sm text-muted-foreground block mb-1.5">Reason (optional)</label>
+            <textarea
+              className="w-full rounded-lg border border-input bg-transparent px-3 py-2 text-sm resize-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              rows={3}
+              placeholder="e.g. Incomplete documents"
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" className="cursor-pointer" onClick={() => { setRejectOpen(false); setRejectReason(''); }} disabled={approvalLoading}>Cancel</Button>
+            <Button className="cursor-pointer bg-red-600 hover:bg-red-700 text-white" onClick={reject} disabled={approvalLoading}>Reject Booking</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

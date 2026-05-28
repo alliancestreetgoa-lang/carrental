@@ -2,6 +2,7 @@ export type CarStatus = 'AVAILABLE' | 'BOOKED' | 'MAINTENANCE' | 'OUT_OF_SERVICE
 export type FuelType = 'PETROL' | 'DIESEL' | 'ELECTRIC' | 'HYBRID' | 'CNG' | 'LPG';
 export type Transmission = 'MANUAL' | 'AUTOMATIC';
 export type BookingStatus = 'RESERVED' | 'ACTIVE' | 'COMPLETED' | 'CANCELLED';
+export type ApprovalStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
 export interface Car {
   id: string;
@@ -106,6 +107,8 @@ export interface Booking {
   pickupLocation: string | null;
   dropLocation: string | null;
   bookingStatus: BookingStatus;
+  approvalStatus: ApprovalStatus;
+  rejectionReason: string | null;
   fuelLevel: string | null;
   returnFuelLevel: string | null;
   startKilometer: number | null;
@@ -302,6 +305,7 @@ export interface DashboardBookingRow {
   returnDate: string;
   totalAmount: string;
   bookingStatus: BookingStatus;
+  approvalStatus?: ApprovalStatus;
   customer: { fullName: string };
   car: { carName: string; brand: string; registrationNumber: string };
   overdue?: boolean;

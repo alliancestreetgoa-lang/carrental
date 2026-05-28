@@ -19,6 +19,12 @@ const STATUS_COLORS: Record<string, string> = {
   CANCELLED: 'bg-red-50 text-red-600 border-red-100',
 };
 
+const APPROVAL_BADGE: Record<string, { cls: string; label: string }> = {
+  PENDING: { cls: 'bg-amber-50 text-amber-700 border-amber-100', label: 'Awaiting approval' },
+  APPROVED: { cls: 'bg-green-50 text-green-700 border-green-100', label: 'Approved' },
+  REJECTED: { cls: 'bg-red-50 text-red-600 border-red-100', label: 'Rejected' },
+};
+
 function BookingRowSkeleton() {
   return (
     <div className="flex items-center gap-4 p-4 rounded-2xl border border-slate-100 bg-white">
@@ -71,7 +77,7 @@ function BookingCard({ booking }: { booking: PortalBookingRow }) {
           <Calendar className="size-3 shrink-0" />
           {formatDate(booking.pickupDate)} – {formatDate(booking.returnDate)}
         </p>
-        <div className="mt-1.5">
+        <div className="mt-1.5 flex flex-wrap gap-1.5">
           <span
             className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${
               STATUS_COLORS[booking.bookingStatus] ?? 'bg-slate-100 text-slate-600 border-slate-200'
@@ -79,6 +85,11 @@ function BookingCard({ booking }: { booking: PortalBookingRow }) {
           >
             {booking.bookingStatus}
           </span>
+          {booking.approvalStatus && APPROVAL_BADGE[booking.approvalStatus] && (
+            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${APPROVAL_BADGE[booking.approvalStatus].cls}`}>
+              {APPROVAL_BADGE[booking.approvalStatus].label}
+            </span>
+          )}
         </div>
       </div>
 
