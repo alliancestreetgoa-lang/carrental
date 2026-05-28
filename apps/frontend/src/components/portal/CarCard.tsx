@@ -80,14 +80,10 @@ export function CarCard({ car, query }: CarCardProps) {
           </span>
         </div>
 
-        {/* Book now button */}
-        <Link
-          href={href}
-          onClick={(e) => e.stopPropagation()}
-          className="mt-1 flex w-full items-center justify-center rounded-xl bg-red-600 hover:bg-red-700 active:bg-red-800 px-4 py-2 text-sm font-semibold text-white transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2"
-        >
+        {/* Book now — visual CTA; the whole card is the link (avoid nested <a>) */}
+        <span className="mt-1 flex w-full items-center justify-center rounded-xl bg-red-600 group-hover:bg-red-700 px-4 py-2 text-sm font-semibold text-white transition-colors">
           Book now
-        </Link>
+        </span>
       </div>
     </Link>
   );
