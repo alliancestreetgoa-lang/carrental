@@ -20,7 +20,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
 
   // Login/register live under /account but must be reachable while logged out —
   // skip the guard (and the account shell) for them.
-  const isAuthPage = pathname === '/account/login' || pathname === '/account/register';
+  const isAuthPage = ['/account/login', '/account/register', '/account/forgot', '/account/reset', '/account/verify-email'].includes(pathname);
 
   useEffect(() => {
     if (!isAuthPage && hydrated && !customer) {

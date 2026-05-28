@@ -179,6 +179,12 @@ export default function CustomerAuthForm({ mode }: Props) {
             />
           </div>
 
+          {mode === 'login' && (
+            <Link href="/account/forgot" className="self-end -mt-2 text-sm font-medium text-red-600 hover:text-red-700">
+              Forgot password?
+            </Link>
+          )}
+
           {mode === 'register' && (
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="licenseNumber" className="text-sm font-medium text-gray-700">
