@@ -159,6 +159,7 @@ model Customer {
   licenseNumber    String    @unique
   licenseExpiry    DateTime?
   aadhaarNumber    String?   @unique
+  password         String?
   emergencyContact String?
   notes            String?
   blacklisted      Boolean   @default(false)
