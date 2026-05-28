@@ -42,8 +42,18 @@ export default function LoginPage() {
       await login(data.email, data.password);
       toast.success('Welcome back!');
       router.push('/dashboard');
-    } catch {
-      toast.error('Invalid email or password');
+    } catch (err) {
+      const e = err as { response?: { status?: number; data?: { message?: string } } };
+      const status = e.response?.status;
+      toast.error(
+        !e.response
+          ? "Can't reach the server. Please try again."
+          : status === 429
+            ? 'Too many attempts. Please wait a minute and try again.'
+            : status === 400 || status === 401
+              ? 'Invalid email or password'
+              : e.response.data?.message ?? 'Something went wrong. Please try again.'
+      );
     }
   };
 
