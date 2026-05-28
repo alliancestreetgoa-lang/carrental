@@ -10,6 +10,7 @@ import { AppError } from '../middleware/error.middleware';
 import { streamInvoicePdf } from '../lib/invoice';
 import { streamAgreementPdf } from '../lib/agreementPdf';
 import { FuelType, Transmission } from '@prisma/client';
+import { emitRealtime } from '../socket';
 
 const isDev = process.env.NODE_ENV !== 'production';
 
@@ -130,6 +131,8 @@ export const createBooking = async (req: Request, res: Response, next: NextFunct
       advancePayment: 0,
       approvalStatus: 'PENDING',
     });
+    emitRealtime('booking:created', { id: booking.id });
+    emitRealtime('car:changed', { id: booking.carId });
     res.status(201).json({ success: true, data: booking });
   } catch (e) { next(e); }
 };
@@ -159,6 +162,8 @@ export const cancelMyBooking = async (req: Request, res: Response, next: NextFun
     const b = await ownedBooking(String(req.params.id), req.customer!.customerId);
     if (b.bookingStatus !== 'RESERVED') throw new AppError(400, 'Only upcoming (reserved) bookings can be cancelled');
     const updated = await bookingService.updateBookingStatus(b.id, 'CANCELLED');
+    emitRealtime('booking:cancelled', { id: updated.id });
+    emitRealtime('car:changed', { id: b.carId });
     res.json({ success: true, data: updated });
   } catch (e) { next(e); }
 };
@@ -169,6 +174,7 @@ export const extendMyBooking = async (req: Request, res: Response, next: NextFun
     const b = await ownedBooking(String(req.params.id), req.customer!.customerId);
     const { returnDate } = extendSchema.parse(req.body);
     const updated = await bookingService.extendBooking(b.id, new Date(returnDate));
+    emitRealtime('booking:updated', { id: updated.id });
     res.json({ success: true, data: updated });
   } catch (e) { next(e); }
 };

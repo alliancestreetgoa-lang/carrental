@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useState, useMemo } from 'react';
+import { Suspense, useCallback, useEffect, useState, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -11,6 +11,7 @@ import { CarFilters } from '@/components/portal/CarFilters';
 import { portalApi } from '@/lib/portalApi';
 import { formatDate, cn } from '@/lib/utils';
 import type { PortalCar } from '@/lib/portalTypes';
+import { useRealtime, CAR_EVENTS, BOOKING_EVENTS } from '@/hooks/useRealtime';
 
 const PAGE_SIZE = 9;
 
@@ -68,7 +69,7 @@ function CarsBrowser() {
   const [view, setView] = useState<'grid' | 'list'>('grid');
   const [page, setPage] = useState(1);
 
-  useEffect(() => {
+  const fetchCars = useCallback(() => {
     setLoading(true);
     portalApi
       .get<{ success: boolean; data: PortalCar[] }>('/cars' + (qs ? '?' + qs : ''))
@@ -82,6 +83,12 @@ function CarsBrowser() {
       })
       .finally(() => setLoading(false));
   }, [qs]);
+
+  useEffect(() => {
+    fetchCars();
+  }, [fetchCars]);
+
+  useRealtime([...CAR_EVENTS, ...BOOKING_EVENTS], fetchCars);
 
   // Reset to page 1 whenever the result set changes
   useEffect(() => {

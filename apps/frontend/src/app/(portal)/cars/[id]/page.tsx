@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -25,6 +25,7 @@ import { CarCard } from '@/components/portal/CarCard';
 import { portalApi } from '@/lib/portalApi';
 import { formatDate } from '@/lib/utils';
 import type { PortalCar } from '@/lib/portalTypes';
+import { useRealtime, CAR_EVENTS, BOOKING_EVENTS } from '@/hooks/useRealtime';
 
 interface CarReview {
   id: string;
@@ -102,7 +103,7 @@ function CarDetailInner() {
   const [relatedCars, setRelatedCars] = useState<PortalCar[]>([]);
   const [relatedLoading, setRelatedLoading] = useState(true);
 
-  useEffect(() => {
+  const fetchCar = useCallback(() => {
     if (!id) return;
     setLoading(true);
     portalApi
@@ -119,6 +120,11 @@ function CarDetailInner() {
         else setNotFound(true);
       })
       .finally(() => setLoading(false));
+  }, [id]);
+
+  useEffect(() => {
+    if (!id) return;
+    fetchCar();
 
     portalApi
       .get<{ success: boolean; data: CarReviewsData }>(`/cars/${id}/reviews`)
@@ -135,7 +141,9 @@ function CarDetailInner() {
       })
       .catch(() => {/* silently fail */})
       .finally(() => setRelatedLoading(false));
-  }, [id]);
+  }, [id, fetchCar]);
+
+  useRealtime([...CAR_EVENTS, ...BOOKING_EVENTS], fetchCar);
 
   function handleShare() {
     const url = window.location.href;
