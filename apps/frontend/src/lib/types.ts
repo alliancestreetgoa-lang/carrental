@@ -142,6 +142,23 @@ export interface BillingPayment {
   };
 }
 
+export interface ReportData {
+  from: string;
+  to: string;
+  totals: {
+    revenue: number;
+    expenses: number;
+    profit: number;
+    bookings: number;
+    avgBookingValue: number;
+    utilization: number;
+  };
+  revenueByMonth: { month: string; revenue: number; expenses: number }[];
+  statusMix: { status: string; count: number }[];
+  topCars: { id: string; label: string; registrationNumber: string; bookings: number; revenue: number }[];
+  topCustomers: { id: string; name: string; spent: number }[];
+}
+
 export interface BillingSummary {
   totalRevenue: number;
   monthRevenue: number;
