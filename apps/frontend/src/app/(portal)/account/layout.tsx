@@ -18,11 +18,17 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
   const router = useRouter();
   const pathname = usePathname();
 
+  // Login/register live under /account but must be reachable while logged out —
+  // skip the guard (and the account shell) for them.
+  const isAuthPage = pathname === '/account/login' || pathname === '/account/register';
+
   useEffect(() => {
-    if (hydrated && !customer) {
+    if (!isAuthPage && hydrated && !customer) {
       router.replace('/account/login?next=' + encodeURIComponent(pathname));
     }
-  }, [hydrated, customer, pathname, router]);
+  }, [isAuthPage, hydrated, customer, pathname, router]);
+
+  if (isAuthPage) return <>{children}</>;
 
   if (!hydrated) {
     return (
