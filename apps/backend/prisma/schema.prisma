@@ -45,6 +45,12 @@ enum BookingStatus {
   CANCELLED
 }
 
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum PaymentMethod {
   CASH
   UPI
@@ -196,6 +202,8 @@ model Booking {
   pickupLocation  String?
   dropLocation    String?
   bookingStatus   BookingStatus @default(RESERVED)
+  approvalStatus  ApprovalStatus @default(APPROVED)
+  rejectionReason String?
   fuelLevel       String?
   returnFuelLevel String?
   startKilometer  Int?

@@ -14,6 +14,8 @@ router.patch('/:id', authorize('SUPER_ADMIN', 'STAFF'), bookingController.update
 router.patch('/:id/status', authorize('SUPER_ADMIN', 'STAFF'), bookingController.updateStatus);
 router.patch('/:id/complete', authorize('SUPER_ADMIN', 'STAFF'), bookingController.completeBooking);
 router.patch('/:id/cancel', authorize('SUPER_ADMIN', 'STAFF'), bookingController.cancelBooking);
+router.patch('/:id/approve', authorize('SUPER_ADMIN', 'STAFF'), bookingController.approveBooking);
+router.patch('/:id/reject', authorize('SUPER_ADMIN', 'STAFF'), bookingController.rejectBooking);
 router.delete('/:id', authorize('SUPER_ADMIN'), bookingController.deleteBooking);
 
 export default router;

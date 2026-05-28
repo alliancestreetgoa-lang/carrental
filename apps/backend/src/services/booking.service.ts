@@ -1,6 +1,6 @@
 import { prisma } from '../lib/prisma';
 import { AppError } from '../middleware/error.middleware';
-import { BookingStatus } from '@prisma/client';
+import { BookingStatus, ApprovalStatus } from '@prisma/client';
 
 const DAY_MS = 1000 * 60 * 60 * 24;
 
@@ -91,6 +91,7 @@ export const createBooking = async (data: {
   securityDeposit?: number;
   totalAmount?: number;
   notes?: string;
+  approvalStatus?: ApprovalStatus;
 }) => {
   const car = await prisma.car.findFirst({ where: { id: data.carId, deletedAt: null } });
   if (!car) throw new AppError(404, 'Car not found');
@@ -125,6 +126,7 @@ export const createBooking = async (data: {
         securityDeposit,
         totalAmount,
         bookingStatus: 'RESERVED',
+        approvalStatus: data.approvalStatus ?? 'APPROVED',
       },
       include: bookingInclude,
     });
@@ -278,5 +280,26 @@ export const deleteBooking = async (id: string) => {
     const deleted = await tx.booking.update({ where: { id }, data: { deletedAt: new Date() } });
     await refreshCarStatus(tx, booking.carId);
     return deleted;
+  });
+};
+
+export const approveBooking = async (id: string) => {
+  const booking = await prisma.booking.findFirst({ where: { id, deletedAt: null } });
+  if (!booking) throw new AppError(404, 'Booking not found');
+  if (booking.approvalStatus === 'REJECTED') throw new AppError(400, 'Rejected bookings cannot be approved');
+  return prisma.booking.update({ where: { id }, data: { approvalStatus: 'APPROVED' }, include: bookingInclude });
+};
+
+export const rejectBooking = async (id: string, reason?: string) => {
+  const booking = await prisma.booking.findFirst({ where: { id, deletedAt: null } });
+  if (!booking) throw new AppError(404, 'Booking not found');
+  return prisma.$transaction(async (tx) => {
+    const updated = await tx.booking.update({
+      where: { id },
+      data: { approvalStatus: 'REJECTED', rejectionReason: reason ?? null, bookingStatus: 'CANCELLED' },
+      include: bookingInclude,
+    });
+    await refreshCarStatus(tx, booking.carId);
+    return updated;
   });
 };

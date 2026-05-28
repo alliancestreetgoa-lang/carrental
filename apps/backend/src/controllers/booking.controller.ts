@@ -45,6 +45,8 @@ const listQuerySchema = z.object({
   status: z.enum(['RESERVED', 'ACTIVE', 'COMPLETED', 'CANCELLED']).optional(),
 });
 
+const rejectSchema = z.object({ reason: z.string().optional() });
+
 export const getBookings = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { status } = listQuerySchema.parse(req.query);
@@ -120,6 +122,24 @@ export const deleteBooking = async (req: Request, res: Response, next: NextFunct
   try {
     await bookingService.deleteBooking(String(req.params.id));
     res.json({ success: true, message: 'Booking deleted' });
+  } catch (e) { next(e); }
+};
+
+export const approveBooking = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const updated = await bookingService.approveBooking(String(req.params.id));
+    emitRealtime('booking:updated', { id: updated.id });
+    res.json({ success: true, data: updated });
+  } catch (e) { next(e); }
+};
+
+export const rejectBooking = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { reason } = rejectSchema.parse(req.body);
+    const updated = await bookingService.rejectBooking(String(req.params.id), reason);
+    emitRealtime('booking:cancelled', { id: updated.id });
+    emitRealtime('car:changed', { id: updated.carId });
+    res.json({ success: true, data: updated });
   } catch (e) { next(e); }
 };
 

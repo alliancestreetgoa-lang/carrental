@@ -114,6 +114,7 @@ export const createBooking = async (req: Request, res: Response, next: NextFunct
       pickupLocation: b.pickupLocation,
       dropLocation: b.dropLocation,
       advancePayment: 0,
+      approvalStatus: 'PENDING',
     });
     res.status(201).json({ success: true, data: booking });
   } catch (e) { next(e); }
