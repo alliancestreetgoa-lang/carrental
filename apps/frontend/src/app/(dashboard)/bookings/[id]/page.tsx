@@ -4,12 +4,13 @@ import { useParams, useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import {
-  ArrowLeft, Pencil, CheckCircle, XCircle, KeyRound, Download, Plus, FileText,
+  ArrowLeft, Pencil, CheckCircle, XCircle, KeyRound, Download, Plus, FileText, FileSignature, PenLine,
 } from 'lucide-react';
 import { StatusBadge } from '@/components/shared/StatusBadge';
 import { BookingFormDialog } from '@/components/bookings/BookingFormDialog';
 import { CompleteBookingDialog } from '@/components/bookings/CompleteBookingDialog';
 import { AddPaymentDialog } from '@/components/bookings/AddPaymentDialog';
+import { SignatureDialog } from '@/components/bookings/SignatureDialog';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
 import { useRealtime } from '@/hooks/useRealtime';
 import { Button } from '@/components/ui/button';
@@ -45,6 +46,7 @@ export default function BookingDetailPage() {
   const [completeOpen, setCompleteOpen] = useState(false);
   const [paymentOpen, setPaymentOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
+  const [signOpen, setSignOpen] = useState(false);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -65,16 +67,27 @@ export default function BookingDetailPage() {
     try { await api.patch(`/bookings/${id}/cancel`); toast.success('Booking cancelled'); load(); }
     catch (e: unknown) { toast.error((e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed'); }
   };
-  const downloadInvoice = async () => {
+  const downloadBlob = async (urlPath: string, filename: string) => {
     try {
-      const res = await api.get(`/bookings/${id}/invoice`, { responseType: 'blob' });
+      const res = await api.get(urlPath, { responseType: 'blob' });
       const url = URL.createObjectURL(res.data as Blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `invoice-${id}.pdf`;
+      a.download = filename;
       a.click();
       URL.revokeObjectURL(url);
-    } catch { toast.error('Failed to download invoice'); }
+    } catch { toast.error('Download failed'); }
+  };
+  const downloadInvoice = () => downloadBlob(`/bookings/${id}/invoice`, `invoice-${id}.pdf`);
+
+  const generateAgreement = async () => {
+    try {
+      await api.post('/agreements', { bookingId: id });
+      toast.success('Agreement generated');
+      load();
+    } catch (e: unknown) {
+      toast.error((e as { response?: { data?: { message?: string } } })?.response?.data?.message ?? 'Failed to generate agreement');
+    }
   };
 
   if (loading || !booking) return (
@@ -197,9 +210,49 @@ export default function BookingDetailPage() {
               </div>
             </CardContent>
           </Card>
+
+          {/* Agreement */}
+          <Card className="mt-4">
+            <CardHeader><CardTitle className="text-base font-semibold flex items-center gap-2"><FileSignature className="w-4 h-4 text-muted-foreground" /> Agreement</CardTitle></CardHeader>
+            <CardContent>
+              {!b.agreement ? (
+                <div className="text-center py-2">
+                  <p className="text-sm text-muted-foreground mb-3">No rental agreement yet.</p>
+                  <Button className="cursor-pointer bg-red-600 hover:bg-red-700 text-white" onClick={generateAgreement} disabled={b.bookingStatus === 'CANCELLED'}>
+                    <FileSignature className="w-4 h-4 mr-1" /> Generate Agreement
+                  </Button>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-mono text-foreground">{b.agreement.agreementNumber}</p>
+                      <p className="text-xs text-muted-foreground">{b.agreement.signed ? `Signed ${b.agreement.signedAt ? formatDate(b.agreement.signedAt) : ''}` : 'Awaiting signature'}</p>
+                    </div>
+                    {b.agreement.signed
+                      ? <Badge className="bg-emerald-100 text-emerald-700 border-0 dark:bg-emerald-900/30 dark:text-emerald-400">Signed</Badge>
+                      : <Badge className="bg-amber-100 text-amber-700 border-0 dark:bg-amber-900/30 dark:text-amber-400">Unsigned</Badge>}
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="cursor-pointer flex-1" onClick={() => downloadBlob(`/agreements/${b.agreement!.id}/pdf`, `agreement-${b.agreement!.agreementNumber}.pdf`)}>
+                      <Download className="w-4 h-4 mr-1" /> PDF
+                    </Button>
+                    {!b.agreement.signed && (
+                      <Button size="sm" className="cursor-pointer flex-1 bg-red-600 hover:bg-red-700 text-white" onClick={() => setSignOpen(true)}>
+                        <PenLine className="w-4 h-4 mr-1" /> Sign
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </div>
 
+      {b.agreement && !b.agreement.signed && (
+        <SignatureDialog open={signOpen} onOpenChange={setSignOpen} agreementId={b.agreement.id} defaultName={b.customer.fullName} onSigned={load} />
+      )}
       <BookingFormDialog open={editOpen} onOpenChange={setEditOpen} booking={b} onSaved={load} />
       <CompleteBookingDialog open={completeOpen} onOpenChange={setCompleteOpen} booking={b} onCompleted={load} />
       <AddPaymentDialog open={paymentOpen} onOpenChange={setPaymentOpen} bookingId={b.id} onAdded={load} />

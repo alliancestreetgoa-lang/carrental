@@ -242,6 +242,8 @@ model Agreement {
   pdfUrl          String?
   signed          Boolean   @default(false)
   signedAt        DateTime?
+  signatureData   String?
+  signatoryName   String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   deletedAt       DateTime?

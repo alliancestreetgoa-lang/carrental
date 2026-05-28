@@ -163,7 +163,7 @@ export interface BookingInvoice {
 export interface BookingDetail extends Booking {
   totalDays: number;
   payments: Payment[];
-  agreement: { id: string; agreementNumber: string; signed: boolean } | null;
+  agreement: { id: string; agreementNumber: string; signed: boolean; signedAt: string | null } | null;
   invoice: BookingInvoice;
   car: { carName: string; brand: string; registrationNumber: string; dailyRent?: string };
 }
