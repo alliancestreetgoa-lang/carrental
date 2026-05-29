@@ -22,7 +22,9 @@ export const getAgreementById = async (id: string) => {
     },
   });
   if (!agreement) throw new AppError(404, 'Agreement not found');
-  return agreement;
+  // Never expose the customer's password hash in API responses
+  const { password: _pw, ...customer } = agreement.booking.customer;
+  return { ...agreement, booking: { ...agreement.booking, customer } };
 };
 
 export const setPdfUrl = (id: string, pdfUrl: string) =>

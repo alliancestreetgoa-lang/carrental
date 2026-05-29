@@ -29,10 +29,13 @@ export const getAllCustomers = async (params: CustomerListParams = {}) => {
       : {}),
   };
 
-  const [items, total] = await Promise.all([
+  const [rows, total] = await Promise.all([
     prisma.customer.findMany({ where, orderBy: { [sortBy]: sortOrder }, skip: (page - 1) * pageSize, take: pageSize }),
     prisma.customer.count({ where }),
   ]);
+
+  // Never expose the password hash in API responses
+  const items = rows.map(({ password: _pw, ...c }) => c);
 
   return { items, total, page, pageSize, totalPages: Math.max(1, Math.ceil(total / pageSize)) };
 };
@@ -68,7 +71,9 @@ export const getCustomerById = async (id: string) => {
   // Strip per-booking payment details from the response
   const bookings = customer.bookings.map(({ payments, ...b }) => b);
 
-  return { ...customer, bookings, pendingDues, totalSpent };
+  // Never expose the password hash in API responses
+  const { password: _pw, ...safe } = customer;
+  return { ...safe, bookings, pendingDues, totalSpent };
 };
 
 export const createCustomer = (data: Prisma.CustomerCreateInput) =>
