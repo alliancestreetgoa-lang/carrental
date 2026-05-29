@@ -101,7 +101,7 @@ export default function LoginPage() {
             </div>
             <Button
               type="submit"
-              className="w-full bg-red-600 hover:bg-red-700 text-white font-medium cursor-pointer"
+              className="w-full acr-liquid font-medium cursor-pointer"
               disabled={isLoading}
             >
               {isLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Signing in...</> : 'Sign in'}

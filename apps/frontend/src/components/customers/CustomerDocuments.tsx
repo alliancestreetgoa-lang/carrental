@@ -65,7 +65,7 @@ export function CustomerDocuments({
         <Input placeholder="Paste document URL" className="flex-1 min-w-[200px]" value={urlInput} onChange={(e) => setUrlInput(e.target.value)} />
         <Button type="button" variant="outline" className="cursor-pointer" onClick={() => urlInput && createDoc(urlInput)}><Plus className="w-4 h-4 mr-1" /> Add</Button>
         <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])} />
-        <Button type="button" className="cursor-pointer bg-red-600 hover:bg-red-700 text-white" onClick={() => fileRef.current?.click()} disabled={uploading}>
+        <Button type="button" className="cursor-pointer acr-liquid" onClick={() => fileRef.current?.click()} disabled={uploading}>
           {uploading ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Upload className="w-4 h-4 mr-1" />} Upload
         </Button>
       </div>

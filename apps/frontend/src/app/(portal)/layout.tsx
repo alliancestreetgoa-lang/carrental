@@ -43,7 +43,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
   return (
     <CustomerAuthProvider>
       <SocketProvider>
-        <div className="min-h-screen flex flex-col bg-white text-slate-900">
+        <div className="min-h-screen flex flex-col bg-slate-100 text-slate-900">
           <PortalNavbar />
           <main className="flex-1">{children}</main>
           <Footer />

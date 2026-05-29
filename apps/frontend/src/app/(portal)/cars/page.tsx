@@ -145,7 +145,7 @@ function CarsBrowser() {
           </div>
           <Link
             href="/cars"
-            className="inline-flex items-center justify-center h-9 px-5 text-sm font-medium rounded-lg bg-red-600 hover:bg-red-700 text-white transition-colors cursor-pointer"
+            className="inline-flex items-center justify-center h-9 px-5 text-sm font-medium rounded-lg acr-liquid transition-colors cursor-pointer"
           >
             Clear filters
           </Link>

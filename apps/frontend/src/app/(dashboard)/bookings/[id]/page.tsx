@@ -289,7 +289,7 @@ export default function BookingDetailPage() {
               {!b.agreement ? (
                 <div className="text-center py-2">
                   <p className="text-sm text-muted-foreground mb-3">No rental agreement yet.</p>
-                  <Button className="cursor-pointer bg-red-600 hover:bg-red-700 text-white" onClick={generateAgreement} disabled={b.bookingStatus === 'CANCELLED'}>
+                  <Button className="cursor-pointer acr-liquid" onClick={generateAgreement} disabled={b.bookingStatus === 'CANCELLED'}>
                     <FileSignature className="w-4 h-4 mr-1" /> Generate Agreement
                   </Button>
                 </div>
@@ -315,7 +315,7 @@ export default function BookingDetailPage() {
                       <UploadCloud className="w-4 h-4 mr-1" /> Store
                     </Button>
                     {!b.agreement.signed && (
-                      <Button size="sm" className="cursor-pointer bg-red-600 hover:bg-red-700 text-white" onClick={() => setSignOpen(true)}>
+                      <Button size="sm" className="cursor-pointer acr-liquid" onClick={() => setSignOpen(true)}>
                         <PenLine className="w-4 h-4 mr-1" /> Sign
                       </Button>
                     )}
@@ -359,7 +359,7 @@ export default function BookingDetailPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" className="cursor-pointer" onClick={() => { setRejectOpen(false); setRejectReason(''); }} disabled={approvalLoading}>Cancel</Button>
-            <Button className="cursor-pointer bg-red-600 hover:bg-red-700 text-white" onClick={reject} disabled={approvalLoading}>Reject Booking</Button>
+            <Button className="cursor-pointer acr-liquid" onClick={reject} disabled={approvalLoading}>Reject Booking</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

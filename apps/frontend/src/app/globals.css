@@ -212,6 +212,69 @@
   border: 1px solid rgba(255, 255, 255, 0.6);
 }
 
+/* Frosted liquid-glass card — premium translucent surface with a glossy top
+   edge. Reads as glass over the tinted portal base; keep each card's own
+   rounded-* + hover classes. */
+.acr-glass-card {
+  background-color: rgba(255, 255, 255, 0.62);
+  background-image: linear-gradient(150deg, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.45));
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    0 10px 30px rgba(15, 23, 42, 0.10),
+    0 2px 6px rgba(15, 23, 42, 0.05);
+}
+
+/* Liquid-glass primary button — red brand glass with a glossy sheen.
+   Stays legible on white and over imagery (near-opaque red + white text).
+   No border-radius here, so each button keeps its own rounded-* class. */
+.acr-liquid {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: #fff;
+  background-color: rgba(220, 38, 38, 0.92); /* fallback when backdrop-filter is unsupported */
+  background-image: linear-gradient(135deg, rgba(248, 113, 113, 0.92), rgba(220, 38, 38, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  backdrop-filter: blur(8px) saturate(160%);
+  -webkit-backdrop-filter: blur(8px) saturate(160%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -2px 6px rgba(127, 29, 29, 0.45),
+    0 6px 18px rgba(220, 38, 38, 0.32);
+  transition: box-shadow 0.25s ease, transform 0.25s ease, background-image 0.25s ease;
+}
+/* Specular sheen across the top */
+.acr-liquid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.38), rgba(255, 255, 255, 0) 55%);
+  pointer-events: none;
+}
+.acr-liquid:hover {
+  background-image: linear-gradient(135deg, rgba(248, 113, 113, 1), rgba(220, 38, 38, 0.96));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -2px 6px rgba(127, 29, 29, 0.5),
+    0 10px 26px rgba(220, 38, 38, 0.42);
+}
+.acr-liquid:active { transform: translateY(1px); }
+.acr-liquid:focus-visible {
+  outline: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 0 0 3px rgba(239, 68, 68, 0.45),
+    0 8px 22px rgba(220, 38, 38, 0.4);
+}
+@media (prefers-reduced-motion: reduce) {
+  .acr-liquid { transition: none; }
+  .acr-liquid:active { transform: none; }
+}
+
 /* Fluid display heading */
 .acr-display {
   font-size: clamp(2.75rem, 1.7rem + 4.6vw, 5.25rem);

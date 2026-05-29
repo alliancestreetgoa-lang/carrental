@@ -37,7 +37,7 @@ export function ConfirmDialog({ open, onOpenChange, title, description, confirmT
         </DialogHeader>
         <DialogFooter>
           <Button variant="outline" className="cursor-pointer" onClick={() => onOpenChange(false)} disabled={loading}>Cancel</Button>
-          <Button className="cursor-pointer bg-red-600 hover:bg-red-700 text-white" onClick={handleConfirm} disabled={loading}>
+          <Button className="cursor-pointer acr-liquid" onClick={handleConfirm} disabled={loading}>
             {loading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Deleting...</> : confirmText}
           </Button>
         </DialogFooter>

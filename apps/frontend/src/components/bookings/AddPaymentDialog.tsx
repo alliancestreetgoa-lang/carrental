@@ -63,7 +63,7 @@ export function AddPaymentDialog({
         </div>
         <DialogFooter>
           <Button variant="outline" className="cursor-pointer" onClick={() => onOpenChange(false)} disabled={saving}>Cancel</Button>
-          <Button className="cursor-pointer bg-red-600 hover:bg-red-700 text-white" onClick={submit} disabled={saving}>
+          <Button className="cursor-pointer acr-liquid" onClick={submit} disabled={saving}>
             {saving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : 'Record Payment'}
           </Button>
         </DialogFooter>

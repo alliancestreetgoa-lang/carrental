@@ -25,10 +25,10 @@ export function CarCard({ car, query }: CarCardProps) {
     <Link
       href={href}
       className={cn(
-        'group flex h-full flex-col rounded-2xl overflow-hidden bg-white border border-slate-200',
-        'shadow-sm cursor-pointer',
+        'group flex h-full flex-col rounded-2xl overflow-hidden acr-glass-card',
+        'cursor-pointer',
         'transition-all duration-300 ease-out',
-        'motion-safe:hover:-translate-y-1.5 hover:shadow-xl hover:border-slate-300',
+        'motion-safe:hover:-translate-y-1.5 hover:shadow-xl',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2'
       )}
     >
@@ -81,7 +81,7 @@ export function CarCard({ car, query }: CarCardProps) {
         </div>
 
         {/* Book now — visual CTA; the whole card is the link (avoid nested <a>) */}
-        <span className="mt-1 flex w-full items-center justify-center rounded-xl bg-red-600 group-hover:bg-red-700 px-4 py-2 text-sm font-semibold text-white transition-colors">
+        <span className="acr-liquid mt-1 flex w-full items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold">
           Book now
         </span>
       </div>

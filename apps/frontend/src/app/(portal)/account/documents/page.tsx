@@ -219,7 +219,7 @@ export default function DocumentsPage() {
         <Button
           onClick={handleSave}
           disabled={saving || uploading || (!fileUrl.trim())}
-          className="rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm cursor-pointer disabled:opacity-50"
+          className="rounded-xl acr-liquid text-sm cursor-pointer disabled:opacity-50"
         >
           {saving ? 'Saving…' : 'Save document'}
         </Button>

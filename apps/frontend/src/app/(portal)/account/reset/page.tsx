@@ -151,7 +151,7 @@ function ResetInner() {
             <Button
               type="submit"
               disabled={submitting}
-              className="w-full bg-red-600 hover:bg-red-700 text-white rounded-lg h-10 font-medium cursor-pointer transition-colors mt-1"
+              className="w-full acr-liquid rounded-lg h-10 font-medium cursor-pointer transition-colors mt-1"
             >
               {submitting ? (
                 <span className="flex items-center gap-2">

@@ -59,7 +59,7 @@ export default function CustomersPage() {
       <PageHeader
         title="Customers"
         description="Manage customer profiles"
-        action={<Button className="cursor-pointer bg-red-600 hover:bg-red-700 text-white" onClick={openAdd}><Plus className="w-4 h-4 mr-1" /> Add Customer</Button>}
+        action={<Button className="cursor-pointer acr-liquid" onClick={openAdd}><Plus className="w-4 h-4 mr-1" /> Add Customer</Button>}
       />
 
       <div className="flex flex-wrap items-center gap-3 mb-4">

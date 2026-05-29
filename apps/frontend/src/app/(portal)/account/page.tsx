@@ -13,6 +13,7 @@ import { formatDate, formatCurrency } from '@/lib/utils';
 import type { PortalBookingRow } from '@/lib/portalTypes';
 import VerifyBanners from '@/components/portal/VerifyBanners';
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog';
+import { Reveal } from '@/components/portal/Reveal';
 import { useCustomerStore } from '@/stores/customer.store';
 
 const STATUS_COLORS: Record<string, string> = {
@@ -30,7 +31,7 @@ const APPROVAL_BADGE: Record<string, { cls: string; label: string }> = {
 
 function BookingRowSkeleton() {
   return (
-    <div className="flex items-center gap-4 p-4 rounded-2xl border border-slate-100 bg-white">
+    <div className="flex items-center gap-4 p-4 rounded-2xl acr-glass-card">
       <Skeleton className="size-16 rounded-xl shrink-0" />
       <div className="flex-1 space-y-2">
         <Skeleton className="h-4 w-40" />
@@ -47,7 +48,7 @@ function BookingRowSkeleton() {
 
 function SummaryCardSkeleton() {
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-4 flex items-center gap-4">
+    <div className="rounded-2xl acr-glass-card p-4 flex items-center gap-4">
       <Skeleton className="size-10 rounded-xl shrink-0" />
       <div className="space-y-2 flex-1">
         <Skeleton className="h-3 w-28" />
@@ -65,7 +66,7 @@ interface SummaryCardProps {
 
 function SummaryCard({ icon, label, value }: SummaryCardProps) {
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-4 flex items-center gap-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
+    <div className="rounded-2xl acr-glass-card p-4 flex items-center gap-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
       <div className="size-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0 text-red-600">
         {icon}
       </div>
@@ -82,7 +83,7 @@ function BookingCard({ booking, onCancel }: { booking: PortalBookingRow; onCance
   const paid = booking.payments.reduce((sum, p) => sum + Number(p.amount), 0);
 
   return (
-    <div className="flex items-center gap-4 p-4 rounded-2xl border border-slate-100 bg-white hover:border-red-200 hover:shadow-sm transition-all group">
+    <div className="flex items-center gap-4 p-4 rounded-2xl acr-glass-card hover:border-red-200 hover:shadow-sm transition-all group">
       {/* Car image */}
       <Link href={`/account/bookings/${booking.id}`} className="size-16 rounded-xl bg-slate-100 overflow-hidden shrink-0 relative cursor-pointer">
         {imgSrc ? (
@@ -268,15 +269,15 @@ export default function AccountPage() {
           </div>
           <Link
             href="/cars"
-            className="inline-flex items-center justify-center h-9 px-5 text-sm font-medium rounded-lg bg-red-600 hover:bg-red-700 text-white transition-colors cursor-pointer"
+            className="inline-flex items-center justify-center h-9 px-5 text-sm font-medium rounded-lg acr-liquid transition-colors cursor-pointer"
           >
             Browse cars
           </Link>
         </div>
       ) : (
         <>
-          <Section title="Upcoming" bookings={upcoming} onCancel={setCancelId} />
-          <Section title="Past" bookings={past} onCancel={setCancelId} />
+          <Reveal><Section title="Upcoming" bookings={upcoming} onCancel={setCancelId} /></Reveal>
+          <Reveal delay={80}><Section title="Past" bookings={past} onCancel={setCancelId} /></Reveal>
           {upcoming.length === 0 && past.length === 0 && (
             <p className="text-slate-400 text-sm">No bookings to display.</p>
           )}

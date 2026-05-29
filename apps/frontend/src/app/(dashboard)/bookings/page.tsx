@@ -43,7 +43,7 @@ export default function BookingsPage() {
       <PageHeader
         title="Bookings"
         description="View and manage all rental bookings"
-        action={<Button className="cursor-pointer bg-red-600 hover:bg-red-700 text-white" onClick={() => setFormOpen(true)}><Plus className="w-4 h-4 mr-1" /> New Booking</Button>}
+        action={<Button className="cursor-pointer acr-liquid" onClick={() => setFormOpen(true)}><Plus className="w-4 h-4 mr-1" /> New Booking</Button>}
       />
 
       <div className="flex items-center gap-3 mb-4">

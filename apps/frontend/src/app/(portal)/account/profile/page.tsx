@@ -120,7 +120,7 @@ export default function ProfilePage() {
 
         <div className="flex items-center justify-between pt-1">
           <p className="text-xs text-slate-400">Member since {formatDate(customer.createdAt)}</p>
-          <Button onClick={save} disabled={saving} className="bg-red-600 hover:bg-red-700 text-white rounded-lg cursor-pointer">
+          <Button onClick={save} disabled={saving} className="acr-liquid rounded-lg cursor-pointer">
             {saving ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving…</> : 'Save changes'}
           </Button>
         </div>

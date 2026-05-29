@@ -247,7 +247,7 @@ export function BookingWidget({ car }: BookingWidgetProps) {
       <Button
         onClick={handleBook}
         disabled={bookDisabled}
-        className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold rounded-xl h-11 cursor-pointer transition-colors motion-safe:active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full acr-liquid font-semibold rounded-xl h-11 cursor-pointer transition-colors motion-safe:active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {submitting ? 'Booking...' : 'Book now'}
       </Button>

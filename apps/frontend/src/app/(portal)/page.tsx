@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ShieldCheck, Clock, IndianRupee, Phone, Mail, MapPin, ArrowRight } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CarCard } from '@/components/portal/CarCard';
@@ -43,7 +44,7 @@ const HERO_PILLS = ['Verified fleet', 'Instant confirmation', 'Transparent INR p
 
 function CarCardSkeleton() {
   return (
-    <div className="rounded-2xl overflow-hidden border border-slate-200 bg-white shadow-sm">
+    <div className="rounded-2xl overflow-hidden acr-glass-card shadow-sm">
       <Skeleton className="w-full" style={{ paddingBottom: '56.25%' }} />
       <div className="p-4 space-y-3">
         <Skeleton className="h-4 w-3/4" />
@@ -109,12 +110,31 @@ export default function StorefrontHome() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
       />
 
-      {/* ─── HERO ─────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden bg-slate-950 text-white">
-        <div className="acr-aurora" aria-hidden="true" />
-        <div className="acr-grid absolute inset-0" aria-hidden="true" />
+      {/* ─── HERO (full viewport, minus the sticky 4rem navbar) ── */}
+      <section className="relative flex min-h-[calc(100svh-4rem)] flex-col bg-slate-950 text-white">
+        {/* Aurora sits behind as a graceful fallback if the photo fails to load */}
+        <div className="acr-aurora opacity-70" aria-hidden="true" />
+        {/* Background: premium car-on-the-road photo, fills the whole hero */}
+        <Image
+          src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?q=80&w=2400&auto=format&fit=crop"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-center"
+        />
+        {/* Legibility overlays: dark on the headline side + darker top/bottom edges */}
+        <div
+          className="absolute inset-0 bg-gradient-to-r from-slate-950/95 via-slate-950/75 to-slate-950/25"
+          aria-hidden="true"
+        />
+        <div
+          className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-transparent to-slate-950/40"
+          aria-hidden="true"
+        />
 
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-24 pb-36 sm:pt-32 sm:pb-44">
+        {/* Headline — vertically centered in the space above the search card */}
+        <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-1 flex-col justify-center px-4 sm:px-6 lg:px-8 pt-10">
           <div className="max-w-3xl">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-widest text-red-300 backdrop-blur-sm">
               <span className="acr-pulse-dot size-1.5 rounded-full bg-red-400" />
@@ -144,16 +164,13 @@ export default function StorefrontHome() {
           </div>
         </div>
 
-        {/* Glass search card — overlapping the hero bottom */}
-        <div className="absolute bottom-0 left-0 right-0 translate-y-1/2 px-4 sm:px-6 lg:px-8">
-          <div className="acr-glass-light mx-auto max-w-5xl rounded-3xl px-6 py-6 shadow-2xl sm:py-5">
+        {/* Glass search card — pinned to the bottom of the hero, fully visible */}
+        <div className="relative z-10 mx-auto w-full max-w-5xl px-4 sm:px-6 lg:px-8 pb-10 sm:pb-12">
+          <div className="acr-glass-light rounded-3xl px-6 py-5 shadow-2xl">
             <DateRangeSearch />
           </div>
         </div>
       </section>
-
-      {/* Spacer for the overlapping search card */}
-      <div className="pb-24 sm:pb-20" />
 
       {/* ─── FEATURED CARS ────────────────────────────────────── */}
       <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 sm:py-24">
@@ -185,7 +202,7 @@ export default function StorefrontHome() {
             </p>
             <Link
               href="/cars"
-              className="inline-flex items-center justify-center h-9 px-4 text-sm font-medium rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-colors cursor-pointer"
+              className="inline-flex items-center justify-center h-9 px-4 text-sm font-medium rounded-lg acr-glass-card hover:bg-slate-50 text-slate-700 transition-colors cursor-pointer"
             >
               Browse all cars
             </Link>
@@ -212,7 +229,7 @@ export default function StorefrontHome() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8">
             {TRUST_ITEMS.map(({ icon: Icon, title, desc }, i) => (
               <Reveal key={title} delay={i * 100}>
-                <div className="group h-full rounded-2xl border border-slate-200 bg-white p-7 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                <div className="group h-full rounded-2xl acr-glass-card p-7 text-center shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
                   <div className="mx-auto mb-5 flex size-14 items-center justify-center rounded-2xl bg-red-100 text-red-600 transition-transform duration-300 group-hover:scale-110">
                     <Icon className="size-7" strokeWidth={1.75} />
                   </div>
@@ -236,7 +253,7 @@ export default function StorefrontHome() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {testimonials.map((t, i) => (
               <Reveal key={t.id} delay={i * 70}>
-                <div className="h-full rounded-2xl border border-slate-100 bg-white p-6 space-y-3 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                <div className="h-full rounded-2xl acr-glass-card p-6 space-y-3 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
                   <StarRating value={t.rating} size={15} />
                   <p className="text-sm text-slate-600 leading-relaxed line-clamp-4">{t.comment}</p>
                   <p className="text-xs font-semibold text-slate-500">
@@ -269,7 +286,7 @@ export default function StorefrontHome() {
             { icon: MapPin, label: 'Address', value: 'Calangute, Goa', href: undefined },
           ].map(({ icon: Icon, label, value, href }, i) => (
             <Reveal key={label} delay={i * 90}>
-              <div className="flex h-full flex-col items-center gap-3 rounded-2xl border border-slate-100 bg-white p-6 text-center shadow-sm">
+              <div className="flex h-full flex-col items-center gap-3 rounded-2xl acr-glass-card p-6 text-center shadow-sm">
                 <div className="flex size-12 items-center justify-center rounded-2xl bg-red-100 text-red-600 shrink-0">
                   <Icon className="size-6" strokeWidth={1.75} />
                 </div>
@@ -294,13 +311,13 @@ export default function StorefrontHome() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <a
             href="mailto:hello@alliancecarrental.com"
-            className="inline-flex items-center justify-center h-11 px-8 text-sm font-medium rounded-lg bg-red-600 hover:bg-red-700 text-white transition-colors cursor-pointer"
+            className="inline-flex items-center justify-center h-11 px-8 text-sm font-medium rounded-lg acr-liquid transition-colors cursor-pointer"
           >
             Email us
           </a>
           <a
             href="tel:+919000000000"
-            className="inline-flex items-center justify-center h-11 px-8 text-sm font-medium rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-colors cursor-pointer"
+            className="inline-flex items-center justify-center h-11 px-8 text-sm font-medium rounded-lg acr-glass-card hover:bg-slate-50 text-slate-700 transition-colors cursor-pointer"
           >
             Call us
           </a>
@@ -319,7 +336,7 @@ export default function StorefrontHome() {
           </div>
           <Link
             href="/cars"
-            className="group inline-flex items-center justify-center gap-2 h-12 px-8 text-sm font-semibold rounded-xl bg-red-600 hover:bg-red-700 text-white transition-colors cursor-pointer shrink-0"
+            className="group inline-flex items-center justify-center gap-2 h-12 px-8 text-sm font-semibold rounded-xl acr-liquid transition-colors cursor-pointer shrink-0"
           >
             Browse cars
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />

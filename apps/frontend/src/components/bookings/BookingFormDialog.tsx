@@ -219,7 +219,7 @@ export function BookingFormDialog({ open, onOpenChange, booking, prefill, onSave
 
           <DialogFooter className="sm:col-span-2">
             <Button type="button" variant="outline" className="cursor-pointer" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button type="submit" className="cursor-pointer bg-red-600 hover:bg-red-700 text-white" disabled={isSubmitting}>
+            <Button type="submit" className="cursor-pointer acr-liquid" disabled={isSubmitting}>
               {isSubmitting ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Saving...</> : isEdit ? 'Save Changes' : 'Create Booking'}
             </Button>
           </DialogFooter>

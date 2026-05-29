@@ -66,7 +66,7 @@ export default function ExpensesPage() {
       <PageHeader
         title="Expense Management"
         description="Track and analyse fleet running costs"
-        action={<Button className="cursor-pointer bg-red-600 hover:bg-red-700 text-white" onClick={() => { setEditing(null); setFormOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Expense</Button>}
+        action={<Button className="cursor-pointer acr-liquid" onClick={() => { setEditing(null); setFormOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add Expense</Button>}
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">

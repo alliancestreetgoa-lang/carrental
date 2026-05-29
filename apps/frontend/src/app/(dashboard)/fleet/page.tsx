@@ -157,7 +157,7 @@ export default function FleetPage() {
         action={
           <div className="flex gap-2">
             <Button variant="outline" className="cursor-pointer" onClick={exportCsv}><Download className="w-4 h-4 mr-1" /> Export</Button>
-            <Button className="cursor-pointer bg-red-600 hover:bg-red-700 text-white" onClick={openAdd}><Plus className="w-4 h-4 mr-1" /> Add Vehicle</Button>
+            <Button className="cursor-pointer acr-liquid" onClick={openAdd}><Plus className="w-4 h-4 mr-1" /> Add Vehicle</Button>
           </div>
         }
       />
@@ -216,7 +216,7 @@ export default function FleetPage() {
                 <Input type="number" placeholder="Max" className="w-24" value={draft.maxRent} onChange={(e) => setDraft({ ...draft, maxRent: e.target.value })} />
               </div>
             </div>
-            <Button className="cursor-pointer bg-red-600 hover:bg-red-700 text-white" onClick={applyFilters}>Apply</Button>
+            <Button className="cursor-pointer acr-liquid" onClick={applyFilters}>Apply</Button>
             <Button variant="ghost" className="cursor-pointer" onClick={clearFilters}>Clear</Button>
           </CardContent>
         </Card>

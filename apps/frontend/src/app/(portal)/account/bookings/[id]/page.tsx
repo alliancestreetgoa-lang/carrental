@@ -395,7 +395,7 @@ export default function BookingDetailPage() {
                 <Button
                   disabled={paying}
                   onClick={() => handlePay('full')}
-                  className="bg-red-600 hover:bg-red-700 text-white rounded-xl cursor-pointer"
+                  className="acr-liquid rounded-xl cursor-pointer"
                 >
                   {paying ? 'Processing…' : `Pay full balance (${formatCurrency(booking.invoice.balanceDue)})`}
                 </Button>
@@ -451,7 +451,7 @@ export default function BookingDetailPage() {
             <Button
               onClick={handleExtend}
               disabled={extending || !extendDate}
-              className="bg-red-600 hover:bg-red-700 text-white rounded-xl cursor-pointer"
+              className="acr-liquid rounded-xl cursor-pointer"
             >
               {extending ? 'Extending…' : 'Extend'}
             </Button>
@@ -501,7 +501,7 @@ export default function BookingDetailPage() {
           <Button
             onClick={submitReview}
             disabled={reviewSubmitting}
-            className="bg-red-600 hover:bg-red-700 text-white rounded-xl cursor-pointer"
+            className="acr-liquid rounded-xl cursor-pointer"
           >
             {reviewSubmitting ? 'Submitting…' : 'Submit review'}
           </Button>

@@ -72,7 +72,7 @@ export function PortalNavbar() {
               </Link>
               <Link
                 href="/account/register"
-                className="inline-flex items-center justify-center h-7 px-2.5 text-[0.8rem] font-medium rounded-[min(var(--radius-md),12px)] bg-red-600 hover:bg-red-700 text-white transition-colors cursor-pointer"
+                className="inline-flex items-center justify-center h-7 px-2.5 text-[0.8rem] font-medium rounded-[min(var(--radius-md),12px)] acr-liquid transition-colors cursor-pointer"
               >
                 Register
               </Link>

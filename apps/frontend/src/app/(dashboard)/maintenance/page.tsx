@@ -67,7 +67,7 @@ export default function MaintenancePage() {
       <PageHeader
         title="Maintenance & Service"
         description="Service history, upcoming maintenance and document expiry"
-        action={<Button className="cursor-pointer bg-red-600 hover:bg-red-700 text-white" onClick={() => { setEditing(null); setFormOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Log Maintenance</Button>}
+        action={<Button className="cursor-pointer acr-liquid" onClick={() => { setEditing(null); setFormOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Log Maintenance</Button>}
       />
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">

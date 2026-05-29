@@ -61,7 +61,7 @@ export default function SettingsPage() {
       <PageHeader
         title="Settings"
         description="Manage team members and access"
-        action={<Button className="cursor-pointer bg-red-600 hover:bg-red-700 text-white" onClick={() => { setEditing(null); setFormOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add User</Button>}
+        action={<Button className="cursor-pointer acr-liquid" onClick={() => { setEditing(null); setFormOpen(true); }}><Plus className="w-4 h-4 mr-1" /> Add User</Button>}
       />
 
       <Card>
