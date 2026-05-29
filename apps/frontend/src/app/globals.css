@@ -148,6 +148,13 @@
 }
 .acr-calendar .fc .fc-toolbar-title { font-size: 1.1rem; font-weight: 600; }
 .acr-calendar .fc .fc-button { text-transform: capitalize; box-shadow: none; border-radius: 0.5rem; padding: 0.35rem 0.7rem; }
+/* Active view button: bg is --primary, so text must be --primary-foreground to
+   stay readable in both light and dark mode (default fc text color is too low-contrast). */
+.acr-calendar .fc .fc-button-primary:not(:disabled).fc-button-active,
+.acr-calendar .fc .fc-button-primary:not(:disabled).fc-button-active:hover,
+.acr-calendar .fc .fc-button-primary:not(:disabled).fc-button-active:focus {
+  color: var(--primary-foreground);
+}
 .acr-calendar .fc-theme-standard td,
 .acr-calendar .fc-theme-standard th { border-color: var(--border); }
 .acr-calendar .fc .fc-datagrid-cell-cushion { padding: 0; }
