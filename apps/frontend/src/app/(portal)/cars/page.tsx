@@ -8,6 +8,7 @@ import { LayoutGrid, List, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CarCard } from '@/components/portal/CarCard';
 import { CarFilters } from '@/components/portal/CarFilters';
+import { Reveal } from '@/components/portal/Reveal';
 import { portalApi } from '@/lib/portalApi';
 import { formatDate, cn } from '@/lib/utils';
 import type { PortalCar } from '@/lib/portalTypes';
@@ -192,8 +193,10 @@ function CarsBrowser() {
                 : 'flex flex-col gap-4'
             }
           >
-            {pagedCars.map((car) => (
-              <CarCard key={car.id} car={car} query={qs} />
+            {pagedCars.map((car, i) => (
+              <Reveal key={car.id} delay={(i % 3) * 70} className="h-full">
+                <CarCard car={car} query={qs} />
+              </Reveal>
             ))}
           </div>
 

@@ -23,6 +23,7 @@ import { BookingWidget } from '@/components/portal/BookingWidget';
 import { StarRating } from '@/components/portal/StarRating';
 import { AvailabilityCalendar } from '@/components/portal/AvailabilityCalendar';
 import { CarCard } from '@/components/portal/CarCard';
+import { Reveal } from '@/components/portal/Reveal';
 import { portalApi } from '@/lib/portalApi';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import type { PortalCar } from '@/lib/portalTypes';
@@ -454,8 +455,10 @@ function CarDetailInner() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {relatedCars.map((relCar) => (
-                <CarCard key={relCar.id} car={relCar} />
+              {relatedCars.map((relCar, i) => (
+                <Reveal key={relCar.id} delay={(i % 4) * 60} className="h-full">
+                  <CarCard car={relCar} />
+                </Reveal>
               ))}
             </div>
           )}

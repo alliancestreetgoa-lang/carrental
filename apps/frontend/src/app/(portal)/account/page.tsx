@@ -65,7 +65,7 @@ interface SummaryCardProps {
 
 function SummaryCard({ icon, label, value }: SummaryCardProps) {
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-4 flex items-center gap-4">
+    <div className="rounded-2xl border border-slate-100 bg-white p-4 flex items-center gap-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
       <div className="size-10 rounded-xl bg-red-50 flex items-center justify-center shrink-0 text-red-600">
         {icon}
       </div>

@@ -25,10 +25,10 @@ export function CarCard({ car, query }: CarCardProps) {
     <Link
       href={href}
       className={cn(
-        'group flex flex-col rounded-2xl overflow-hidden bg-white border border-slate-200',
+        'group flex h-full flex-col rounded-2xl overflow-hidden bg-white border border-slate-200',
         'shadow-sm cursor-pointer',
-        'transition-all duration-200',
-        'motion-safe:hover:-translate-y-0.5 hover:shadow-lg',
+        'transition-all duration-300 ease-out',
+        'motion-safe:hover:-translate-y-1.5 hover:shadow-xl hover:border-slate-300',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-600 focus-visible:ring-offset-2'
       )}
     >

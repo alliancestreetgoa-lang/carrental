@@ -160,3 +160,91 @@
 .acr-calendar .fc .fc-datagrid-cell-cushion { padding: 0; }
 .acr-calendar .fc .fc-resource-timeline-divider { background: var(--border); }
 .acr-calendar .fc-event { cursor: pointer; border-radius: 4px; }
+
+/* ============================================================
+   Portal — modern design utilities (opt-in classes only;
+   no effect on the admin app, which never uses them)
+   ============================================================ */
+
+/* Animated aurora / mesh-gradient hero background */
+@keyframes acr-aurora {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%      { transform: translate3d(0, -4%, 0) scale(1.1); }
+}
+.acr-aurora { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.acr-aurora::before,
+.acr-aurora::after {
+  content: ""; position: absolute; border-radius: 9999px;
+  filter: blur(90px); opacity: 0.5; will-change: transform;
+}
+.acr-aurora::before {
+  width: 60vw; height: 60vw; top: -25%; left: -12%;
+  background: radial-gradient(circle at center, #ef4444 0%, transparent 70%);
+  animation: acr-aurora 16s ease-in-out infinite;
+}
+.acr-aurora::after {
+  width: 55vw; height: 55vw; bottom: -30%; right: -12%;
+  background: radial-gradient(circle at center, #6366f1 0%, transparent 70%);
+  animation: acr-aurora 20s ease-in-out infinite reverse;
+}
+
+/* Faint grid texture for dark sections */
+.acr-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 30%, transparent 80%);
+          mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 30%, transparent 80%);
+}
+
+/* Glassmorphism */
+.acr-glass {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+.acr-glass-light {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+}
+
+/* Fluid display heading */
+.acr-display {
+  font-size: clamp(2.75rem, 1.7rem + 4.6vw, 5.25rem);
+  line-height: 1.02;
+  letter-spacing: -0.035em;
+}
+
+/* Scroll reveal — toggled by the Reveal component via [data-reveal] */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(26px);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+[data-reveal="in"] { opacity: 1; transform: none; }
+
+/* Soft pulsing status dot */
+@keyframes acr-pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.4; transform: scale(0.7); }
+}
+.acr-pulse-dot { animation: acr-pulse-dot 2.4s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .acr-aurora::before,
+  .acr-aurora::after,
+  .acr-pulse-dot { animation: none; }
+  [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
